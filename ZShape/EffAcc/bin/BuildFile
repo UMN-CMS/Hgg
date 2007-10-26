@@ -1,0 +1,11 @@
+<bin file=efficiencyRoot2Txt.cpp>
+  <use name=root>
+  <use name=rootcore>
+  <use name=ZShape/EffAcc>
+</bin>
+
+<bin file=efficiencyTxt2Root.cpp>
+  <use name=root>
+  <use name=rootcore>
+  <use name=ZShape/EffAcc>
+</bin>
