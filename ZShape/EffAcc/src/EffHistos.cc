@@ -44,10 +44,10 @@ void EffHistos::Book() {
 
 }
 
-void EffHistos::Fill(const RawParticle& e1, const RawParticle& e2) {
+void EffHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtEtaPhiMLorentzVector& e2) {
 
-  XYZTLorentzVector p1 = e1.momentum() ;
-  XYZTLorentzVector p2 = e2.momentum() ;
+  XYZTLorentzVector p1(e1);
+  XYZTLorentzVector p2(e2);
 
   XYZTLorentzVector pZ = p1 + p2 ;
 

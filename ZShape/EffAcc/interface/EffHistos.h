@@ -2,13 +2,14 @@
 #define EFFHS_INC
 
 #include <TH1.h>
-#include "FastSimulation/Particle/interface/RawParticle.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
+#include "DataFormats/Math/interface/Vector3D.h"
 
 class EffHistos {
 
  public:
   void Book();
-  void Fill(const RawParticle& e1, const RawParticle& e2);
+  void Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtEtaPhiMLorentzVector& e2);
 
  private:
   TH1 *mZ_,*YZ_, *ptZ_;

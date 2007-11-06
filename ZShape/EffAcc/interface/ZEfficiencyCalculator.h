@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id$
+// $Id: ZEfficiencyCalculator.h,v 1.1 2007/10/26 23:02:09 franzoni Exp $
 //
 //
 
@@ -31,12 +31,12 @@ Implementation:
 #include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
 #include "DataFormats/Common/interface/Handle.h"
 
-#include "FastSimulation/Particle/interface/RawParticle.h"
-
 #include <CLHEP/Vector/LorentzVector.h>
 
+#include "ZShape/Base/interface/EtaAcceptance.h"
+#include "ZShape/Base/interface/ZShapeEvent.h"
+#include "ZShape/Base/interface/ZShapeZDef.h"
 #include "ZShape/EffAcc/interface/EffHistos.h"
-#include "ZShape/EffAcc/interface/EtaAcceptance.h"
 #include "ZShape/EffAcc/interface/EfficiencyStore.h"
 #include "ZShape/EffAcc/interface/EfficiencyCut.h"
 
@@ -59,48 +59,46 @@ private:
   virtual void beginJob(const edm::EventSetup&) ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
+  
+  void fillEvent(const HepMC::GenEvent* evt);
+  void loadEfficiency(const std::string& name, const std::string& fname, const std::string& var);
+  void acceptanceCuts();
+  void applyEfficiencies();
 
   // ----------member data ---------------------------
-
-  std::vector<RawParticle> myElectrons_;
+  ZShapeEvent evt_;
+  
   TRandom3 randomNum;
 
   std::string outFileName_;
   bool        writeHistoConservatively_;
   TFile*      histoFile_;
-  TFile *     eff1File_;
-  TFile *     eff2File_;
-  TFile *     eff3File_;
 
-  TFile * effHistoFile_;
-  std::string inputEffFileName_;
-
-  std::string inputEffFileNameCut1_;
-  std::string inputEffFileNameCut2_;
-  std::string inputEffFileNameCut3_;
-
-  //GF: these three will go away
-  std::string cut1HistoName_;
-  std::string cut2HistoName_;
-  std::string cut3HistoName_;
-
-  EfficiencyStore * eff1_;
-  EfficiencyStore * eff2_;
-  EfficiencyStore * eff3_;
-  
-  TH1F*  histoSeeding_;
-  TH1F*  histoTracking_;
-  TH1F*  histoEReco_;
-
-  // objects holding histograms to fill
-  EffHistos allCase_, acceptance_, aftercut1_, aftercut2_, aftercut3_;
+  // the efficiency objects
+  std::map<std::string, EfficiencyStore*> efficiencies_;
+  std::map<std::string, EfficiencyCut*> theCuts_;
   
   // object which applies the eta cuts
   EtaAcceptance theEtaSelector_;
 
-  // objects for the efficiency cuts
-  EfficiencyCut * seedingCut_;
-  EfficiencyCut * trackingCut_;
-  EfficiencyCut * eRecoCut_;
-  
+  // Z Definitions
+  std::map<std::string, ZShapeZDef*> zdefs_;
+
+  // Z Plots
+  EffHistos allCase_;
+  struct ZPlots {
+    ZPlots(int nc) : postCut_(nc) { }
+    EffHistos acceptance_;
+    std::vector<EffHistos> postCut_;
+  };
+  std::map<std::string,ZPlots*> zplots_;
 };
+
+
+/** TODO: 
+
+    Efficiencies need to specify dependencies (eta, pT, etc) [current: hack]
+
+    Randomization of efficiencies
+
+ */
