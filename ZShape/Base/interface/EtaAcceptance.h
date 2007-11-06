@@ -1,0 +1,23 @@
+#ifndef ETAACC_INC
+#define ETAACC_INC
+
+//
+// Simple class to cut on eta acceptance
+//
+
+#include "DataFormats/Math/interface/LorentzVector.h"
+
+class EtaAcceptance {
+
+ public:
+  EtaAcceptance( void );
+
+  bool isInAcceptance(const math::PtEtaPhiMLorentzVector& p);
+  enum Zone { zone_EB, zone_EE, zone_ECAL, zone_HF, zone_ANY };
+  bool isInAcceptance(const math::PtEtaPhiMLorentzVector& p, Zone zone);
+
+ private:
+
+}; 
+
+#endif
