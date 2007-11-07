@@ -23,17 +23,19 @@ EfficiencyStore::EfficiencyStore()
   
 }
 
-EfficiencyStore::EfficiencyStore(TFile * file)
+EfficiencyStore::EfficiencyStore(TFile * file, std::string EffName, std::string PhysVar)
 { 
   values1DHisto_=0;   systPlus1DHisto_=0;
   systMinus1DHisto_=0;  denominator1DHisto_=0;
   values2DHisto_=0;  systPlus2DHisto_=0;
   systMinus2DHisto_=0; denominator2DHisto_=0;
-
+  effName_ = EffName;
+  physVar_ = PhysVar;
   std::cout << "class EfficiencyStore created with root file: " << file->GetName() << std::endl;
   setRootFile(file);
   textFileName_="";
 }
+
 
 EfficiencyStore::EfficiencyStore(std::string & textFileName)
 { 
@@ -80,50 +82,55 @@ void EfficiencyStore::setRootFile(TFile * file){
       
     std::cout << "object in file has name: " << key->GetName() << std::endl;
     TH1F * tmp1;    TH2F * tmp2;
-
-    if(  strstr(key->GetName(),"values_") &&   strcmp(key->GetClassName(),"TH1F")==0 )
-      { 
-	tmp1 = (TH1F*) theFile_->Get(key->GetName());
-	values1DHisto_ = (TH1F *) tmp1->Clone();
-	//	values1DHisto_ = (TH1F*) theFile_->Get(key->GetName());
-      }
-    else if(  strstr(key->GetName(),"systematicPlus_") &&  strcmp(key->GetClassName(),"TH1F")==0) 
-      {
-	tmp1 = (TH1F*) theFile_->Get(key->GetName());
-	systPlus1DHisto_ = (TH1F *) tmp1->Clone();
-      }
-    else if(  strstr(key->GetName(),"systematicMinus_") &&   strcmp(key->GetClassName(),"TH1F")==0) 
-      {
-	tmp1 = (TH1F*) theFile_->Get(key->GetName());
-	systMinus1DHisto_ = (TH1F *) tmp1->Clone();
-      }
-    else if(  strstr(key->GetName(),"denominator_") &&   strcmp(key->GetClassName(),"TH1F")==0)
-      {
-	tmp1 = (TH1F*) theFile_->Get(key->GetName());
-	denominator1DHisto_ = 	(TH1F *) tmp1->Clone();
-      }
+    if (strstr(key->GetName(),effName_.c_str()) && strstr(key->GetName(),physVar_.c_str()))
+     {
+       if(  strstr(key->GetName(),"values_") &&   strcmp(key->GetClassName(),"TH1F")==0 )
+         { 
+   	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
+	   values1DHisto_ = (TH1F *) tmp1->Clone();
+	   //	values1DHisto_ = (TH1F*) theFile_->Get(key->GetName());
+	   std::cout << " This Object is values_ " <<  key->GetName() << std::endl;
+         }
+       else if(  strstr(key->GetName(),"systematicPlus_") &&  strcmp(key->GetClassName(),"TH1F")==0) 
+         {
+	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
+	   systPlus1DHisto_ = (TH1F *) tmp1->Clone();
+	   std::cout << " This Object is sytemtaicPlus_ " <<  key->GetName() << std::endl;        
+         }
+       else if(  strstr(key->GetName(),"systematicMinus_") &&   strcmp(key->GetClassName(),"TH1F")==0) 
+         {
+	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
+	   systMinus1DHisto_ = (TH1F *) tmp1->Clone();
+	   std::cout << " This Object is systematicMinus_ " <<  key->GetName() << std::endl;
+         }
+       else if(  strstr(key->GetName(),"denominator_") &&   strcmp(key->GetClassName(),"TH1F")==0)
+         {
+	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
+	   denominator1DHisto_ = 	(TH1F *) tmp1->Clone();
+	   std::cout << " This Object is denominator_ " <<  key->GetName() << std::endl;
+         }
       
-    if(  strstr(key->GetName(),"values_") && key->GetClassName()=="TH2F")
-      {
-	tmp2 = (TH2F*) theFile_->Get(key->GetName());
-	values2DHisto_  = (TH2F *) tmp2->Clone();
-      }
-    else if(  strstr(key->GetName(),"systematicPlus_") && key->GetClassName()=="TH2F")
-      {
-	tmp2 = (TH2F*) theFile_->Get(key->GetName());
-	systPlus2DHisto_ =  (TH2F *) tmp2->Clone();
-      }
-    else if(  strstr(key->GetName(),"systematicMinus_") && key->GetClassName()=="TH2F")
-      {
-	tmp2 = (TH2F*) theFile_->Get(key->GetName());
-	systMinus2DHisto_ =  (TH2F *) tmp2->Clone();
-      }
-    else if(  strstr(key->GetName(),"denominator_") && key->GetClassName()=="TH2F")
-      {
-	tmp2 = (TH2F*) theFile_->Get(key->GetName());
-	denominator2DHisto_ =  (TH2F *) tmp2->Clone();
-	  }
-
+       if(  strstr(key->GetName(),"values_") && key->GetClassName()=="TH2F")
+         {
+	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
+	   values2DHisto_  = (TH2F *) tmp2->Clone();
+         }
+       else if(  strstr(key->GetName(),"systematicPlus_") && key->GetClassName()=="TH2F")
+         {
+	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
+	   systPlus2DHisto_ =  (TH2F *) tmp2->Clone();
+         }
+       else if(  strstr(key->GetName(),"systematicMinus_") && key->GetClassName()=="TH2F")
+         {
+	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
+	   systMinus2DHisto_ =  (TH2F *) tmp2->Clone();
+         }
+       else if(  strstr(key->GetName(),"denominator_") && key->GetClassName()=="TH2F")
+         {
+	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
+	   denominator2DHisto_ =  (TH2F *) tmp2->Clone();
+	 }
+     }
   }
   std::cout << "leaving setRootFile  values1DHisto_ :" << values1DHisto_ << std::endl;
   
@@ -246,6 +253,7 @@ void EfficiencyStore::produceTxtFile1D(){
   std::string theHistoTitle(values1DHisto_ ->GetTitle());
   int v = theHistoTitle.find( std::string("_") );
   std::string theEffTitle = theHistoTitle.substr( (v+1) );
+  //std::string theEffTitle = theHistoTitle.substr(0 ,v );
 
   ofstream the1DEffFile;
   the1DEffFile.open (textFileName_.c_str(),std::ios::out);
