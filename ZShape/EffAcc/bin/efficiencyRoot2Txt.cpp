@@ -12,15 +12,19 @@
 int main( int argc, char **argv ) {
 
   std::cout << "\nThis program converts efficiencies from Root to txt format." << std::endl;
-
+  char *eff ="";
+  char *phys="";
 
   if(argc<3 ){
     std::cout << "\nlacking arguments. Usage:    efficiencyRoot2Txt <path/efficiencyFileName.root> <path/effFileName.txt>\n" << std::endl;
     return -1;
   }
-
-  else if (argc >3){
-    std::cout << "too many arguments.   Usage: efficiencyFileHisto <path/efficiencyFileName.root> <path/effFile.txt>\n" << std::endl;
+  else if (argc == 5){
+    eff = argv[3];
+    phys= argv[4];
+  }
+  else if (argc >5){
+    std::cout << "too many arguments.   Usage: efficiencyFileHisto <path/efficiencyFileName.root> <path/effFile.txt> Efficiency(optional) PhysType(optional)\n" << std::endl;
     return -1;
   }
 
@@ -43,9 +47,10 @@ int main( int argc, char **argv ) {
   
   
   // created with root file in constructor
-  EfficiencyStore Root2TxtObject(effFile);
+  EfficiencyStore Root2TxtObject(effFile, eff, phys);
 
   std::string textFileName(effTxtFileName);
+  
   Root2TxtObject.produceTxtFile(textFileName);
 
 }
