@@ -9,7 +9,7 @@ EfficiencyCut::EfficiencyCut ( void ) {
   std::cerr << "in EfficiencyCut void constructor" << std::endl ;
 }
 
-EfficiencyCut::EfficiencyCut ( TH1F * histo, const std::string& variable ) {
+EfficiencyCut::EfficiencyCut ( TH1F * histo ) {
   
   if(! histo)
     {
@@ -25,15 +25,17 @@ EfficiencyCut::EfficiencyCut ( TH1F * histo, const std::string& variable ) {
   // 	    <<   theClonedEffHisto_ ->GetTitle() 
   // 	    << " and pointer: " << theClonedEffHisto_ << std::endl;
   theClonedEffHisto_ ->SetDirectory(0);
-
-  if (!strcasecmp(variable.c_str(),"eta")) theCutVariable_=cv_Eta;
-  else if (!strcasecmp(variable.c_str(),"phi")) theCutVariable_=cv_Phi;
-  else if (!strcasecmp(variable.c_str(),"pt") || !strcasecmp(variable.c_str(),"et") ||
-	   !strcasecmp(variable.c_str(),"p_t") || !strcasecmp(variable.c_str(),"e_t"))
+  std::string variable = histo->GetName();
+  if (strstr(variable.c_str(),"eta")      || strstr(variable.c_str(),"Eta") ) theCutVariable_=cv_Eta;
+  else if (strstr(variable.c_str(),"phi") || strstr(variable.c_str(),"Phi") ) theCutVariable_=cv_Phi;
+  else if (strstr(variable.c_str(),"pt")  || strstr(variable.c_str(),"et")  ||
+	   strstr(variable.c_str(),"p_t") || strstr(variable.c_str(),"e_t")||
+           strstr(variable.c_str(),"Pt") )
     theCutVariable_=cv_Pt;
   else {
     edm::LogWarning("ZShape") << "Unknown variable in efficiency cut: '" << variable << "'";
   }
+  //std::cout << "For CutVariable " <<  variable << " the type is " << theCutVariable_ << std::endl;
 }
 
 bool EfficiencyCut::passesCut(float variable) const
@@ -54,23 +56,23 @@ bool EfficiencyCut::passesCut(float variable) const
     }
 
 
-  float theEfficiency = theClonedEffHisto_->GetBinContent(theBin);
-
+  float theEfficiency = theClonedEffHisto_->GetBinContent(theBin)
+;
   TRandom3 randomNum(0); // put this back
   float randNum = randomNum.Uniform(0., 1.); // put this back
-
+  //std::cout << "EffCut is " << theEfficiency << " in " << theClonedEffHisto_->GetTitle() << " variable is: " << variable << " which falls in bin: " << theBin << std::endl;
   if ( randomNum.Uniform(0., 1.) < theEfficiency ) 
      if ( randNum < theEfficiency ) 
        {
 	 //  	std::cout << "EfficiencyCut passescut in cut: " <<  theClonedEffHisto_->GetTitle() << " variable is: " <<
 	 //  	  variable << " which falls in bin: " << theBin << " and the cut was passed" 
-	 //  	  " (randNum: " << randNum << " eff: " << theEfficiency << ")" <<std::endl;
+	 // 	  " (randNum: " << randNum << " eff: " << theEfficiency << ")" <<std::endl;
 	 return true;
        }
      else{
-       //        std::cout << "iEfficiencyCut passescut n cut: " <<  theClonedEffHisto_->GetTitle() << " variable is: " <<
-       //  	variable << " which falls in bin: " << theBin << " and the cut was not passed" 
-       //  	" (randNum: " << randNum << " eff: " << theEfficiency << ")" << std::endl;
+       //     std::cout << "iEfficiencyCut passescut n cut: " <<  theClonedEffHisto_->GetTitle() << " variable is: " <<
+       //	variable << " which falls in bin: " << theBin << " and the cut was not passed" 
+       //	" (randNum: " << randNum << " eff: " << theEfficiency << ")" << std::endl;
        return false;
      }
 

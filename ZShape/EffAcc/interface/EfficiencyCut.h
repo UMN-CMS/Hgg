@@ -11,7 +11,7 @@ class EfficiencyCut
   public :
 
   EfficiencyCut( void );
-  EfficiencyCut( TH1F * histo , const std::string& variable);
+  EfficiencyCut( TH1F * histo);
 
   bool passesCut( float variable ) const;
   bool passesCut( const ::math::PtEtaPhiMLorentzVector& elec) const;

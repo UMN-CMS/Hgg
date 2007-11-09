@@ -14,7 +14,8 @@ class EfficiencyStore {
 
 
   EfficiencyStore();
-  EfficiencyStore(TFile * file);
+  //EfficiencyStore(TFile * file);
+  EfficiencyStore(TFile *file, std::string EffName ="" , std::string PhysVar ="" );
   EfficiencyStore(std::string & textFileName);  
   
 
@@ -62,7 +63,8 @@ class EfficiencyStore {
   int dimension_;
   std::string efficiencyName_;
 
-
+  std::string effName_;
+  std::string physVar_;
   void produceTxtFile1D();
   void produce1DHistograms(TFile * rootFile);
   //  void produce2DHistograms(TFile * rootFile);

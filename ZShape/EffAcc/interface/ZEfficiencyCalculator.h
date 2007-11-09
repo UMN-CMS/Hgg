@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.1 2007/10/26 23:02:09 franzoni Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.2 2007/11/06 18:19:35 mansj Exp $
 //
 //
 
@@ -61,7 +61,7 @@ private:
   virtual void endJob() ;
   
   void fillEvent(const HepMC::GenEvent* evt);
-  void loadEfficiency(const std::string& name, const std::string& fname, const std::string& var);
+  void loadEfficiency(const std::string& name, const std::string& fname);
   void acceptanceCuts();
   void applyEfficiencies();
 
