@@ -15,8 +15,8 @@ int main( int argc, char **argv ) {
   char *eff ="";
   char *phys="";
 
-  if(argc<3 ){
-    std::cout << "\nlacking arguments. Usage:    efficiencyRoot2Txt <path/efficiencyFileName.root> <path/effFileName.txt>\n" << std::endl;
+  if(argc<5 ){
+    std::cout << "\nlacking arguments. Usage:    efficiencyRoot2Txt <path/efficiencyFileName.root> <path/effFileName.txt> <eff name> <phys>\n" << std::endl;
     return -1;
   }
   else if (argc == 5){
