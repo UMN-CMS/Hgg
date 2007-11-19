@@ -1,7 +1,8 @@
 <use name=DataFormats/Math>
 <use name=FWCore/MessageLogger>
-
+<use name=root>
 <export>
    <use name=DataFormats/Math>
+   <use name=root>
    <lib name=ZShapeBase>
 </export>
