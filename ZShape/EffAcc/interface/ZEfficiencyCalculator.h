@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.2 2007/11/06 18:19:35 mansj Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.3 2007/11/09 17:52:56 haupt Exp $
 //
 //
 
@@ -40,10 +40,10 @@ Implementation:
 #include "ZShape/EffAcc/interface/EfficiencyStore.h"
 #include "ZShape/EffAcc/interface/EfficiencyCut.h"
 
-
 #include "TRandom3.h"
 #include "TFile.h"
 
+class TProfile;
 
 //
 // class decleration
@@ -64,12 +64,14 @@ private:
   void loadEfficiency(const std::string& name, const std::string& fname);
   void acceptanceCuts();
   void applyEfficiencies();
+  void createAlternateEfficiencies();
 
   // ----------member data ---------------------------
   ZShapeEvent evt_;
   
   TRandom3 randomNum;
 
+  edm::InputTag m_srcTag;
   std::string outFileName_;
   bool        writeHistoConservatively_;
   TFile*      histoFile_;
@@ -83,6 +85,16 @@ private:
 
   // Z Definitions
   std::map<std::string, ZShapeZDef*> zdefs_;
+
+  // when doing efficiency statistics runs
+  struct StatsBox {
+    std::string targetEff, targetZDef;
+    int trials;
+    std::vector<EfficiencyCut*> alternateCuts;
+    std::vector<EffHistos> hists;
+    std::vector<TH1*> rawHists;
+    TProfile* cutsProfile;
+  } statsBox_;
 
   // Z Plots
   EffHistos allCase_;

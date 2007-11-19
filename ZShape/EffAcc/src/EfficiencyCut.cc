@@ -19,8 +19,10 @@ EfficiencyCut::EfficiencyCut ( TH1F * histo ) {
 
   std::cout << "building EfficiencyCut - constructor - num entries is: " << histo->GetEntries() << std::endl;
   //  std::cerr << "theTmpHisto_ is: " << theTmpHisto_<< std::endl;
-  
-  theClonedEffHisto_ = (TH1F *) histo->Clone("clonedEfficiencyHisto");
+
+  char name[1024];
+  snprintf(name,1023,"%s ",histo->GetName());
+  theClonedEffHisto_ = (TH1F *) histo->Clone(name);
   //   std::cout << "cloned EfficiencyCut obj created with histo named: " 
   // 	    <<   theClonedEffHisto_ ->GetTitle() 
   // 	    << " and pointer: " << theClonedEffHisto_ << std::endl;
@@ -46,12 +48,27 @@ bool EfficiencyCut::passesCut(float variable) const
   int theBin =  theClonedEffHisto_ -> FindBin(variable);
   if (theBin <= 0 ) 
     {
-      std::cout << "in EfficiencyCut passesCut piff underflow : " << variable << std::endl;
+      std::cout << "in " << theClonedEffHisto_->GetName() <<" passesCut piff underflow : " << variable;
+      switch (theCutVariable_) {
+      case(cv_Eta) : std::cout << " eta"; break;
+      case(cv_Phi) : std::cout << " phi"; break;
+      case(cv_Pt) : std::cout << " pt"; break;
+      case(cv_Energy) : std::cout << " energy"; break;
+      }
+      std::cout << std::endl;
+
       return false; // underflow
     }
   if (theBin ==  ( theClonedEffHisto_->GetNbinsX()  +1)  ) 
     {
-      std::cout << "in EfficiencyCut passesCut overflow : " << variable << std::endl;
+      std::cout << "in " << theClonedEffHisto_->GetName() << " passesCut overflow : " << variable;
+      switch (theCutVariable_) {
+      case(cv_Eta) : std::cout << " eta"; break;
+      case(cv_Phi) : std::cout << " phi"; break;
+      case(cv_Pt) : std::cout << " pt"; break;
+      case(cv_Energy) : std::cout << " energy"; break;
+      }
+      std::cout << std::endl;
       return false; // underflow
     }
 

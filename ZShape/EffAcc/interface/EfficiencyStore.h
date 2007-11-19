@@ -34,7 +34,6 @@ class EfficiencyStore {
 
   
   TH1F* getValuesHisto1D()     {
-    std::cout << "inside the getter method values1DHisto_: " << values1DHisto_ << std::endl;
     return values1DHisto_;
   };
   TH2F* getValuesHisto2D()     {return values2DHisto_;};

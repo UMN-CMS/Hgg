@@ -80,7 +80,7 @@ void EfficiencyStore::setRootFile(TFile * file){
     
   while(key=(TKey*) next() ){
       
-    std::cout << "object in file has name: " << key->GetName() << std::endl;
+    //    std::cout << "object in file has name: " << key->GetName() << std::endl;
     TH1F * tmp1;    TH2F * tmp2;
     if (strstr(key->GetName(),effName_.c_str()) && strstr(key->GetName(),physVar_.c_str()))
      {
@@ -88,47 +88,55 @@ void EfficiencyStore::setRootFile(TFile * file){
          { 
    	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
 	   values1DHisto_ = (TH1F *) tmp1->Clone();
+	   values1DHisto_->SetDirectory(0);
 	   //	values1DHisto_ = (TH1F*) theFile_->Get(key->GetName());
-	   std::cout << " This Object is values_ " <<  key->GetName() << std::endl;
+	   //	   std::cout << " This Object is values_ " <<  key->GetName() << std::endl;
          }
        else if(  strstr(key->GetName(),"systematicPlus_") &&  strcmp(key->GetClassName(),"TH1F")==0) 
          {
 	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
 	   systPlus1DHisto_ = (TH1F *) tmp1->Clone();
-	   std::cout << " This Object is sytemtaicPlus_ " <<  key->GetName() << std::endl;        
+	   systPlus1DHisto_->SetDirectory(0);
+	   //	   std::cout << " This Object is sytemtaicPlus_ " <<  key->GetName() << std::endl;        
          }
        else if(  strstr(key->GetName(),"systematicMinus_") &&   strcmp(key->GetClassName(),"TH1F")==0) 
          {
 	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
 	   systMinus1DHisto_ = (TH1F *) tmp1->Clone();
-	   std::cout << " This Object is systematicMinus_ " <<  key->GetName() << std::endl;
+	   systMinus1DHisto_->SetDirectory(0);
+	   //	   std::cout << " This Object is systematicMinus_ " <<  key->GetName() << std::endl;
          }
        else if(  strstr(key->GetName(),"denominator_") &&   strcmp(key->GetClassName(),"TH1F")==0)
          {
 	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
 	   denominator1DHisto_ = 	(TH1F *) tmp1->Clone();
-	   std::cout << " This Object is denominator_ " <<  key->GetName() << std::endl;
+	   denominator1DHisto_->SetDirectory(0);
+	   //	   std::cout << " This Object is denominator_ " <<  key->GetName() << std::endl;
          }
       
        if(  strstr(key->GetName(),"values_") && key->GetClassName()=="TH2F")
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   values2DHisto_  = (TH2F *) tmp2->Clone();
+	   values2DHisto_->SetDirectory(0);
          }
        else if(  strstr(key->GetName(),"systematicPlus_") && key->GetClassName()=="TH2F")
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   systPlus2DHisto_ =  (TH2F *) tmp2->Clone();
+	   systPlus2DHisto_->SetDirectory(0);
          }
        else if(  strstr(key->GetName(),"systematicMinus_") && key->GetClassName()=="TH2F")
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   systMinus2DHisto_ =  (TH2F *) tmp2->Clone();
+	   systMinus2DHisto_->SetDirectory(0);
          }
        else if(  strstr(key->GetName(),"denominator_") && key->GetClassName()=="TH2F")
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   denominator2DHisto_ =  (TH2F *) tmp2->Clone();
+	   denominator2DHisto_->SetDirectory(0);
 	 }
      }
   }
@@ -195,7 +203,7 @@ void EfficiencyStore::produceHistograms(TFile * rootFile){
   efficiencyName_ = std::string(effName);
 
   // call dedicated private method depending on the dimension of the histogram
-  std::cout<<"histogram dimension is: " << dimension_ << std::endl;
+  //  std::cout<<"histogram dimension is: " << dimension_ << std::endl;
   if(dimension_==1) produce1DHistograms(rootFile);
   //  else if(dimension_==2) produce2DHistograms(rootFile);
   else  {
@@ -314,7 +322,7 @@ void EfficiencyStore::produce1DHistograms(TFile * rootFile){
   int binCounter=0;
   while ( 	is.getline(str,1000)){
     if ( strstr(str,"#") ) continue;
-    std::cout << str << std::endl; // just for debug
+    //std::cout << str << std::endl; // just for debug
     sscanf (str,"%d %f %f %f %f %f %d", &binNumber[binCounter], &binMin[binCounter], &binMax[binCounter],
 	    &values[binCounter], &systErrP[binCounter], &systErrM[binCounter], &denominator[binCounter]);
     binCounter++;
