@@ -297,14 +297,23 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
 
 void ZEfficiencyCalculator::loadEfficiency(const std::string& name, const std::string& fname) {
 
-  TFile effFile(fname.c_str(),"READ");
-
-  edm::LogInfo("ZShape") << "Reading " << fname << " for efficiency " << name;
-  EfficiencyStore* effs       = new EfficiencyStore(&effFile, name);
-  TH1F* histo = effs->getValuesHisto1D();
-  EfficiencyCut* theCut  = new   EfficiencyCut(histo);
-  efficiencies_[name]=effs;
-  theCuts_[name]=theCut;
+  if (fname.find(".root")!=std::string::npos) {
+    TFile effFile(fname.c_str(),"READ");
+    
+    edm::LogInfo("ZShape") << "Reading ROOT " << fname << " for efficiency " << name;
+    EfficiencyStore* effs       = new EfficiencyStore(&effFile, name);
+    TH1F* histo = effs->getValuesHisto1D();
+    EfficiencyCut* theCut  = new   EfficiencyCut(histo);
+    efficiencies_[name]=effs;
+    theCuts_[name]=theCut;
+  } else {
+    edm::LogInfo("ZShape") << "Reading TEXT " << fname << " for efficiency " << name;
+    EfficiencyStore* effs       = new EfficiencyStore(fname);
+    TH1F* histo = effs->getValuesHisto1D();
+    EfficiencyCut* theCut  = new   EfficiencyCut(histo);
+    efficiencies_[name]=effs;
+    theCuts_[name]=theCut;
+  }
 }
 
 

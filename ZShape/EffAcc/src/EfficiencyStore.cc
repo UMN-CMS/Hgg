@@ -37,7 +37,7 @@ EfficiencyStore::EfficiencyStore(TFile * file, std::string EffName, std::string 
 }
 
 
-EfficiencyStore::EfficiencyStore(std::string & textFileName)
+EfficiencyStore::EfficiencyStore(const std::string & textFileName)
 { 
   theFile_ =0;
   values1DHisto_=0;   systPlus1DHisto_=0;
@@ -46,6 +46,7 @@ EfficiencyStore::EfficiencyStore(std::string & textFileName)
   systMinus2DHisto_=0; denominator2DHisto_=0;
   textFileName_ = textFileName;
   std::cout << "class EfficiencyStore created with text file: " << textFileName_ << std::endl;
+  produceHistograms(0);
 }
   
   
@@ -346,7 +347,7 @@ void EfficiencyStore::produce1DHistograms(TFile * rootFile){
     }
     
 
-  rootFile->cd();
+  if (rootFile!=0) rootFile->cd();
   std::string title = std::string("values_")+efficiencyName_;
   TH1F * valuesHisto = new TH1F(title.c_str(),title.c_str(), binCounter, bins);
   title = std::string("systematicMinus_")+efficiencyName_;
@@ -356,6 +357,17 @@ void EfficiencyStore::produce1DHistograms(TFile * rootFile){
   title = std::string("denominator_")+efficiencyName_;
   TH1F * denominatorHisto = new TH1F(title.c_str(),title.c_str(), binCounter, bins);
 
+  if (rootFile==0) {
+    valuesHisto->SetDirectory(0);
+    systematicMHisto->SetDirectory(0);
+    systematicPHisto->SetDirectory(0);
+    denominatorHisto->SetDirectory(0);
+    values1DHisto_=valuesHisto;
+    systPlus1DHisto_=systematicMHisto;
+    systMinus1DHisto_=systematicPHisto;
+    denominator1DHisto_=denominatorHisto;
+  }
+
   for (int u=1; u<=binCounter; u++)
     {
       valuesHisto->SetBinContent(u,values[u-1]);
@@ -364,9 +376,11 @@ void EfficiencyStore::produce1DHistograms(TFile * rootFile){
       denominatorHisto->SetBinContent(u,denominator[u-1]);
     }
 
-  valuesHisto->Write();systematicMHisto ->Write();
-  systematicPHisto->Write(); denominatorHisto->Write();
-  rootFile->Close();
+  if (rootFile!=0) {
+    valuesHisto->Write();systematicMHisto ->Write();
+    systematicPHisto->Write(); denominatorHisto->Write();
+    rootFile->Close();
+  }
 }
   
 

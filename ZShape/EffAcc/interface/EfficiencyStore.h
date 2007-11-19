@@ -16,7 +16,7 @@ class EfficiencyStore {
   EfficiencyStore();
   //EfficiencyStore(TFile * file);
   EfficiencyStore(TFile *file, std::string EffName ="" , std::string PhysVar ="" );
-  EfficiencyStore(std::string & textFileName);  
+  EfficiencyStore(const std::string & textFileName);  
   
 
   //-----------------------------------------------------------------------------------//
