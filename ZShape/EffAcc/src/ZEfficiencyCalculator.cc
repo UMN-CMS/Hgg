@@ -92,10 +92,13 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 
   //
   // fill histograms for before any selection
-  allCase_.Fill(evt_.elec_[0].p4_, evt_.elec_[1].p4_);
+  allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
   
   // these stages merely _fill_ bits.  They do not apply cuts!
-  acceptanceCuts();
+  stdCuts_.acceptanceCuts(evt_.elec(0));
+  stdCuts_.acceptanceCuts(evt_.elec(1));
+  stdCuts_.ptCuts(evt_.elec(0));
+  stdCuts_.ptCuts(evt_.elec(1));
   
   EfficiencyCut* keep=0;
 
@@ -109,7 +112,7 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 
     for (std::map<std::string,EfficiencyCut*>::iterator cut=theCuts_.begin(); cut!=theCuts_.end(); cut++) {
       for (int ne=0; ne<2; ne++) {
-	evt_.elec_[ne].cutResult(cut->first,cut->second->passesCut(evt_.elec_[ne].p4_));
+	evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne).p4_));
       }
     }
 
@@ -130,8 +133,8 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 	if (!q->second->pass(evt_,1,1,0,&pairing)) continue;
 	
 	// fill standard histograms after acceptance
-	if (!pairing) plots->acceptance_.Fill(evt_.elec_[0].p4_, evt_.elec_[1].p4_);
-	else plots->acceptance_.Fill(evt_.elec_[1].p4_, evt_.elec_[0].p4_);
+	if (!pairing) plots->acceptance_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
+	else plots->acceptance_.Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
 	
 	// next n-cuts
 	bool ok=true;
@@ -139,9 +142,9 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 	  ok=q->second->pass(evt_,j+1,j+1,0,&pairing);
 	  if (ok)
 	    if (!pairing) 
-	      plots->postCut_[j-1].Fill(evt_.elec_[0].p4_, evt_.elec_[1].p4_);
+	      plots->postCut_[j-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
 	    else
-	      plots->postCut_[j-1].Fill(evt_.elec_[1].p4_, evt_.elec_[0].p4_);
+	      plots->postCut_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
 	}
       }
     }
@@ -149,9 +152,9 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
       ZShapeZDef* zdef=zdefs_[statsBox_.targetZDef];
       if (zdef->pass(evt_,zdef->criteriaCount(ZShapeZDef::crit_E1),zdef->criteriaCount(ZShapeZDef::crit_E2),0,&pairing)) {
 	if (!pairing) 
-	  statsBox_.hists[pass].Fill(evt_.elec_[0].p4_, evt_.elec_[1].p4_);
+	  statsBox_.hists[pass].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
 	else
-	  statsBox_.hists[pass].Fill(evt_.elec_[1].p4_, evt_.elec_[0].p4_);
+	  statsBox_.hists[pass].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
       }
     }
     pass++;
@@ -193,7 +196,7 @@ void ZEfficiencyCalculator::fillEvent(const HepMC::GenEvent* Evt) {
       momentum.SetPz(  (*mcpart)->momentum().z() );        momentum.SetE(   (*mcpart)->momentum().t() );
       
       if (ne<2) {
-	evt_.elec_[ne].p4_=momentum;
+	evt_.elec(ne).p4_=momentum;
       }     
       ne++;
 
@@ -216,12 +219,12 @@ void ZEfficiencyCalculator::fillEvent(const HepMC::GenEvent* Evt) {
 
   //
   // reorder electrons in pT
-  float pt1 = evt_.elec_[0].p4_.Pt();
-  float pt2 = evt_.elec_[1].p4_.Pt();
+  float pt1 = evt_.elec(0).p4_.Pt();
+  float pt2 = evt_.elec(1).p4_.Pt();
 
   // flipping order only if necessary
   if (pt2 > pt1){
-    std::swap( evt_.elec_[0], evt_.elec_[1]);
+    std::swap( evt_.elec(0), evt_.elec(1));
   }
 }  
   
@@ -355,16 +358,6 @@ void ZEfficiencyCalculator::createAlternateEfficiencies() {
     }
     statsBox_.rawHists.push_back(randy);
     statsBox_.alternateCuts.push_back(new EfficiencyCut(randy));
-  }
-}
-
-void ZEfficiencyCalculator::acceptanceCuts() {
-  for (int i=0; i<2; i++) {
-    evt_.elec_[i].cutResult("ACC(EB)",theEtaSelector_.isInAcceptance(evt_.elec_[i].p4_,EtaAcceptance::zone_EB));
-    evt_.elec_[i].cutResult("ACC(EE)",theEtaSelector_.isInAcceptance(evt_.elec_[i].p4_,EtaAcceptance::zone_EE));
-    evt_.elec_[i].cutResult("ACC(ECAL)",theEtaSelector_.isInAcceptance(evt_.elec_[i].p4_,EtaAcceptance::zone_ECAL));
-    evt_.elec_[i].cutResult("ACC(HF)",theEtaSelector_.isInAcceptance(evt_.elec_[i].p4_,EtaAcceptance::zone_HF));
-    evt_.elec_[i].cutResult("ACC(ANY)",theEtaSelector_.isInAcceptance(evt_.elec_[i].p4_,EtaAcceptance::zone_ANY));
   }
 }
 

@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.3 2007/11/09 17:52:56 haupt Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.4 2007/11/19 21:39:58 mansj Exp $
 //
 //
 
@@ -33,9 +33,9 @@ Implementation:
 
 #include <CLHEP/Vector/LorentzVector.h>
 
-#include "ZShape/Base/interface/EtaAcceptance.h"
 #include "ZShape/Base/interface/ZShapeEvent.h"
 #include "ZShape/Base/interface/ZShapeZDef.h"
+#include "ZShape/Base/interface/ZShapeStandardCuts.h"
 #include "ZShape/EffAcc/interface/EffHistos.h"
 #include "ZShape/EffAcc/interface/EfficiencyStore.h"
 #include "ZShape/EffAcc/interface/EfficiencyCut.h"
@@ -62,7 +62,6 @@ private:
   
   void fillEvent(const HepMC::GenEvent* evt);
   void loadEfficiency(const std::string& name, const std::string& fname);
-  void acceptanceCuts();
   void applyEfficiencies();
   void createAlternateEfficiencies();
 
@@ -80,8 +79,8 @@ private:
   std::map<std::string, EfficiencyStore*> efficiencies_;
   std::map<std::string, EfficiencyCut*> theCuts_;
   
-  // object which applies the eta cuts
-  EtaAcceptance theEtaSelector_;
+  // object which applies the eta and pt cuts
+  ZShapeStandardCuts stdCuts_;
 
   // Z Definitions
   std::map<std::string, ZShapeZDef*> zdefs_;
