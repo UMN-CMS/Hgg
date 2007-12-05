@@ -1,30 +1,34 @@
 #include "ZShape/Base/interface/ZShapeEvent.h"
 #include <iostream>
 
+ZShapeElectron* ZShapeEvent::allocateElectron() {
+  return new ZShapeElectron(); // vanilla
+}
+
 void ZShapeEvent::dump() const {
   dump(std::cout);
 }
 void ZShapeEvent::dump(std::ostream& s) const {
   s << "Vertex: " << z0_.x() << ", " << z0_.y() << ", " << z0_.z() << std::endl;
   for (int i=0; i<2; i++) {
-    s << "Electron " << i+1 << ": (eta,phi,pt) " << elec_[i].p4_.eta() << ", " << elec_[i].p4_.phi() << ", " << elec_[i].p4_.Pt() << std::endl;
-    for (std::map<std::string,bool>::const_iterator j=elec_[i].cutMap_.begin(); j!=elec_[i].cutMap_.end(); ++j) {
-      s << "  \"" << j->first << "\" : " << ((j->second)?("pass"):("fail")) << std::endl;
-    }
+    s << "Electron " << i+1;
+    elec(i).dump(s);
   }
 }
 
 void ZShapeEvent::clear() {
-  elec_[0].cutMap_.clear();
-  elec_[1].cutMap_.clear();
+  if (e1_==0) e1_=allocateElectron();
+  if (e2_==0) e2_=allocateElectron();
+  elec(0).clear();
+  elec(1).clear();
   n_elec=0;
 }
 
-bool ZShapeEvent::ElectronStruct::passed(const std::string& cutName) const { // false if not present!
-  std::map<std::string,bool>::const_iterator i=cutMap_.find(cutName);
-  return ((i==cutMap_.end())?(false):(i->second));
+ZShapeEvent::ZShapeEvent() : e1_(0),e2_(0) {
 }
 
-void ZShapeEvent::ElectronStruct::cutResult(const std::string& cutName, bool didpass) {
-  cutMap_[cutName]=didpass;
+ZShapeEvent::~ZShapeEvent() {
+  if (e1_!=0) delete e1_;
+  if (e2_!=0) delete e2_;
 }
+

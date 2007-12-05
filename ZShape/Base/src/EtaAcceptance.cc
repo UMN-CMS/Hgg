@@ -8,7 +8,7 @@ EtaAcceptance::EtaAcceptance () {
 }
 
 
-bool EtaAcceptance::isInAcceptance(const math::PtEtaPhiMLorentzVector& p, Zone z) {
+bool EtaAcceptance::isInAcceptance(const math::PtEtaPhiMLorentzVector& p, Zone z) const {
   float eta = fabsf( p.eta() );
 
   switch (z) {
@@ -32,6 +32,6 @@ bool EtaAcceptance::isInAcceptance(const math::PtEtaPhiMLorentzVector& p, Zone z
   }
 }
 
-bool EtaAcceptance::isInAcceptance(const math::PtEtaPhiMLorentzVector& p) {
+bool EtaAcceptance::isInAcceptance(const math::PtEtaPhiMLorentzVector& p) const {
   return isInAcceptance(p,zone_ANY);
 }

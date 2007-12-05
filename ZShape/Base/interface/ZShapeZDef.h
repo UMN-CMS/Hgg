@@ -11,8 +11,8 @@ class ZShapeEvent;
   * These cuts apply to the first electron, the second electron, and then
   * the di-electron. 
   * 
-  * $Date: $
-  * $Revision: $
+  * $Date: 2007/11/06 18:18:24 $
+  * $Revision: 1.1 $
   * \author J. Mans - Minnesota
   */
 class ZShapeZDef {
@@ -29,7 +29,7 @@ public:
   /// does this event pass all criteria of this Z Definition up-to-and-including the n-th for each item?
   bool pass(const ZShapeEvent& evt, int ne1, int ne2=1000, int nz=1000, bool* swapPairing=0) const;
 private:
-  bool pass(const ZShapeEvent::ElectronStruct& e1, const ZShapeEvent::ElectronStruct& e2, int ne1, int ne2, int nz) const;
+  bool pass(const ZShapeElectron& e1, const ZShapeElectron& e2, int ne1, int ne2, int nz) const;
   std::vector<std::string> m_requirements[3];
 };
 

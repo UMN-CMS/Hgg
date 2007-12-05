@@ -20,15 +20,15 @@ bool ZShapeZDef::pass(const ZShapeEvent& evt, bool* swapPairing) const {
 
 bool ZShapeZDef::pass(const ZShapeEvent& evt, int ne1, int ne2, int nz,bool* swapPairing) const {
   // try straight-up assignment first
-  bool p=pass(evt.elec_[0],evt.elec_[1],ne1,ne2,nz);
+  bool p=pass(evt.elec(0),evt.elec(1),ne1,ne2,nz);
   if (!p) { // try swapping electrons!
-    p=pass(evt.elec_[1],evt.elec_[0],ne1,ne2,nz);
+    p=pass(evt.elec(1),evt.elec(0),ne1,ne2,nz);
     if (swapPairing!=0) *swapPairing=true;
   } else if (swapPairing!=0) *swapPairing=false;
   return p;
 }
 
-bool ZShapeZDef::pass(const ZShapeEvent::ElectronStruct& e1, const ZShapeEvent::ElectronStruct& e2, int ne1, int ne2, int nz) const {
+bool ZShapeZDef::pass(const ZShapeElectron& e1, const ZShapeElectron& e2, int ne1, int ne2, int nz) const {
   bool ok=true;
   // concrete assignment
   for (unsigned int i=0; ok && int(i)<ne1 && i<m_requirements[crit_E1].size(); ++i) {
