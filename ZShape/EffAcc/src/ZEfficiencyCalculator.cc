@@ -261,10 +261,9 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
     for (int i=1; i<q->second->criteriaCount(ZShapeZDef::crit_E1); ++i) {
       char dirname[1024];
       std::string c1=q->second->criteria(ZShapeZDef::crit_E1,i);
-      //Change this, it assumes there must always be the same number of criteria for both electrons
-      //  one could add in a dummy criteria
+
       std::string c2=q->second->criteria(ZShapeZDef::crit_E2,i);
-      if (c1==c2) 
+      if (c1==c2 || i>=q->second->criteriaCount(ZShapeZDef::crit_E2)) 
 	sprintf(dirname,"C%02d-%s",i,c1.c_str());
       else 
 	sprintf(dirname,"C%02d-%s-%s",i,c1.c_str(),c2.c_str());
