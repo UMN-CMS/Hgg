@@ -7,7 +7,8 @@
 // constructors and destructor
 //
 ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
-  m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("zrc",edm::InputTag("source")))
+  m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("src",edm::InputTag("source"))),
+  quiet_(iConfig.getUntrackedParameter<bool>("quiet",false))
 {
 	
   //now do what ever initialization is needed
@@ -125,7 +126,7 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
     bool pairing;
     
     if (pass==0) {
-      evt_.dump();
+      if (!quiet_) evt_.dump();
 
       for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
 	ZPlots* plots=zplots_[q->first];

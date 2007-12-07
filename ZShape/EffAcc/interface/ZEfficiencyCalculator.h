@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.4 2007/11/19 21:39:58 mansj Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.5 2007/12/05 22:42:05 mansj Exp $
 //
 //
 
@@ -67,10 +67,11 @@ private:
 
   // ----------member data ---------------------------
   ZShapeEvent evt_;
-  
+
   TRandom3 randomNum;
 
   edm::InputTag m_srcTag;
+  bool quiet_;
   std::string outFileName_;
   bool        writeHistoConservatively_;
   TFile*      histoFile_;

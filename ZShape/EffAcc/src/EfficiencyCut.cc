@@ -48,6 +48,7 @@ bool EfficiencyCut::passesCut(float variable) const
   int theBin =  theClonedEffHisto_ -> FindBin(variable);
   if (theBin <= 0 ) 
     {
+      /*
       std::cout << "in " << theClonedEffHisto_->GetName() <<" passesCut piff underflow : " << variable;
       switch (theCutVariable_) {
       case(cv_Eta) : std::cout << " eta"; break;
@@ -56,11 +57,12 @@ bool EfficiencyCut::passesCut(float variable) const
       case(cv_Energy) : std::cout << " energy"; break;
       }
       std::cout << std::endl;
-
+      */
       return false; // underflow
     }
   if (theBin ==  ( theClonedEffHisto_->GetNbinsX()  +1)  ) 
     {
+      /*
       std::cout << "in " << theClonedEffHisto_->GetName() << " passesCut overflow : " << variable;
       switch (theCutVariable_) {
       case(cv_Eta) : std::cout << " eta"; break;
@@ -69,6 +71,7 @@ bool EfficiencyCut::passesCut(float variable) const
       case(cv_Energy) : std::cout << " energy"; break;
       }
       std::cout << std::endl;
+      */
       return false; // underflow
     }
 
