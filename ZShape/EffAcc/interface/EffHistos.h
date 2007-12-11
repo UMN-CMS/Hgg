@@ -5,6 +5,9 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/Vector3D.h"
 
+// holds histograms for Z and e+/- quantities
+// filled to carachterize candidates' pupulation at every step along selection path
+
 class EffHistos {
 
  public:

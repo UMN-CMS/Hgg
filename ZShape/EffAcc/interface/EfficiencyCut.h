@@ -6,6 +6,9 @@
 #include "DataFormats/Math/interface/Vector3D.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 
+//
+// holds efficiency info and performs the cut. Recognizes well-knonw variables
+
 class EfficiencyCut
 {
   public :

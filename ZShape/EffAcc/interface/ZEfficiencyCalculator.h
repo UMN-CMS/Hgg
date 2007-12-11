@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.5 2007/12/05 22:42:05 mansj Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.6 2007/12/07 05:06:52 mansj Exp $
 //
 //
 
@@ -76,7 +76,7 @@ private:
   bool        writeHistoConservatively_;
   TFile*      histoFile_;
 
-  // the efficiency objects
+  // the efficiency objects: strings identify the cuts efficiencies and corresponding cuts
   std::map<std::string, EfficiencyStore*> efficiencies_;
   std::map<std::string, EfficiencyCut*> theCuts_;
   
@@ -96,8 +96,12 @@ private:
     TProfile* cutsProfile;
   } statsBox_;
 
-  // Z Plots
+  // Z Plots:
+
+  // before any z-def selection
   EffHistos allCase_;
+
+  // at each step of selection for any z-definition
   struct ZPlots {
     ZPlots(int nc) : postCut_(nc) { }
     EffHistos acceptance_;

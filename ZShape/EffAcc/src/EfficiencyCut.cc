@@ -76,11 +76,12 @@ bool EfficiencyCut::passesCut(float variable) const
     }
 
 
-  float theEfficiency = theClonedEffHisto_->GetBinContent(theBin)
-;
+  float theEfficiency = theClonedEffHisto_->GetBinContent(theBin);
+
   TRandom3 randomNum(0); // put this back
   float randNum = randomNum.Uniform(0., 1.); // put this back
   //std::cout << "EffCut is " << theEfficiency << " in " << theClonedEffHisto_->GetTitle() << " variable is: " << variable << " which falls in bin: " << theBin << std::endl;
+  // GF: I do not understand this: why comparing rand with theEfficiency twice?
   if ( randomNum.Uniform(0., 1.) < theEfficiency ) 
      if ( randNum < theEfficiency ) 
        {
