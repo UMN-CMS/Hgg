@@ -10,11 +10,14 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("src",edm::InputTag("source"))),
   quiet_(iConfig.getUntrackedParameter<bool>("quiet",false))
 {
-	
+  //
   //now do what ever initialization is needed
 
   outFileName_              = iConfig.getUntrackedParameter<std::string>("outHistogramsFile", "");
   writeHistoConservatively_ = iConfig.getUntrackedParameter<bool>("writeHistoBeforeEndJob", false);
+
+  //
+  // multiple PSets==Zdefinitions: each electron required to pass a set of cuts
 
   std::vector<edm::ParameterSet> zdefSetups =iConfig.getUntrackedParameter< std::vector<edm::ParameterSet> >("ZDefs");
 
@@ -30,6 +33,9 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
     zdefs_[name]=zdef;
   }
 
+  //
+  // list of all available efficiencies
+  
   std::vector<edm::ParameterSet> effs =iConfig.getUntrackedParameter< std::vector<edm::ParameterSet> >("Effs");
 
   for (std::vector<edm::ParameterSet>::iterator i=effs.begin(); i!=effs.end(); ++i) {
@@ -39,7 +45,11 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
     loadEfficiency(name,file);
   }
 
+  //
+  // setting up trials - done only for one specific efficiency (es_eff) and one specific Zdef (es_zdef)
+
   statsBox_.trials=iConfig.getUntrackedParameter<int>("es_trials",-1);
+  edm::LogInfo("ZShape") << "Number of trials requested: " << statsBox_.trials;
   if (statsBox_.trials>0) {
     statsBox_.targetEff=iConfig.getUntrackedParameter<std::string>("es_eff");
     statsBox_.targetZDef=iConfig.getUntrackedParameter<std::string>("es_zdef");
@@ -104,7 +114,6 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   EfficiencyCut* keep=0;
 
   do {
-
     if (statsBox_.trials>=1) {
       // swap to alternate universe
       if (pass==0) keep=theCuts_[statsBox_.targetEff];
@@ -175,7 +184,7 @@ void ZEfficiencyCalculator::fillEvent(const HepMC::GenEvent* Evt) {
   evt_.clear();
   int ne=0;
 
-  //
+
   // looping on all the particles of the simulated event
   for(HepMC::GenEvent::particle_const_iterator mcpart = Evt->particles_begin();
       mcpart != Evt->particles_end();
@@ -238,36 +247,45 @@ void ZEfficiencyCalculator::fillEvent(const HepMC::GenEvent* Evt) {
 void 
 ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
 {
-
+  // smearing the target efficiency according to statistics 
   if (statsBox_.trials>0) createAlternateEfficiencies();
 
   // file to write out the histograms produced by the ZEfficiencyCalculator
   histoFile_   = new TFile(outFileName_.c_str(),"RECREATE");
 
+  // one directory for histos of event before any selection
   TDirectory* td=histoFile_->mkdir("All");
   td->cd();
   allCase_.Book();
 
+  //
+  // one directory for each Z definition
   for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
     ZPlots* zplots=new ZPlots(q->second->criteriaCount(ZShapeZDef::crit_E1)-1); // -1 for acceptance
     
     TDirectory* pd = histoFile_->mkdir(q->first.c_str());
 
-    // organize in directories in order to have histograms at each step
+    // organize in sub-directories in order to have histograms at each step
 
     td = pd->mkdir("Acceptance");
     td->cd();
     zplots->acceptance_.Book();
 
+
+    // looping over cuts foreseen in given Z definition (for E1 and E2 simultaneously)
     for (int i=1; i<q->second->criteriaCount(ZShapeZDef::crit_E1); ++i) {
       char dirname[1024];
       std::string c1=q->second->criteria(ZShapeZDef::crit_E1,i);
 
       std::string c2=q->second->criteria(ZShapeZDef::crit_E2,i);
+
+      // name is combination of the cut on E1 and E2, when both available
       if (c1==c2 || i>=q->second->criteriaCount(ZShapeZDef::crit_E2)) 
 	sprintf(dirname,"C%02d-%s",i,c1.c_str());
       else 
 	sprintf(dirname,"C%02d-%s-%s",i,c1.c_str(),c2.c_str());
+
+      // one sub-dir for each step of selection
       td = pd->mkdir(dirname);
       td->cd();
       zplots->postCut_[i-1].Book();
@@ -276,9 +294,11 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
     zplots_[q->first]=zplots;
   }
  
+
   // book trials histograms
   if (statsBox_.trials>0) {
     char dirname[1024];
+    edm::LogInfo("ZShape") << "Making histograms for " << statsBox_.trials << " trials";
     sprintf(dirname,"EffStats_%s_%s",statsBox_.targetEff.c_str(),statsBox_.targetZDef.c_str());     
     TDirectory* pd = histoFile_->mkdir(dirname);
     statsBox_.hists=std::vector<EffHistos>(statsBox_.trials);
@@ -333,6 +353,7 @@ void ZEfficiencyCalculator::createAlternateEfficiencies() {
   if (statsBox_.trials<1) return;
   EfficiencyStore* es=efficiencies_[statsBox_.targetEff];
 
+  // the target efficiency to be smeared 
   TH1* val=es->getValuesHisto1D();
   TH1* denom=es->getDenominatorHisto1D();
 
