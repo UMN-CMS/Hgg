@@ -46,26 +46,33 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   }
 
   //
-  // setting up trials - done only for one specific efficiency (es_eff) and one specific Zdef (es_zdef)
+  // setting up trials - done only for one specific efficiency (estat_eff) and one specific Zdef (estat_zdef)
 
-  statsBox_.trials=iConfig.getUntrackedParameter<int>("es_trials",-1);
+  statsBox_.trials=iConfig.getUntrackedParameter<int>("estat_trials",-1);
   edm::LogInfo("ZShape") << "Number of trials requested: " << statsBox_.trials;
   if (statsBox_.trials>0) {
-    statsBox_.targetEff=iConfig.getUntrackedParameter<std::string>("es_eff");
-    statsBox_.targetZDef=iConfig.getUntrackedParameter<std::string>("es_zdef");
+    statsBox_.targetEffStat=iConfig.getUntrackedParameter<std::string>("estat_eff");
+    statsBox_.targetZDefStat=iConfig.getUntrackedParameter<std::string>("estat_zdef");
 
-    if (efficiencies_.find(statsBox_.targetEff)==efficiencies_.end()) {
-      edm::LogError("ZShape") << "Unable to find efficiency '" <<statsBox_.targetEff << "' to vary!";
+    if (efficiencies_.find(statsBox_.targetEffStat)==efficiencies_.end()) {
+      edm::LogError("ZShape") << "Unable to find efficiency '" <<statsBox_.targetEffStat << "' for statistical variations!";
       statsBox_.trials=0;
     }
-    if (zdefs_.find(statsBox_.targetZDef)==zdefs_.end()) {
-      edm::LogError("ZShape") << "Unable to find Z-definition '" <<statsBox_.targetZDef << "' to vary!";
+    if (zdefs_.find(statsBox_.targetZDefStat)==zdefs_.end()) {
+      edm::LogError("ZShape") << "Unable to find Z-definition '" <<statsBox_.targetZDefStat << "' for statistical variations!";
       statsBox_.trials=0;
     }
 
   }
-
   
+
+  //
+  // setting up systematic variations 
+  targetEffSys_  =iConfig.getUntrackedParameter<std::string>("esys_eff","");
+  targetZDefSys_ =iConfig.getUntrackedParameter<std::string>("esys_zdef","");
+  edm::LogInfo("ZShape") << "esys_eff: " << targetEffSys_ << "   while esys_zdef: "<< targetZDefSys_;  
+
+  createAlternateZDefs(targetZDefSys_,targetEffSys_);
 
 }
 
@@ -116,10 +123,12 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   do {
     if (statsBox_.trials>=1) {
       // swap to alternate universe
-      if (pass==0) keep=theCuts_[statsBox_.targetEff];
-      theCuts_[statsBox_.targetEff]=statsBox_.alternateCuts[pass];
+      if (pass==0) keep=theCuts_[statsBox_.targetEffStat];
+      // after first iteration, override standard cut with alternate cut
+      theCuts_[statsBox_.targetEffStat]=statsBox_.alternateCuts[pass];
     }
 
+    // apply all cuts and store results into ZEle objects
     for (std::map<std::string,EfficiencyCut*>::iterator cut=theCuts_.begin(); cut!=theCuts_.end(); cut++) {
       for (int ne=0; ne<2; ne++) {
 	evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne).p4_));
@@ -137,6 +146,7 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
     if (pass==0) {
       if (!quiet_) evt_.dump();
 
+      // selections done at first pass, no matter whether there are trials or not
       for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
 	ZPlots* plots=zplots_[q->first];
 	// acceptance is always the first cut
@@ -157,9 +167,11 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 	      plots->postCut_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
 	}
       }
-    }
+    }// end if pass==0
+
+    // selections specific in case of trials
     if (statsBox_.trials>0) {
-      ZShapeZDef* zdef=zdefs_[statsBox_.targetZDef];
+      ZShapeZDef* zdef=zdefs_[statsBox_.targetZDefStat];
       if (zdef->pass(evt_,zdef->criteriaCount(ZShapeZDef::crit_E1),zdef->criteriaCount(ZShapeZDef::crit_E2),0,&pairing)) {
 	if (!pairing) 
 	  statsBox_.hists[pass].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
@@ -168,9 +180,10 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
       }
     }
     pass++;
+
   } while (statsBox_.trials>0 && pass<statsBox_.trials);
 
-  if (keep!=0) theCuts_[statsBox_.targetEff]=keep;
+  if (keep!=0) theCuts_[statsBox_.targetEffStat]=keep;
 }
 
 
@@ -299,7 +312,7 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
   if (statsBox_.trials>0) {
     char dirname[1024];
     edm::LogInfo("ZShape") << "Making histograms for " << statsBox_.trials << " trials";
-    sprintf(dirname,"EffStats_%s_%s",statsBox_.targetEff.c_str(),statsBox_.targetZDef.c_str());     
+    sprintf(dirname,"EffStats_%s_%s",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str());     
     TDirectory* pd = histoFile_->mkdir(dirname);
     statsBox_.hists=std::vector<EffHistos>(statsBox_.trials);
     for (int j=0; j<statsBox_.trials;j++) {
@@ -351,7 +364,7 @@ ZEfficiencyCalculator::endJob() {
 
 void ZEfficiencyCalculator::createAlternateEfficiencies() {
   if (statsBox_.trials<1) return;
-  EfficiencyStore* es=efficiencies_[statsBox_.targetEff];
+  EfficiencyStore* es=efficiencies_[statsBox_.targetEffStat];
 
   // the target efficiency to be smeared 
   TH1* val=es->getValuesHisto1D();
@@ -359,10 +372,10 @@ void ZEfficiencyCalculator::createAlternateEfficiencies() {
 
   for (int i=0; i<statsBox_.trials; ++i) {
     char name[1024];
-    snprintf(name,1024,"StatEff_%s_%s_%d",statsBox_.targetEff.c_str(),statsBox_.targetZDef.c_str(),i+1);
+    snprintf(name,1024,"StatEff_%s_%s_%d",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str(),i+1);
     TH1F* randy=new TH1F(name,name,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
     if (i==0) {
-      snprintf(name,1024,"Variations_%s_%s",statsBox_.targetEff.c_str(),statsBox_.targetZDef.c_str());
+      snprintf(name,1024,"Variations_%s_%s",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str());
       statsBox_.cutsProfile=new TProfile(name,name,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
     }
     for (int j=1; j<=val->GetXaxis()->GetNbins(); j++) {
@@ -381,6 +394,95 @@ void ZEfficiencyCalculator::createAlternateEfficiencies() {
     statsBox_.alternateCuts.push_back(new EfficiencyCut(randy));
   }
 }
+
+
+void ZEfficiencyCalculator::createAlternateZDefs(const std::string& targetZDefSys, const std::string& targetEffSys) {
+  
+  EfficiencyStore* targetEff;
+  ZShapeZDef*      targetZDef;
+  targetEff=0; targetZDef=0;
+
+ if (zdefs_.find(targetZDefSys)!=zdefs_.end())
+    targetZDef=zdefs_[targetZDefSys];
+  else
+    edm::LogError("ZShape") << "Unable to find Z-definition '" <<targetZDefSys << "' for systematic variations!";
+  
+  if (efficiencies_.find(targetEffSys)!=efficiencies_.end())
+    targetEff=efficiencies_[targetEffSys];
+  else
+    edm::LogError("ZShape") << "Unable to find efficiency '" <<targetEffSys << "' for systematic variations!";
+  
+  // checking that target ZDef and Eff are among the existing
+  if (!targetZDef || !targetEff) return;
+
+  // defining the two modified cuts: +syst and -syst
+  TH1* val  =targetEff->getValuesHisto1D();
+  TH1* plus =targetEff->getSystPlusHisto1D();
+  TH1* minus=targetEff->getSystMinusHisto1D();
+
+  char name[1024];
+  snprintf(name,1024,"%s_SysPlus",targetEffSys.c_str());
+  TH1F* dPlusH=new TH1F(name,name,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
+  std::string dPlusName(name);
+
+  snprintf(name,1024,"%s_SysMin",targetEffSys.c_str());
+  TH1F* dMinusH=new TH1F(name,name,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
+  std::string dMinusName(name);
+  
+  for (int j=1; j<=val->GetXaxis()->GetNbins(); j++) {
+    double ave=val->GetBinContent(j);
+    double dPlus=plus->GetBinContent(j);
+    double dMinus=minus->GetBinContent(j);
+    dPlusH ->Fill(val->GetBinCenter(j), ave+dPlus);
+    dMinusH->Fill(val->GetBinCenter(j), ave+dMinus);//GF: check sign
+  }
+
+  EfficiencyCut* thePlusCut  = new   EfficiencyCut(dPlusH);
+  EfficiencyCut* theMinusCut  = new   EfficiencyCut(dMinusH);
+  theCuts_[dPlusName]=thePlusCut;
+  theCuts_[dMinusName]=theMinusCut;
+
+  // two new ZDefinitions: all cuts stay the same except target Eff which gets +syst and -syst
+  ZShapeZDef* zDefPlus=new ZShapeZDef();
+  ZShapeZDef* zDefMinus=new ZShapeZDef();
+  
+  for (int i=0; i<targetZDef->criteriaCount(ZShapeZDef::crit_E1); i++){
+    std::string criterion = targetZDef->criteria(ZShapeZDef::crit_E1, i);
+    if (criterion==targetEffSys){	
+      zDefPlus ->addCriterion(ZShapeZDef::crit_E1,dPlusName);
+      zDefMinus->addCriterion(ZShapeZDef::crit_E1,dMinusName);
+    }
+    else{
+      zDefPlus ->addCriterion(ZShapeZDef::crit_E1,criterion);
+      zDefMinus->addCriterion(ZShapeZDef::crit_E1,criterion);
+    }
+  }
+  
+  
+  for (int i=0; i<targetZDef->criteriaCount(ZShapeZDef::crit_E2); i++){
+    std::string criterion = targetZDef->criteria(ZShapeZDef::crit_E2, i);
+    if (criterion==targetEffSys){	
+      zDefPlus ->addCriterion(ZShapeZDef::crit_E2,dPlusName);
+      zDefMinus->addCriterion(ZShapeZDef::crit_E2,dMinusName);
+    }
+    else{
+      zDefPlus ->addCriterion(ZShapeZDef::crit_E2,criterion);
+      zDefMinus->addCriterion(ZShapeZDef::crit_E2,criterion);
+    }
+  }  
+
+  // adding 2 new ZDefs to standard list
+  snprintf(name,1024,"%s-SysPlus_%s",targetZDefSys.c_str(),targetEffSys.c_str());
+  std::string dPlusNameZ(name);
+  snprintf(name,1024,"%s-SysMinus_%s",targetZDefSys.c_str(),targetEffSys.c_str());
+  std::string dMinusNameZ(name);
+  zdefs_[dPlusNameZ]=zDefPlus;
+  zdefs_[dMinusNameZ]=zDefMinus;
+  
+}
+
+
+
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(ZEfficiencyCalculator);

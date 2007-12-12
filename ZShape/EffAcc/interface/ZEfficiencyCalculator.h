@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.6 2007/12/07 05:06:52 mansj Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.7 2007/12/11 14:16:14 franzoni Exp $
 //
 //
 
@@ -64,6 +64,7 @@ private:
   void loadEfficiency(const std::string& name, const std::string& fname);
   void applyEfficiencies();
   void createAlternateEfficiencies();
+  void createAlternateZDefs(const std::string& targetZDefSys, const std::string& targetEffSys);
 
   // ----------member data ---------------------------
   ZShapeEvent evt_;
@@ -88,13 +89,16 @@ private:
 
   // when doing efficiency statistics runs
   struct StatsBox {
-    std::string targetEff, targetZDef;
+    std::string targetEffStat, targetZDefStat;
     int trials;
     std::vector<EfficiencyCut*> alternateCuts;
     std::vector<EffHistos> hists;
     std::vector<TH1*> rawHists;
     TProfile* cutsProfile;
   } statsBox_;
+  
+  // targets for systematic variations
+  std::string targetEffSys_, targetZDefSys_;
 
   // Z Plots:
 
