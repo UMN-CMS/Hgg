@@ -2,12 +2,14 @@
 #include "ZShape/Base/interface/EfficiencyStatistics.h"
 #include "ZShape/EffAcc/interface/ZEfficiencyCalculator.h"
 
+#include "DataFormats/Candidate/interface/Particle.h"
 
 //
 // constructors and destructor
 //
 ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("src",edm::InputTag("source"))),
+  zElectronsTag(iConfig.getUntrackedParameter<edm::InputTag>("zElectronsCollection",edm::InputTag("ZIntoElectronsEnventProducer:ZEventParticles"))),
   quiet_(iConfig.getUntrackedParameter<bool>("quiet",false))
 {
   //
@@ -96,15 +98,20 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   using namespace edm;
   using namespace std;
   using namespace cms;
+  using namespace reco;
   int pass=0;
 
   Handle< HepMCProduct > EvtHandle ;
    
   // find initial (unsmeared, unfiltered,...) HepMCProduct
   iEvent.getByLabel(m_srcTag, EvtHandle ) ;
-  
-  const HepMC::GenEvent* Evt = EvtHandle->GetEvent() ;
-  fillEvent(Evt);
+
+  Handle <GenParticleCollection> pZeeParticles;
+  iEvent.getByLabel(zElectronsTag,pZeeParticles);
+
+  const GenParticleCollection * ZeeParticles = pZeeParticles.product();
+
+  fillEvent(ZeeParticles);
 
   if (evt_.n_elec!=2) return; // need 2 and only 2
 
@@ -187,9 +194,8 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 }
 
 
-void ZEfficiencyCalculator::fillEvent(const HepMC::GenEvent* Evt) {
-  int status;
-  int pid;
+void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeeParticles) {
+  using namespace reco;
 
   ////////////////////////
   // looking for electrons
@@ -198,25 +204,15 @@ void ZEfficiencyCalculator::fillEvent(const HepMC::GenEvent* Evt) {
   int ne=0;
 
 
-  // looping on all the particles of the simulated event
-  for(HepMC::GenEvent::particle_const_iterator mcpart = Evt->particles_begin();
-      mcpart != Evt->particles_end();
-      ++ mcpart ) {
-
-    status = (*mcpart)->status();
-    pid    = (*mcpart)->pdg_id();
-     
-    if (status == 3 && abs(pid) == myPid ){
-
-      const HepMC::GenVertex * vertex_=(*mcpart)->production_vertex();
-
-      if (ne==0) {
-	evt_.z0_=::math::XYZVector(vertex_->position().x(),vertex_->position().y(),vertex_->position().z() );
-      }
-      
+  for(
+      GenParticleCollection::const_iterator ZeeElectron_itr = ZeeParticles->begin();
+      ZeeElectron_itr != ZeeParticles->end();
+      ZeeElectron_itr++
+      )
+    {
       math::XYZTLorentzVector  momentum;
-      momentum.SetPx(  (*mcpart)->momentum().x() );        momentum.SetPy(  (*mcpart)->momentum().y() );
-      momentum.SetPz(  (*mcpart)->momentum().z() );        momentum.SetE(   (*mcpart)->momentum().t() );
+      momentum.SetPx( (*ZeeElectron_itr).momentum().x() );  momentum.SetPy( (*ZeeElectron_itr).momentum().y() );
+      momentum.SetPz( (*ZeeElectron_itr).momentum().z() );   momentum.SetE( (*ZeeElectron_itr).momentum().y() );
       
       if (ne<2) {
 	evt_.elec(ne).p4_=momentum;
@@ -225,11 +221,26 @@ void ZEfficiencyCalculator::fillEvent(const HepMC::GenEvent* Evt) {
 
     }
 
-  }
+
+
+  for(
+      GenParticleCollection::const_iterator ZeeElectron_itr = ZeeParticles->begin();
+      ZeeElectron_itr != ZeeParticles->end();
+      ZeeElectron_itr++
+      )
+    {
+      //       std::cout << "DEBUG: inner product is: " //
+      // 		<< (*ZeeElectron_itr).charge()
+      // 		<< " "  << (*ZeeElectron_itr).momentum() << std::endl;
+    }
+  
+
+  
+  
   // end loop on particles
   evt_.n_elec=ne;
-
-
+  
+  
   //
   // check than we have 2 and only 2 electrons
  
@@ -316,11 +327,11 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
     TDirectory* pd = histoFile_->mkdir(dirname);
     statsBox_.hists=std::vector<EffHistos>(statsBox_.trials);
     for (int j=0; j<statsBox_.trials;j++) {
-     sprintf(dirname,"Trial%d",j+1);
-     td = pd->mkdir(dirname);
-     td->cd();
-     statsBox_.hists[j].Book();
-     statsBox_.rawHists[j]->SetDirectory(td);
+      sprintf(dirname,"Trial%d",j+1);
+      td = pd->mkdir(dirname);
+      td->cd();
+      statsBox_.hists[j].Book();
+      statsBox_.rawHists[j]->SetDirectory(td);
     }
     statsBox_.cutsProfile->SetDirectory(pd);
   }
@@ -402,7 +413,7 @@ void ZEfficiencyCalculator::createAlternateZDefs(const std::string& targetZDefSy
   ZShapeZDef*      targetZDef;
   targetEff=0; targetZDef=0;
 
- if (zdefs_.find(targetZDefSys)!=zdefs_.end())
+  if (zdefs_.find(targetZDefSys)!=zdefs_.end())
     targetZDef=zdefs_[targetZDefSys];
   else
     edm::LogError("ZShape") << "Unable to find Z-definition '" <<targetZDefSys << "' for systematic variations!";
@@ -434,7 +445,7 @@ void ZEfficiencyCalculator::createAlternateZDefs(const std::string& targetZDefSy
     double dPlus=plus->GetBinContent(j);
     double dMinus=minus->GetBinContent(j);
     dPlusH ->Fill(val->GetBinCenter(j), ave+dPlus);
-    dMinusH->Fill(val->GetBinCenter(j), ave+dMinus);//GF: check sign
+    dMinusH->Fill(val->GetBinCenter(j), ave+dMinus);
   }
 
   EfficiencyCut* thePlusCut  = new   EfficiencyCut(dPlusH);
