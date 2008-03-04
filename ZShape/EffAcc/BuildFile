@@ -8,6 +8,10 @@
 <use name=FastSimulation/Particle>
 <use name=ZShape/Base>
 
+<use name=DataFormats/Candidate>
+<use name=DataFormats/Math>
+<use name=DataFormats/HepMCCandidate>
+
 <export>
 
    <use name=FWCore/Framework>
@@ -17,5 +21,10 @@
   <use name=SimDataFormats/HepMCProduct>
   <use name=FastSimulation/Particle>
 
+
+  <use name=DataFormats/Candidate>
+  <use name=DataFormats/Math>
+  <use name=DataFormats/HepMCCandidate>
+    
    <lib name=ZShapeEffAcc>
 </export>
