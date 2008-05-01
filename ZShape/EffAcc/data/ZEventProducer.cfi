@@ -5,5 +5,5 @@
 // (Remember that filenames are case sensitive.)
 
 module ZIntoElectronsEnventProducer = ZEventProducer {
-
+ double deltaR = 0.2
 }
