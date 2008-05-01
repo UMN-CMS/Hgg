@@ -2,6 +2,7 @@
 #include <iomanip>
 
 #include <string.h>
+#include <vector>
 #include <iostream>
 
 #include <TH1.h>

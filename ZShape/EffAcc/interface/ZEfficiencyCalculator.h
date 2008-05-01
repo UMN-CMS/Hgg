@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.7 2007/12/11 14:16:14 franzoni Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.8 2007/12/12 01:04:02 franzoni Exp $
 //
 //
 
@@ -29,6 +29,9 @@ Implementation:
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "DataFormats/Candidate/interface/Particle.h"
+
 #include "DataFormats/Common/interface/Handle.h"
 
 #include <CLHEP/Vector/LorentzVector.h>
@@ -59,8 +62,8 @@ private:
   virtual void beginJob(const edm::EventSetup&) ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
-  
-  void fillEvent(const HepMC::GenEvent* evt);
+
+  void fillEvent(const reco::GenParticleCollection* ZeeParticles);
   void loadEfficiency(const std::string& name, const std::string& fname);
   void applyEfficiencies();
   void createAlternateEfficiencies();
@@ -72,6 +75,7 @@ private:
   TRandom3 randomNum;
 
   edm::InputTag m_srcTag;
+  edm::InputTag zElectronsTag;
   bool quiet_;
   std::string outFileName_;
   bool        writeHistoConservatively_;

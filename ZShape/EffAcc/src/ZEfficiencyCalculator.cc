@@ -2,7 +2,8 @@
 #include "ZShape/Base/interface/EfficiencyStatistics.h"
 #include "ZShape/EffAcc/interface/ZEfficiencyCalculator.h"
 
-#include "DataFormats/Candidate/interface/Particle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 
 //
 // constructors and destructor
@@ -20,7 +21,7 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
 
   //
   // multiple PSets==Zdefinitions: each electron required to pass a set of cuts
-
+  
   std::vector<edm::ParameterSet> zdefSetups =iConfig.getUntrackedParameter< std::vector<edm::ParameterSet> >("ZDefs");
 
   for (std::vector<edm::ParameterSet>::iterator i=zdefSetups.begin(); i!=zdefSetups.end(); ++i) {
@@ -211,8 +212,10 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
       )
     {
       math::XYZTLorentzVector  momentum;
-      momentum.SetPx( (*ZeeElectron_itr).momentum().x() );  momentum.SetPy( (*ZeeElectron_itr).momentum().y() );
-      momentum.SetPz( (*ZeeElectron_itr).momentum().z() );   momentum.SetE( (*ZeeElectron_itr).momentum().y() );
+      momentum.SetPx( (*ZeeElectron_itr).momentum().x() );
+      momentum.SetPy( (*ZeeElectron_itr).momentum().y() );
+      momentum.SetPz( (*ZeeElectron_itr).momentum().z() );
+      momentum.SetE( (*ZeeElectron_itr).momentum().y() );
       
       if (ne<2) {
 	evt_.elec(ne).p4_=momentum;
