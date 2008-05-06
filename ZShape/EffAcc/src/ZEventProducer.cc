@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Mon Feb 18 21:18:39 CET 2008
-// $Id: ZEventProducer.cc,v 1.2 2008/05/01 17:13:23 franzoni Exp $
+// $Id: ZEventProducer.cc,v 1.3 2008/05/06 01:56:30 mansj Exp $
 //
 //
 
@@ -137,10 +137,12 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     status = (*mcpart)->status();
     pid    = (*mcpart)->pdg_id();
 
+    // https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookGenParticleCandidate
     // http://cepa.fnal.gov/psm/simulation/mcgen/lund/pythia_manual/pythia6.3/pythia6301/node39.html
     // status = 1 : an existing entry, which has not decayed or fragmented. This is the main class of entries, which represents the `final state' given by the generator.
+    // status = 2 : decayed or fragmented entry (i.e. decayed particle or parton produced in shower.)
     // status = 3 : a documentation line, defined separately from the event history. This could include the two incoming reacting particles, etc
-    if (status == 3 && abs(pid) == myPid ){
+    if (status == 1 && abs(pid) == myPid ){
       
       const HepMC::GenVertex * vertex_=(*mcpart)->production_vertex();
       
