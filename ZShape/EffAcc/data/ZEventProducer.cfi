@@ -4,6 +4,7 @@
 // with 'include "producerDir/ZEventProducer/data/ZEventProducer.cfi" '.
 // (Remember that filenames are case sensitive.)
 
-module ZIntoElectronsEnventProducer = ZEventProducer {
+module ZIntoElectronsEventProducer = ZEventProducer {
  double deltaR = 0.2
+ double minET = 0.050 // 50 MeV...
 }

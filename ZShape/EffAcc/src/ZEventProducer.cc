@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Mon Feb 18 21:18:39 CET 2008
-// $Id: ZEventProducer.cc,v 1.1 2008/03/04 14:56:17 franzoni Exp $
+// $Id: ZEventProducer.cc,v 1.2 2008/05/01 17:13:23 franzoni Exp $
 //
 //
 
@@ -57,13 +57,14 @@ private:
   // ----------member data ---------------------------
 
   edm::InputTag m_srcTag;
-  double deltaR_;
+  double deltaR_, minET_;
 };
 
 
 ZEventProducer::ZEventProducer(const edm::ParameterSet& iConfig) : 
     m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("src",edm::InputTag("source"))),
-    deltaR_(iConfig.getParameter<double>("deltaR"))
+    deltaR_(iConfig.getParameter<double>("deltaR")),
+    minET_(iConfig.getParameter<double>("minET"))
 {
   using namespace reco;
 
@@ -188,7 +189,9 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     LorentzVector momentum;
     momentum.SetPx(  (*mcpart)->momentum().x() );        momentum.SetPy(  (*mcpart)->momentum().y() );
     momentum.SetPz(  (*mcpart)->momentum().z() );        momentum.SetE(   (*mcpart)->momentum().t() );
-    
+ 
+    if (momentum.Pt()<minET_) continue; // kill very low PT stuff
+     
     float DR=9999;
     GenParticleCollection::const_iterator oneElectron;
     for (oneElectron = pZeeElectrons->begin();
@@ -236,7 +239,7 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   //float pt1 = evt_.elec(0).p4_.Pt();
   //float pt2 = evt_.elec(1).p4_.Pt();
   
-  std::cout << "collection size: " << pZeeParticles->size() << std::endl;
+  //  std::cout << "collection size: " << pZeeParticles->size() << std::endl;
   iEvent.put(pZeeParticles,"ZEventParticles");
   
   
