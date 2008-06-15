@@ -13,13 +13,14 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Mon Feb 18 21:18:39 CET 2008
-// $Id: ZEventProducer.cc,v 1.3 2008/05/06 01:56:30 mansj Exp $
+// $Id: ZEventProducer.cc,v 1.4 2008/05/06 14:34:09 franzoni Exp $
 //
 //
 
 
 // system include files
 #include <memory>
+#include <algorithm>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -69,6 +70,8 @@ ZEventProducer::ZEventProducer(const edm::ParameterSet& iConfig) :
   using namespace reco;
 
   //register your products
+  produces<GenParticleCollection>("ZEventEle1");
+  produces<GenParticleCollection>("ZEventEle3");
   produces<GenParticleCollection>("ZEventParticles");
 
 }
@@ -95,7 +98,8 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   using namespace std; 
   using namespace reco;
   
-  std::auto_ptr<GenParticleCollection> pZeeElectrons(  new GenParticleCollection() );
+  std::auto_ptr<GenParticleCollection> pZeeEle1(  new GenParticleCollection() );
+  std::auto_ptr<GenParticleCollection> pZeeEle3(  new GenParticleCollection() );
   std::auto_ptr<GenParticleCollection> pZeeParticles(  new GenParticleCollection() );
 
 
@@ -122,12 +126,51 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      
   int status;
   int pid;
-
+  std::vector<int> ele1Barcodes;
+  
   ////////////////////////
   // looking for electrons
   int myPid = 11;
-  int ne=0;
 
+  // first loop aiming to pre-FSR electrons
+  for(HepMC::GenEvent::particle_const_iterator mcpart = Evt->particles_begin();
+      mcpart != Evt->particles_end();
+      ++ mcpart ) {
+    
+    status = (*mcpart)->status();
+    pid    = (*mcpart)->pdg_id();
+    
+    // https://twiki.cern.ch/twiki/bin/view/CMS/WorkBookGenParticleCandidate
+    // http://cepa.fnal.gov/psm/simulation/mcgen/lund/pythia_manual/pythia6.3/pythia6301/node39.html
+    // status = 1 : an existing entry, which has not decayed or fragmented. This is the main class of entries, which represents the `final state' given by the generator.
+    // status = 2 : decayed or fragmented entry (i.e. decayed particle or parton produced in shower.)
+    // status = 3 : a documentation line, defined separately from the event history. This could include the two incoming reacting particles, etc
+    if (status == 3 && abs(pid) == myPid ){
+        
+      const HepMC::GenVertex * vertex_=(*mcpart)->production_vertex();
+      
+      ele1Barcodes.push_back( (*mcpart)->barcode() );
+      
+      LorentzVector momentum;
+      momentum.SetPx(  (*mcpart)->momentum().x() );        momentum.SetPy(  (*mcpart)->momentum().y() );
+      momentum.SetPz(  (*mcpart)->momentum().z() );        momentum.SetE(   (*mcpart)->momentum().t() );
+      
+      pZeeEle3->push_back( GenParticle(q,
+                                       momentum,
+                                       Point(vertex_->position().x(),vertex_->position().y(),vertex_->position().z() ),
+                                       pid,
+                                       status,
+                                       true
+                                       )
+                           );
+    
+    }
+
+  }// end loop on particles
+
+
+
+  
   
   // first loop aiming to electrons
   for(HepMC::GenEvent::particle_const_iterator mcpart = Evt->particles_begin();
@@ -142,32 +185,47 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     // status = 1 : an existing entry, which has not decayed or fragmented. This is the main class of entries, which represents the `final state' given by the generator.
     // status = 2 : decayed or fragmented entry (i.e. decayed particle or parton produced in shower.)
     // status = 3 : a documentation line, defined separately from the event history. This could include the two incoming reacting particles, etc
-    if (status == 1 && abs(pid) == myPid ){
-      
-      const HepMC::GenVertex * vertex_=(*mcpart)->production_vertex();
-      
-      LorentzVector momentum;
-      momentum.SetPx(  (*mcpart)->momentum().x() );        momentum.SetPy(  (*mcpart)->momentum().y() );
-      momentum.SetPz(  (*mcpart)->momentum().z() );        momentum.SetE(   (*mcpart)->momentum().t() );
-      
-      if (ne<2) {
-	pZeeElectrons->push_back( GenParticle(q,
-					      momentum,
-					      Point(vertex_->position().x(),vertex_->position().y(),vertex_->position().z() ),
-					      pid,
-					      status,
-					      true
-					      )
-				  );
-      }     
-      ne++;
-    
-    }
 
+    // aiming at electrons  after FSR (status 1) which match mother electrons with status 3
+    if (status == 1 && abs(pid) == myPid ){
+        
+        const HepMC::GenVertex * vertex_=(*mcpart)->production_vertex();
+        
+        if ( vertex_ != 0 ) {
+            size_t numberOfMothers = vertex_->particles_in_size();
+            if ( numberOfMothers > 0 ) {
+                HepMC::GenVertex::particles_in_const_iterator motherIt = vertex_->particles_in_const_begin();
+                
+                for( ; motherIt != vertex_->particles_in_const_end(); motherIt++) {
+                    
+                    if ( std::find(ele1Barcodes.begin() ,  ele1Barcodes.end(), (*motherIt)->barcode() ) != ele1Barcodes.end() )
+                    {
+                        // std::cout << "they match: " << std::endl;
+                        // std::cout << "barcode: " << (*motherIt)->barcode() << " py: " << (*motherIt)->momentum().y() << std::endl;
+                        // std::cout << "barcode: " << (*mcpart)->barcode() << " py: "  <<  (*mcpart)->momentum().y() << std::endl;
+                        
+                        LorentzVector momentum;
+                        momentum.SetPx(  (*mcpart)->momentum().x() );        momentum.SetPy(  (*mcpart)->momentum().y() );
+                        momentum.SetPz(  (*mcpart)->momentum().z() );        momentum.SetE(   (*mcpart)->momentum().t() );
+                        
+                        pZeeEle1->push_back( GenParticle(q,
+                                                         momentum,
+                                                         Point(vertex_->position().x(),vertex_->position().y(),vertex_->position().z() ),
+                                                         pid,
+                                                         status,
+                                                         true
+                                                         )
+                                             );
+                        
+                    }// end if there's matching
+                }// end loop on moters
+            }// end if there's mothers
+        }// end if production vertex found
+    }// end if electron with status 1
   }// end loop on particles
 
 
-// looping on all the particles of the simulated event
+// looping on all the (status 1) particles of the simulated event to collect those falling in a cone around status 1 electrons 
   for(HepMC::GenEvent::particle_const_iterator mcpart = Evt->particles_begin();
       mcpart != Evt->particles_end();
       ++ mcpart ) {
@@ -182,32 +240,26 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     if     ((*mcpart)->pdg_id() >0) q=1;
     else  q=-1;
-
-    //GF
-    //    std::cout<<pid << "  " << status << std::endl;
-    //GF
-
     
     LorentzVector momentum;
     momentum.SetPx(  (*mcpart)->momentum().x() );        momentum.SetPy(  (*mcpart)->momentum().y() );
     momentum.SetPz(  (*mcpart)->momentum().z() );        momentum.SetE(   (*mcpart)->momentum().t() );
- 
-    if (momentum.Pt()<minET_) continue; // kill very low PT stuff
+
+    // kill very low PT stuff
+    if (momentum.Pt()<minET_) continue;
      
     float DR=9999;
     GenParticleCollection::const_iterator oneElectron;
-    for (oneElectron = pZeeElectrons->begin();
-           oneElectron != pZeeElectrons->end();
+    for (oneElectron = pZeeEle1->begin();
+           oneElectron != pZeeEle1->end();
          oneElectron ++)
     {
         float dr=pow((momentum.phi()-(*oneElectron).phi()),2)+pow((momentum.Eta()-(*oneElectron).eta()),2);
-    //GF
-        //std::cout <<pZeeElectrons->size() << " " <<momentum.e() << " "  << momentum.phi() << "  " <<(*oneElectron).phi() << "  " <<momentum.Eta() << "  " <<(*oneElectron).eta()  << "  DR: " << DR << std::endl;
+        //std::cout <<pZeeEle1->size() << " " <<momentum.e() << " "  << momentum.phi() << "  " <<(*oneElectron).phi()
+        //<< "  " <<momentum.Eta() << "  " <<(*oneElectron).eta()  << "  DR: " << DR << std::endl;
         if (dr<DR) DR=dr;
     }
     
-    //GF
-    //   std::cout << "  DR: " << DR << std::endl;
     DR=sqrt(DR);
 
     if (DR>deltaR_) continue;
@@ -226,22 +278,13 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   }// end loop to store particles
   
   
-  
-  //
-  // check than we have 2 and only 2 electrons
-  if (ne!= 2)
-    {
-      edm::LogWarning("ZEfficiencyCalculator") << " we need two electrons (pid: " << myPid << " ) while we have: " << ne;
-      return;
-    }
-  
-  
-  //
   // reorder electrons in pT
   //float pt1 = evt_.elec(0).p4_.Pt();
   //float pt2 = evt_.elec(1).p4_.Pt();
   
   //  std::cout << "collection size: " << pZeeParticles->size() << std::endl;
+  iEvent.put(pZeeEle1,"ZEventEle1");
+  iEvent.put(pZeeEle3,"ZEventEle3");
   iEvent.put(pZeeParticles,"ZEventParticles");
   
   
