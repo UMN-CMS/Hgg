@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.8 2007/12/12 01:04:02 franzoni Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.9 2008/05/01 14:18:24 franzoni Exp $
 //
 //
 
@@ -77,9 +77,7 @@ private:
   edm::InputTag m_srcTag;
   edm::InputTag zElectronsTag;
   bool quiet_;
-  std::string outFileName_;
-  bool        writeHistoConservatively_;
-  TFile*      histoFile_;
+  float zElectronsCone_;
 
   // the efficiency objects: strings identify the cuts efficiencies and corresponding cuts
   std::map<std::string, EfficiencyStore*> efficiencies_;

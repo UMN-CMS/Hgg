@@ -5,7 +5,7 @@ typedef math::XYZTLorentzVector XYZTLorentzVector;
 // for reference
 // $ROOTSYS/include/Math/GenVector/LorentzVector.h
 
-void EffHistos::Book() {
+void EffHistos::Book(TFileDirectory& tdf) {
 
   // add here all extremes, tidily
   float pi       = 3.141593;
@@ -14,32 +14,32 @@ void EffHistos::Book() {
   float minZmass = 50;
   float maxZmass = 140;
 
-  mZ_  = new TH1F("Z0_mass","Z0_mass", 50, minZmass, maxZmass);
+  mZ_  = tdf.make<TH1F>("Z0_mass","Z0_mass", 50, minZmass, maxZmass);
   mZ_ ->GetXaxis()->SetTitle("m_{Z0} (GeV/c^{2}");
 
-  YZ_  = new TH1F("Z0_Y","Z0_Y", int((maxY*2)*4), -maxY, maxY);
+  YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y", int((maxY*2)*4), -maxY, maxY);
   YZ_ ->GetXaxis()->SetTitle("Y_{Z0}");
 
-  ptZ_ = new TH1F("Z0_Pt","Z0_Pt", 100, 0, maxPt);
+  ptZ_ = tdf.make<TH1F>("Z0_Pt","Z0_Pt", 100, 0, maxPt);
   ptZ_ ->GetXaxis()->SetTitle("p_{T,Z0}");
   
 
-  e1eta_ = new TH1F("e1_eta","e1_eta", 100, -5, 5);
+  e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta", 100, -5, 5);
   e1eta_ ->GetXaxis()->SetTitle("#eta_{e1}");
 
-  e2eta_ = new TH1F("e2_eta","e2_eta", 100, -5, 5);
+  e2eta_ = tdf.make<TH1F>("e2_eta","e2_eta", 100, -5, 5);
   e2eta_ ->GetXaxis()->SetTitle("#eta_{e2}");
 
-  e1phi_ = new TH1F("e1_phi","e1_phi", 100, -pi, pi);
+  e1phi_ = tdf.make<TH1F>("e1_phi","e1_phi", 100, -pi, pi);
   e1phi_ ->GetXaxis()->SetTitle("#phi_{e1}");
 
-  e2phi_ = new TH1F("e2_phi","e2_phi", 100,  -pi, pi);
+  e2phi_ = tdf.make<TH1F>("e2_phi","e2_phi", 100,  -pi, pi);
   e2phi_ ->GetXaxis()->SetTitle("#phi_{e2}");
 
-  e1pt_  = new TH1F("e1_P_t","e1_P_t", 200, 0, maxPt*2);
+  e1pt_  = tdf.make<TH1F>("e1_P_t","e1_P_t", 200, 0, maxPt*2);
   e1pt_ ->GetXaxis()->SetTitle("p_{T,e1}");
 
-  e2pt_  = new TH1F("e2_P_t","e2_P_t", 200, 0, maxPt*2);
+  e2pt_  = tdf.make<TH1F>("e2_P_t","e2_P_t", 200, 0, maxPt*2);
   e2pt_ ->GetXaxis()->SetTitle("p_{T,e2}");
 
 }

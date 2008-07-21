@@ -3,6 +3,9 @@
 #include "ZShape/EffAcc/interface/ZEfficiencyCalculator.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "Math/VectorUtil.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 
 
 //
@@ -10,14 +13,12 @@
 //
 ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("src",edm::InputTag("source"))),
-  zElectronsTag(iConfig.getUntrackedParameter<edm::InputTag>("zElectronsCollection",edm::InputTag("ZIntoElectronsEnventProducer:ZEventParticles"))),
-  quiet_(iConfig.getUntrackedParameter<bool>("quiet",false))
+  zElectronsTag(iConfig.getUntrackedParameter<edm::InputTag>("zElectronsCollection",edm::InputTag("ZIntoElectronsEventProducer:ZEventParticles"))),
+  quiet_(iConfig.getUntrackedParameter<bool>("quiet",false)),
+  zElectronsCone_(iConfig.getParameter<double>("zElectronsCone"))
 {
   //
   //now do what ever initialization is needed
-
-  outFileName_              = iConfig.getUntrackedParameter<std::string>("outHistogramsFile", "");
-  writeHistoConservatively_ = iConfig.getUntrackedParameter<bool>("writeHistoBeforeEndJob", false);
 
   //
   // multiple PSets==Zdefinitions: each electron required to pass a set of cuts
@@ -203,25 +204,20 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
   int myPid = 11;
   evt_.clear();
   int ne=0;
+  int ngot[2]; ngot[0]=0; ngot[1]=0;
+  
+  GenParticleCollection::const_iterator me[2];
+  math::XYZTLorentzVector elecs[2];
 
-
-  for(
-      GenParticleCollection::const_iterator ZeeElectron_itr = ZeeParticles->begin();
+  for(GenParticleCollection::const_iterator ZeeElectron_itr = ZeeParticles->begin();
       ZeeElectron_itr != ZeeParticles->end();
       ZeeElectron_itr++
       )
-    {
-      math::XYZTLorentzVector  momentum;
-      momentum.SetPx( (*ZeeElectron_itr).momentum().x() );
-      momentum.SetPy( (*ZeeElectron_itr).momentum().y() );
-      momentum.SetPz( (*ZeeElectron_itr).momentum().z() );
-      momentum.SetE( (*ZeeElectron_itr).momentum().y() );
-      
+    if (abs(ZeeElectron_itr->pdgId())==11) {
       if (ne<2) {
-	evt_.elec(ne).p4_=momentum;
-      }     
-      ne++;
-
+	me[ne]=ZeeElectron_itr;
+	ne++;
+      }
     }
 
 
@@ -232,18 +228,30 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
       ZeeElectron_itr++
       )
     {
-      //       std::cout << "DEBUG: inner product is: " //
-      // 		<< (*ZeeElectron_itr).charge()
-      // 		<< " "  << (*ZeeElectron_itr).momentum() << std::endl;
-    }
-  
 
-  
+      double dR=ROOT::Math::VectorUtil::DeltaR(me[0]->momentum(),ZeeElectron_itr->momentum());
+      if (me[0]==ZeeElectron_itr || dR<zElectronsCone_) {
+	elecs[0]+=ZeeElectron_itr->p4();
+	ngot[0]++;
+      } else {
+	dR=ROOT::Math::VectorUtil::DeltaR(me[1]->momentum(),ZeeElectron_itr->momentum());
+	if (me[1]==ZeeElectron_itr || dR<zElectronsCone_) {
+	  elecs[1]+=ZeeElectron_itr->p4();
+	  ngot[1]++;
+	}
+      }
+    }
+  evt_.elec(0).p4_=elecs[0];
+  evt_.elec(1).p4_=elecs[1];
   
   // end loop on particles
   evt_.n_elec=ne;
   
-  
+  std::cout << ngot[0] << "->" << elecs[0].energy() <<
+    " " << elecs[0].eta() << " " << elecs[0].phi() << std::endl;
+  std::cout << ngot[1] << "->" << elecs[1].energy() <<
+    " " << elecs[1].eta() << " " << elecs[1].phi() << std::endl;
+
   //
   // check than we have 2 and only 2 electrons
  
@@ -274,29 +282,24 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
 void 
 ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
 {
-  // smearing the target efficiency according to statistics 
-  if (statsBox_.trials>0) createAlternateEfficiencies();
-
   // file to write out the histograms produced by the ZEfficiencyCalculator
-  histoFile_   = new TFile(outFileName_.c_str(),"RECREATE");
+  edm::Service<TFileService> fs;
 
   // one directory for histos of event before any selection
-  TDirectory* td=histoFile_->mkdir("All");
-  td->cd();
-  allCase_.Book();
+  TFileDirectory subDir=fs->mkdir("All");  
+  allCase_.Book(subDir);
 
   //
   // one directory for each Z definition
   for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
     ZPlots* zplots=new ZPlots(q->second->criteriaCount(ZShapeZDef::crit_E1)-1); // -1 for acceptance
     
-    TDirectory* pd = histoFile_->mkdir(q->first.c_str());
+    TFileDirectory sd = fs->mkdir(q->first.c_str());
 
     // organize in sub-directories in order to have histograms at each step
 
-    td = pd->mkdir("Acceptance");
-    td->cd();
-    zplots->acceptance_.Book();
+    TFileDirectory td = sd.mkdir("Acceptance");
+    zplots->acceptance_.Book(td);
 
 
     // looping over cuts foreseen in given Z definition (for E1 and E2 simultaneously)
@@ -313,34 +316,36 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
 	sprintf(dirname,"C%02d-%s-%s",i,c1.c_str(),c2.c_str());
 
       // one sub-dir for each step of selection
-      td = pd->mkdir(dirname);
-      td->cd();
-      zplots->postCut_[i-1].Book();
+      td = sd.mkdir(dirname);
+      zplots->postCut_[i-1].Book(td);
     }
 
     zplots_[q->first]=zplots;
   }
  
+  // smearing the target efficiency according to statistics 
+  if (statsBox_.trials>0) createAlternateEfficiencies();
+
 
   // book trials histograms
   if (statsBox_.trials>0) {
     char dirname[1024];
     edm::LogInfo("ZShape") << "Making histograms for " << statsBox_.trials << " trials";
     sprintf(dirname,"EffStats_%s_%s",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str());     
-    TDirectory* pd = histoFile_->mkdir(dirname);
+    TFileDirectory pd = fs->mkdir(dirname);
     statsBox_.hists=std::vector<EffHistos>(statsBox_.trials);
     for (int j=0; j<statsBox_.trials;j++) {
       sprintf(dirname,"Trial%d",j+1);
-      td = pd->mkdir(dirname);
-      td->cd();
-      statsBox_.hists[j].Book();
-      statsBox_.rawHists[j]->SetDirectory(td);
+      TFileDirectory td = pd.mkdir(dirname);
+      statsBox_.hists[j].Book(td);
+      //      statsBox_.rawHists[j]->SetDirectory(td);
     }
-    statsBox_.cutsProfile->SetDirectory(pd);
+    //    statsBox_.cutsProfile->SetDirectory(pd);
   }
 
-  // if one wanted to be very safe, start writing to file histograms immediately
-  if (writeHistoConservatively_) histoFile_->Write();
+
+
+
 
 }
 
@@ -370,10 +375,6 @@ void ZEfficiencyCalculator::loadEfficiency(const std::string& name, const std::s
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 ZEfficiencyCalculator::endJob() {
-
-  histoFile_->Write();  
-  delete histoFile_;
-
 }
 
 void ZEfficiencyCalculator::createAlternateEfficiencies() {
