@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Mon Feb 18 21:18:39 CET 2008
-// $Id: ZEventProducer.cc,v 1.5 2008/06/15 16:03:19 franzoni Exp $
+// $Id: ZEventProducer.cc,v 1.6 2008/06/29 14:42:41 franzoni Exp $
 //
 //
 
@@ -61,13 +61,15 @@ private:
 
   edm::InputTag m_srcTag;
   double deltaR_, minET_;
+  bool needMatch3_;
 };
 
 
 ZEventProducer::ZEventProducer(const edm::ParameterSet& iConfig) : 
     m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("src",edm::InputTag("source"))),
     deltaR_(iConfig.getParameter<double>("deltaR")),
-    minET_(iConfig.getParameter<double>("minET"))
+    minET_(iConfig.getParameter<double>("minET")),
+    needMatch3_(iConfig.getUntrackedParameter<bool>("needMatch3",true))
 {
   using namespace reco;
 
@@ -195,8 +197,11 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     // aiming at electrons  after FSR (status 1) which match mother electrons with status 3
     if (status == 1 && abs(pid) == myPid ){
+
+
+      if (needMatch3_) {
         
-        const HepMC::GenVertex * vertex_=(*mcpart)->production_vertex();
+	const HepMC::GenVertex * vertex_=(*mcpart)->production_vertex();
         
         if ( vertex_ != 0 ) {
             size_t numberOfMothers = vertex_->particles_in_size();
@@ -229,6 +234,20 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
                 }// end loop on moters
             }// end if there's mothers
         }// end if production vertex found
+      } else {
+	LorentzVector momentum;
+	momentum.SetPx(  (*mcpart)->momentum().x() );        momentum.SetPy(  (*mcpart)->momentum().y() );
+	momentum.SetPz(  (*mcpart)->momentum().z() );        momentum.SetE(   (*mcpart)->momentum().t() );
+        
+	pZeeEle1->push_back( GenParticle(q,
+					 momentum,
+					 Point(0,0,0),
+					 pid,
+					 status,
+					 true
+					 )
+			     );
+      }
     }// end if electron with status 1
   }// end loop on particles, aiming at type-1 electrons 
 
