@@ -6,7 +6,7 @@
 #include <cmath>
 #include "DataFormats/Common/interface/AssociationMap.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
-#include "MuonAnalysis/TagAndProbe/interface/CandidateAssociation.h"
+#include "PhysicsTools/TagAndProbe/interface/CandidateAssociation.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -149,20 +149,20 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   using namespace std;
   using namespace cms;
   
-  std::cout << " Start 0 " << std::endl;
+  //std::cout << " Start 0 " << std::endl;
   Handle< HepMCProduct > EvtHandle ;
    
   // find initial (unsmeared, unfiltered,...) HepMCProduct
   iEvent.getByLabel(m_srcTag, EvtHandle ) ;
-  std::cout << " Start 1 " << std::endl;
+  //std::cout << " Start 1 " << std::endl;
   const HepMC::GenEvent* Evt = EvtHandle->GetEvent() ;
-   std::cout << " Start 0 " << std::endl;
+   //std::cout << " Start 2 " << std::endl;
   fillMCEvent(Evt);
   //evt_.findDataZ(iEvent);
   //int numDataZ = 0;
-  std::cout << " Clearing an Event " << std::endl;
+  //std::cout << " Clearing an Event " << std::endl;
   evt_.clear();
-  std::cout << " Checking an Event " << std::endl;
+  //std::cout << " Checking an Event " << std::endl;
    
   
   // Fill some information about the tag & probe collections
@@ -216,7 +216,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        }
 	  }
    ///}
-  std::cout << " Ending this one loop woohoo " << std::endl;
+  //std::cout << " Ending this one loop woohoo " << std::endl;
   /* 
 
           if (!oneevt){
@@ -236,14 +236,14 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //
   // fill histograms for before any selection
   allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
-   ///if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
+  if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
 
   // these stages merely _fill_ bits.  They do not apply cuts!
   stdCuts_.acceptanceCuts(evt_.elec(0));
   stdCuts_.acceptanceCuts(evt_.elec(1));
   stdCuts_.ptCuts(evt_.elec(0));
   stdCuts_.ptCuts(evt_.elec(1));
-  std::cout << "MYevt Start 3" << std::endl;
+  //std::cout << "MYevt Start 3" << std::endl;
   EfficiencyCut* keep=0;
   //std::cout << "Got the 4-vectors " << std::endl;
  
@@ -274,11 +274,11 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// fill standard histograms after acceptance
 	if (!pairing){
 	  plots->acceptance_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
-	  ///if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
+	  if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
 	}
 	else{
 	  plots->acceptance_.Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
-	  ///if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
+	  if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
 	}
 	
 	// next n-cuts
@@ -288,11 +288,11 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  if (ok)
 	    if (!pairing) {
 	      plots->postCut_[j-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
-              ///if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
+              if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
 	    }
 	    else{
 	      plots->postCut_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
-              ///if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
+              if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
 	    }
 	}
     }
@@ -312,7 +312,7 @@ void ZFromData::fillMCEvent(const HepMC::GenEvent* Evt) {
   evtMC_.clear();
   int ne=0;
 
-
+  //std::cout << " Do I even do the MC stuff? " << std::endl;
   // looping on all the particles of the simulated event
   for(HepMC::GenEvent::particle_const_iterator mcpart = Evt->particles_begin();
       mcpart != Evt->particles_end();
@@ -351,6 +351,7 @@ void ZFromData::fillMCEvent(const HepMC::GenEvent* Evt) {
   if (ne!= 2)
     {
       edm::LogWarning("ZFromData") << " we need two electrons (pid: " << myPid << " ) while we have: " << ne;
+    //  std::cout << " WHAT is going on here? " << std::endl;
       return;
     }
 
@@ -359,6 +360,8 @@ void ZFromData::fillMCEvent(const HepMC::GenEvent* Evt) {
   // reorder electrons in pT
   float pt1 = evtMC_.elec(0).p4_.Pt();
   float pt2 = evtMC_.elec(1).p4_.Pt();
+  
+  //std::cout << " The Pt of these are.. " << pt1 << " and " << pt2 << std::endl;
 
   // flipping order only if necessary
   if (pt2 > pt1){
@@ -387,11 +390,11 @@ ZFromData::beginJob(const edm::EventSetup&)
   TFileDirectory subDir=fs->mkdir("All");
 
   allCase_.Book(subDir);
-  ///if (extraHistos_){ allCaseExtra_.Book();}
+  if (extraHistos_){ allCaseExtra_.Book(subDir);}
 
   TFileDirectory subDirF=fs->mkdir("AllFirst");
   allCaseFirst_.Book(subDirF);
-  ///if (extraHistos_) allCaseExtraFirst_.Book();
+  if (extraHistos_) allCaseExtraFirst_.Book(subDirF);
   
   //
   // one directory for each Z definition
@@ -404,7 +407,7 @@ ZFromData::beginJob(const edm::EventSetup&)
 
     TFileDirectory td = sd.mkdir("Acceptance");
     zplots->acceptance_.Book(td);    
-    /// if (extraHistos_) zplots->acceptanceExtra_.Book();
+    if (extraHistos_) zplots->acceptanceExtra_.Book(td);
     
     // looping over cuts foreseen in given Z definition (for E1 and E2 simultaneously)
     for (int i=1; i<q->second->criteriaCount(ZShapeZDef::crit_E1); ++i) {
@@ -417,13 +420,13 @@ ZFromData::beginJob(const edm::EventSetup&)
 	sprintf(dirname,"C%02d-%s",i,c1.c_str());
       else 
 	sprintf(dirname,"C%02d-%s-%s",i,c1.c_str(),c2.c_str());
-      std::cout << " BGDBG 62 " << std::endl;
+      //std::cout << " BGDBG 62 " << std::endl;
       // one sub-dir for each step of selection
       td = sd.mkdir(dirname);
       zplots->postCut_[i-1].Book(td);
       
        //if (extraHistos_){td->cd(); zplots->postCutExtra_[i-1].Book();}
-      ///if (extraHistos_){td->cd(); zplots->postCutExtra_[i-1].Book();}
+      if (extraHistos_){ zplots->postCutExtra_[i-1].Book(td);}
     }
 
     zplots_[q->first]=zplots;
@@ -609,4 +612,4 @@ bool ZFromData::MatchObjects( const reco::Candidate *hltObj,
 // ************************************************************** //
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(ZFromData);
+//DEFINE_ANOTHER_FWK_MODULE(ZFromData);

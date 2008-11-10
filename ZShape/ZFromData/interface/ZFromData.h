@@ -34,7 +34,7 @@ Implementation:
 #include "ZShape/EffAcc/interface/EffHistos.h"
 #include "ZShape/EffAcc/interface/EfficiencyStore.h"
 #include "ZShape/EffAcc/interface/EfficiencyCut.h"
-///#include "ZShape/ZEffFromData/interface/EffExtraHistos.h"
+#include "ZShape/ZFromData/interface/EffExtraHistos.h"
 
 ///#include "AnalysisDataFormats/ElectronEfficiency/interface/EmObjectFwd.h"
 ///#include "AnalysisDataFormats/ElectronEfficiency/interface/TagProbeAssociation.h"
@@ -134,17 +134,17 @@ private:
   // before any z-def selection
   EffHistos allCase_;
   EffHistos allCaseFirst_;
-  ///EffExtraHistos allCaseExtra_;
-  ///EffExtraHistos allCaseExtraFirst_;
+  EffExtraHistos allCaseExtra_;
+  EffExtraHistos allCaseExtraFirst_;
 
   // at each step of selection for any z-definition
   struct ZPlots {
-    ///ZPlots(int nc) : postCut_(nc), postCutExtra_(nc) { }
-    ZPlots(int nc) : postCut_(nc) { }
+    ZPlots(int nc) : postCut_(nc), postCutExtra_(nc) { }
+    ///ZPlots(int nc) : postCut_(nc) { }
     EffHistos acceptance_;
-    ///EffExtraHistos acceptanceExtra_; //added for the extra histos
+    EffExtraHistos acceptanceExtra_; //added for the extra histos
     std::vector<EffHistos> postCut_;
-    ///std::vector<EffExtraHistos> postCutExtra_; //added for the extra histos
+    std::vector<EffExtraHistos> postCutExtra_; //added for the extra histos
   };
   std::map<std::string,ZPlots*> zplots_;
   TRandom3 *random_;
