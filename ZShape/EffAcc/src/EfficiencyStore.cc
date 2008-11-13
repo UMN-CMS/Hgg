@@ -79,14 +79,15 @@ void EfficiencyStore::setRootFile(TFile * file){
     
     
   // looping on objects in the file aiming at the 4 needed histograms 
+  
     
   while(key=(TKey*) next() ){
       
     //    std::cout << "object in file has name: " << key->GetName() << std::endl;
     TH1F * tmp1;    TH2F * tmp2;
-    if (strstr(key->GetName(),effName_.c_str()) && strstr(key->GetName(),physVar_.c_str()))
+    if (strstr(key->GetName(),physVar_.c_str()))
      {
-       if(  strstr(key->GetName(),"values_") &&   strcmp(key->GetClassName(),"TH1F")==0 )
+       if(  strstr(key->GetName(),"eff") &&   strcmp(key->GetClassName(),"TH1F")==0 )
          { 
    	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
 	   values1DHisto_ = (TH1F *) tmp1->Clone();
@@ -108,7 +109,7 @@ void EfficiencyStore::setRootFile(TFile * file){
 	   systMinus1DHisto_->SetDirectory(0);
 	   //	   std::cout << " This Object is systematicMinus_ " <<  key->GetName() << std::endl;
          }
-       else if(  strstr(key->GetName(),"denominator_") &&   strcmp(key->GetClassName(),"TH1F")==0)
+       else if(  strstr(key->GetName(),"den") &&   strcmp(key->GetClassName(),"TH1F")==0)
          {
 	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
 	   denominator1DHisto_ = 	(TH1F *) tmp1->Clone();
@@ -116,7 +117,7 @@ void EfficiencyStore::setRootFile(TFile * file){
 	   //	   std::cout << " This Object is denominator_ " <<  key->GetName() << std::endl;
          }
       
-       if(  strstr(key->GetName(),"values_") && key->GetClassName()=="TH2F")
+       if(  strstr(key->GetName(),"eff") && key->GetClassName()=="TH2F")
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   values2DHisto_  = (TH2F *) tmp2->Clone();
@@ -134,7 +135,7 @@ void EfficiencyStore::setRootFile(TFile * file){
 	   systMinus2DHisto_ =  (TH2F *) tmp2->Clone();
 	   systMinus2DHisto_->SetDirectory(0);
          }
-       else if(  strstr(key->GetName(),"denominator_") && key->GetClassName()=="TH2F")
+       else if(  strstr(key->GetName(),"den") && key->GetClassName()=="TH2F")
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   denominator2DHisto_ =  (TH2F *) tmp2->Clone();
@@ -154,8 +155,10 @@ void EfficiencyStore::produceTxtFile(std::string &textFileName){
   // check if there are 4 histograms of the same type and with the same number of bins;
   bool histosAre1D =false;
   if(  ( values1DHisto_ && systPlus1DHisto_ &&  systMinus1DHisto_  &&  denominator1DHisto_ ) ) histosAre1D = true;
+  if(  ( values1DHisto_ && denominator1DHisto_ ) ) histosAre1D = true; //To allow for now systematic histos
   bool histosAre2D =false;
   if(  ( values2DHisto_ && systPlus2DHisto_ &&  systMinus2DHisto_  &&  denominator2DHisto_ ) ) histosAre2D = true;
+  if(  ( values2DHisto_ &&  denominator2DHisto_ ) ) histosAre2D = true; //To allow for now systematic histos
 
   if ( (!histosAre1D)   && (!histosAre2D))
     {
@@ -223,14 +226,14 @@ void EfficiencyStore::produceHistograms(TFile * rootFile){
 void EfficiencyStore::produceTxtFile1D(){
 
   int numBinvalues1D = values1DHisto_ ->GetXaxis()->GetNbins();
-  int numBinsystPlus1D = systPlus1DHisto_ ->GetXaxis()->GetNbins();
-  int numBinsystMinus1D =systMinus1DHisto_->GetXaxis()->GetNbins();
+  ///int numBinsystPlus1D = systPlus1DHisto_ ->GetXaxis()->GetNbins();
+  ///int numBinsystMinus1D = systMinus1DHisto_->GetXaxis()->GetNbins();
   int numBindenominator1D =denominator1DHisto_->GetXaxis()->GetNbins();
 
   if (!
       numBinvalues1D==
-      numBinsystPlus1D==
-      numBinsystMinus1D==
+	  //numBinsystPlus1D==
+      // numBinsystMinus1D==
       numBindenominator1D
       )
     {
@@ -254,8 +257,10 @@ void EfficiencyStore::produceTxtFile1D(){
       binMin.push_back( values1DHisto_->GetBinLowEdge(u) );
       binMax.push_back( values1DHisto_->GetBinLowEdge(u) + values1DHisto_->GetBinWidth(u) );
       values1D.push_back( values1DHisto_->GetBinContent(u) );
-      systPlus1D.push_back( systPlus1DHisto_->GetBinContent(u) );
-      systMinus1D.push_back( systMinus1DHisto_->GetBinContent(u) );
+      //systPlus1D.push_back( systPlus1DHisto_->GetBinContent(u) );
+      //systMinus1D.push_back( systMinus1DHisto_->GetBinContent(u) );
+	  systPlus1D.push_back( 1.0 ); //To allow for no systematic histos
+      systMinus1D.push_back( -1.0 ); //To allow for no systematic histos
       denominator1D.push_back( denominator1DHisto_->GetBinContent(u) );
     }
 
@@ -264,12 +269,13 @@ void EfficiencyStore::produceTxtFile1D(){
   int v = theHistoTitle.find( std::string("_") );
   std::string theEffTitle = theHistoTitle.substr( (v+1) );
   //std::string theEffTitle = theHistoTitle.substr(0 ,v );
+  
 
   ofstream the1DEffFile;
   the1DEffFile.open (textFileName_.c_str(),std::ios::out);
 
   the1DEffFile << "#put your comments after a '#'.\n";
-  the1DEffFile << "\nefficiency name: " << theEffTitle <<"\n";
+  the1DEffFile << "\nefficiency name: " << effName_ << "-" << physVar_  <<"\n";
   the1DEffFile << "dimension: 1 \n\n\n";
   the1DEffFile << "Nbin"
 	       << "\t" << "binMin"
@@ -279,7 +285,7 @@ void EfficiencyStore::produceTxtFile1D(){
 	       << "\t"  << "systM"
 	       << "\t" << "denom"
 	       << "\n";
-    
+     
   if (the1DEffFile.is_open())
     {
 	
