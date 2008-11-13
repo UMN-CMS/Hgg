@@ -297,7 +297,7 @@ void EfficiencyStore::produceTxtFile1D(){
 		       << "\t" << std::setprecision(4) <<  values1D[r]
 		       << "\t" << std::setprecision(4) << systPlus1D[r]
 		       << "\t" << std::setprecision(4) << systMinus1D[r]
-		       << "\t" << denominator1D[r]
+		       << "\t" << std::setprecision(5) << denominator1D[r]
 		       << "\n";
 	}
     }
