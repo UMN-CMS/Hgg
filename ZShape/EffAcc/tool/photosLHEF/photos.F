@@ -439,6 +439,12 @@ C--   Print info
      & ,T81,'*',/,  1H ,'*',9X,
      & ' HERE:                     d_h_nmxhep=2000  and  NMXHEP=10000'
 #endif
+     & ,T81,'*',/,  1H ,'*',9X,
+     & ' WARNING (3): this code has been modified by G. Franzoni in order'
+     & ,T81,'*',/,  1H ,'*',9X,
+     & ' to avoid that events with too much bremsstrahlung stop the program.'
+     & ,T81,'*',/,  1H ,'*',9X,
+     & ' For those events the event number (NEVHEP) is set negative.'
      & ,T81,'*')
       END
       SUBROUTINE PHOTOS(ID)
@@ -1781,6 +1787,7 @@ C--   Determine kinematical limit...
           XPHMAX=(MPASQR-(PNEUTR(5)+PPHO(5,CHAPOI(NCHARG)))**2)/MPASQR
 C--
 C--   Photon energy fraction...
+C--   GF inside this function too much brem may occur
           CALL PHOENE(MPASQR,MCHREN,BETA,BIGLOG,IDPHO(CHAPOI(NCHARG)))
 C--
          IF (XPHOTO.LT.-4D0) THEN
@@ -1964,6 +1971,17 @@ C.----------------------------------------------------------------------
       LOGICAL EXPINI
       REAL*8 PRO,PRSUM
       COMMON /PHOEXP/ PRO(NX),NCHAN,EXPINI
+C--   GF adding common to flag event with too much brem
+      COMMON /PHNUM/ IEV
+      INTEGER        IEV
+C--
+      INTEGER NMXHEP
+      PARAMETER (NMXHEP=10000)
+      INTEGER IDHEP,ISTHEP,JDAHEP,JMOHEP,NEVHEP,NHEP
+      REAL*8 PHEP,VHEP
+      COMMON/PH_HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
+     &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+C--   GF adding common to flag event with too much brem
 C--
       IF (XPHMAX.LE.XPHCUT) THEN
         BETA=PHOFAC(-1)  ! to zero counter, here beta is dummy
@@ -2025,12 +2043,24 @@ C--   Check on kinematical bounds
       IF (IEXP) THEN
        IF (PRSOFT.LT.-5.0D-8) THEN
          DATA=PRSOFT
+C--   GF Too much Brem condition is met here
+C--   GF in the event of too much brem, flag event by changing sign of event number
          CALL PHOERR(2,'PHOENE',DATA)
+C--      PRINT *,'Here is my event number before',NEVHEP
+         NEVHEP=-1*NEVHEP
+C--      PRINT *,'Here is my event number after',NEVHEP
+C--   GF
        ENDIF
       ELSE
        IF (PRSOFT.LT.0.04D0) THEN
          DATA=PRSOFT
+C--   GF Too much Brem condition is met here
+C--   GF in the event of too much brem, flag event by changing sign of event number
          CALL PHOERR(2,'PHOENE',DATA)
+C--      PRINT *,'Here is my event number before',NEVHEP
+         NEVHEP=-1*NEVHEP
+C--      PRINT *,'Here is my event number after',NEVHEP
+C--   GF
        ENDIF
       ENDIF
 
@@ -2740,8 +2770,12 @@ C--   Count number of non-fatal errors...
       GOTO 120
    10 WRITE(PHLUN,9010) TEXT,INT(SDATA)
       GOTO 110
-   20 WRITE(PHLUN,9020) TEXT,SDATA
-      GOTO 110
+C--   /this is the original code
+C--   20 WRITE(PHLUN,9020) TEXT,SDATA
+C--   GOTO 110
+C--   \this is the original code
+   20 WRITE(PHLUN,9021) TEXT,SDATA
+      GOTO 130
    30 WRITE(PHLUN,9030) TEXT,SDATA
       GOTO 110
    40 WRITE(PHLUN,9040) TEXT
@@ -2785,6 +2819,8 @@ C--   Count number of non-fatal errors...
  9010 FORMAT(1H ,'* ',A,': Too many charged Particles, NCHARG =',I6,T81,
      &'*')
  9020 FORMAT(1H ,'* ',A,': Too much Bremsstrahlung required, PRSOFT = ',
+     &F15.6,T81,'*')
+ 9021 FORMAT(1H ,'* ',A,': Too much Brem req. - will continue, PRSOFT = ',
      &F15.6,T81,'*')
  9030 FORMAT(1H ,'* ',A,': Combined Weight is exceeding 1., Weight = ',
      &F15.6,T81,'*')
