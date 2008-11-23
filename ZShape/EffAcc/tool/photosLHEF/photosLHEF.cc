@@ -3,6 +3,7 @@
 #include <string>
 #include <string.h>
 #include <stdlib.h>
+#include <iostream>
 
 class LHEF {
 public:
@@ -49,20 +50,30 @@ private:
 };
 
 void event2hepevt(LHEF::Event& evt);
-void hepevt2event(LHEF::Event& evt);
+void hepevt2event(LHEF::Event& evt,bool);
 
 int main(int argc, char* argv[]) {
+
+    if (argc<3 || argc>4)
+    {
+        std::cout << "usage: photosLHEF  file_in  file_out  [1/0 i.e. keep/nokeep]" << std::endl;
+        exit (0);
+    }
+
   phoini_();
 
   int mod=3;
   phcork_(mod);
 
-  LHEF lhefIn, lhefOut;
-
+  LHEF lhefIn, lhefOut;  
+  
   // load event from LHEF
   lhefIn.loadFromFile(argv[1]);
   lhefOut.storeToFile(argv[2],lhefIn.getPretext());
 
+  bool keep(false);
+  if(argc==4) keep=argv[3]; 
+  
   while (lhefIn.loadNextEvent()) {
     event2hepevt(lhefIn.event);
     
@@ -79,7 +90,7 @@ int main(int argc, char* argv[]) {
       phodmp_();
 
     lhefOut.event=lhefIn.event;
-    hepevt2event(lhefOut.event);
+    hepevt2event(lhefOut.event,keep);
     lhefOut.storeEvent();
   }
 
@@ -130,17 +141,30 @@ void event2hepevt(LHEF::Event& evt) {
   }
 }
 
-void hepevt2event(LHEF::Event& evt) {
+void hepevt2event(LHEF::Event& evt, bool keep) {
   // just do the particles beyond the end...
-  int had=evt.particles.size();
+  // int had=evt.particles.size();
 
-  for (int j=had; j<hepevt_.d_h_nhep; ++j) {
+  // clear and reinsert all particles in event
+  // (not just those added by photos) to allow flagging of 'too much brem'-like events
+  evt.particles.clear();
+
+  for (int j=0; j<hepevt_.d_h_nhep; ++j) {
     LHEF::Event::Particle p;
     p.pdgid=hepevt_.d_h_idhep[j];
     p.mother1=hepevt_.d_h_jmohep[j][0];
     p.mother2=hepevt_.d_h_jmohep[j][1];
-
+    
     p.status=hepevt_.d_h_isthep[j];
+
+    // if there's a particle with 'too much brem'-like status (9999)
+    // drop or keep event according to user's flag. Drop is default.
+    if(p.status==9999 && (!keep))
+    {
+        evt.particles.clear();
+        return;
+    }
+
     p.color1=0;
     p.color2=0;
 

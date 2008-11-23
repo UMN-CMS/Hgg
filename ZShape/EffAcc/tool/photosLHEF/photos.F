@@ -444,7 +444,7 @@ C--   Print info
      & ,T81,'*',/,  1H ,'*',9X,
      & ' to avoid that events with too much bremsstrahlung stop the program.'
      & ,T81,'*',/,  1H ,'*',9X,
-     & ' For those events the event number (NEVHEP) is set negative.'
+     & ' For those events the particle status ISTHEP(I) is set to 9999.'
      & ,T81,'*')
       END
       SUBROUTINE PHOTOS(ID)
@@ -1981,6 +1981,7 @@ C--
       REAL*8 PHEP,VHEP
       COMMON/PH_HEPEVT/NEVHEP,NHEP,ISTHEP(NMXHEP),IDHEP(NMXHEP),
      &JMOHEP(2,NMXHEP),JDAHEP(2,NMXHEP),PHEP(5,NMXHEP),VHEP(4,NMXHEP)
+      INTEGER I
 C--   GF adding common to flag event with too much brem
 C--
       IF (XPHMAX.LE.XPHCUT) THEN
@@ -2044,26 +2045,30 @@ C--   Check on kinematical bounds
        IF (PRSOFT.LT.-5.0D-8) THEN
          DATA=PRSOFT
 C--   GF Too much Brem condition is met here
-C--   GF in the event of too much brem, flag event by changing sign of event number
+C--   GF in the event of too much brem, flag event by changing status of loaded particles to be 999
          CALL PHOERR(2,'PHOENE',DATA)
-C--      PRINT *,'Here is my event number before',NEVHEP
-         NEVHEP=-1*NEVHEP
-C--      PRINT *,'Here is my event number after',NEVHEP
+         do 12345 I = 1, NHEP
+C--   PRINT *,'Before NHEP ISTHEP(I): ',NHEP,ISTHEP(I)
+            ISTHEP(I)=9999
+C--   GF         PRINT *,'Inside PHOENE After NHEP ISTHEP(I): ',NHEP,ISTHEP(I)
+12345    continue
 C--   GF
        ENDIF
       ELSE
        IF (PRSOFT.LT.0.04D0) THEN
          DATA=PRSOFT
 C--   GF Too much Brem condition is met here
-C--   GF in the event of too much brem, flag event by changing sign of event number
+C--   GF in the event of too much brem, flag event by changing status of loaded particles to be 999
          CALL PHOERR(2,'PHOENE',DATA)
-C--      PRINT *,'Here is my event number before',NEVHEP
-         NEVHEP=-1*NEVHEP
-C--      PRINT *,'Here is my event number after',NEVHEP
+         do 12346 I = 1, NHEP
+C--   PRINT *,'Before NHEP ISTHEP(I): ',NHEP,ISTHEP(I)
+            ISTHEP(I)=9999
+C--   GF         PRINT *,'Inside PHOENE After NHEP ISTHEP(I): ',NHEP,ISTHEP(I)
+12346    continue
 C--   GF
-       ENDIF
       ENDIF
-
+      ENDIF
+      
       RRR=PHORAN(IWT1)
       IF (RRR.LT.PRSOFT) THEN
 C--
