@@ -82,23 +82,25 @@ bool EfficiencyCut::passesCut(float variable) const
   float randNum = randomNum.Uniform(0., 1.); // put this back
   //std::cout << "EffCut is " << theEfficiency << " in " << theClonedEffHisto_->GetTitle() << " variable is: " << variable << " which falls in bin: " << theBin << std::endl;
   // GF: I do not understand this: why comparing rand with theEfficiency twice?
-  if ( randomNum.Uniform(0., 1.) < theEfficiency ) 
-     if ( randNum < theEfficiency ) 
+  //if ( randomNum.Uniform(0., 1.) < theEfficiency ) 
+    if ( randNum < theEfficiency ) 
        {
-	 //  	std::cout << "EfficiencyCut passescut in cut: " <<  theClonedEffHisto_->GetTitle() << " variable is: " <<
-	 //  	  variable << " which falls in bin: " << theBin << " and the cut was passed" 
-	 // 	  " (randNum: " << randNum << " eff: " << theEfficiency << ")" <<std::endl;
+	 //  std::cout << "EfficiencyCut passescut in cut: " <<  theClonedEffHisto_->GetTitle() << " variable is: " <<
+	 // variable << " which falls in bin: " << theBin << " and the cut was passed" 
+	 //             " (randNum: " << randNum << " eff: " << theEfficiency << ")" <<std::endl;
+	 // std::cout << " Returning TRUE " << std::endl;
 	 return true;
        }
-     else{
-       //     std::cout << "iEfficiencyCut passescut n cut: " <<  theClonedEffHisto_->GetTitle() << " variable is: " <<
-       //	variable << " which falls in bin: " << theBin << " and the cut was not passed" 
-       //	" (randNum: " << randNum << " eff: " << theEfficiency << ")" << std::endl;
-       return false;
-     }
+   else{
+         //     std::cout << "iEfficiencyCut passescut n cut: " <<  theClonedEffHisto_->GetTitle() << " variable is: " <<
+         //	variable << " which falls in bin: " << theBin << " and the cut was not passed" 
+         //	" (randNum: " << randNum << " eff: " << theEfficiency << ")" << std::endl;
+         //     std::cout << " Returning FALSE " << std::endl;
+         return false;
+    }
 
-
-  return true;
+  std::cout << " Returning FALSE " << std::endl;
+  return false;
 
 } 
  
