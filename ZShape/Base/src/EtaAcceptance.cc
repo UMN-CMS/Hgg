@@ -20,6 +20,10 @@ bool EtaAcceptance::isInAcceptance(const math::PtEtaPhiMLorentzVector& p, Zone z
       (eta<1.127 || eta>1.163); // module 3-4
   case (zone_EE) :
     return (eta>1.558) && (eta<2.850);
+  case (zone_EE_tracker) :
+    return (eta>1.558) && (eta<2.48);
+  case (zone_EE_notracker) :
+    return (eta>=2.48) && (eta<2.850);
   case (zone_HF) :
     return (eta>3.1) && (eta<4.60);
   case (zone_ECAL) :

@@ -13,7 +13,7 @@ class EtaAcceptance {
   EtaAcceptance( void );
 
   bool isInAcceptance(const math::PtEtaPhiMLorentzVector& p) const;
-  enum Zone { zone_EB, zone_EE, zone_ECAL, zone_HF, zone_ANY };
+  enum Zone { zone_EB, zone_EE, zone_EE_tracker, zone_EE_notracker, zone_ECAL, zone_HF, zone_ANY };
   bool isInAcceptance(const math::PtEtaPhiMLorentzVector& p, Zone zone) const;
 
  private:
