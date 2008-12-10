@@ -6,15 +6,17 @@
 //
 
 #include "DataFormats/Math/interface/LorentzVector.h"
+#include "ZShape/Base/interface/ZShapeElectron.h"
 
 class EtaAcceptance {
 
  public:
   EtaAcceptance( void );
 
-  bool isInAcceptance(const math::PtEtaPhiMLorentzVector& p) const;
+  //  bool isInAcceptance(const math::PtEtaPhiMLorentzVector& p) const;
   enum Zone { zone_EB, zone_EE, zone_EE_tracker, zone_EE_notracker, zone_ECAL, zone_HF, zone_ANY };
-  bool isInAcceptance(const math::PtEtaPhiMLorentzVector& p, Zone zone) const;
+  bool isInAcceptance(double deteta, Zone zone) const;
+  bool isInAcceptance(const ZShapeElectron& zs, Zone zone) const { return isInAcceptance(zs.detEta_,zone); }
 
  private:
 
