@@ -248,7 +248,6 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
   // end loop on particles
   evt_.n_elec=ne;
 
-  evt_.dump(std::cout);
   
   /*
   std::cout << ngot[0] << "->" << elecs[0].energy() <<
@@ -278,6 +277,8 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
   if (pt2 > pt1){
     std::swap( evt_.elec(0), evt_.elec(1));
   }
+  evt_.dump(std::cout);
+
 }  
   
 
