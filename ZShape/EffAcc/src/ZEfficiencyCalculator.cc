@@ -247,11 +247,12 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
   // end loop on particles
   evt_.n_elec=ne;
   
+  /*
   std::cout << ngot[0] << "->" << elecs[0].energy() <<
     " " << elecs[0].eta() << " " << elecs[0].phi() << std::endl;
   std::cout << ngot[1] << "->" << elecs[1].energy() <<
     " " << elecs[1].eta() << " " << elecs[1].phi() << std::endl;
-
+  */
   //
   // check than we have 2 and only 2 electrons
  

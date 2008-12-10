@@ -127,7 +127,7 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
             e1 = cms.untracked.vstring('ACC(ECAL+TRK)', 
                 'PT10', 
                 'PT20','PT20'),
-            e2 = cms.untracked.vstring('ACC(ANY)', 
+            e2 = cms.untracked.vstring('ACC(ANY-EEnotrk)', 
                 'PT10', 
                 'PT10','PT20')
         ), 
