@@ -122,20 +122,14 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
                 'ElectronId-Eta')
         ), 
         cms.PSet(
-            name = cms.untracked.string('Tight-ECAL-HF'),
+            name = cms.untracked.string('Acceptance-Tracker'),
             Z = cms.untracked.vstring(),
-            e1 = cms.untracked.vstring('ACC(ECAL)', 
+            e1 = cms.untracked.vstring('ACC(ECAL+TRK)', 
                 'PT10', 
-                'Supercluster-Eta', 
-                'PT20', 
-                'GsfTrack-Eta', 
-                'Iso-Pt', 
-                'ElectronId-Eta', 
-                'HLT-Eta'),
-            e2 = cms.untracked.vstring('ACC(HF)', 
+                'PT20','PT20'),
+            e2 = cms.untracked.vstring('ACC(ANY)', 
                 'PT10', 
-                'PT20',
-                'HFElectronId-Eta')
+                'PT10','PT20')
         ), 
         cms.PSet(
             name = cms.untracked.string('Maximal'),
