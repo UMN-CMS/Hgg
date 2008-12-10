@@ -19,7 +19,7 @@ class EffHistos {
  private:
   TH1 *mZ_,*YZ_, *ptZ_;
   TH1 *e1eta_,*e2eta_,*e1phi_,*e2phi_,*e1pt_,*e2pt_;
-  TH2 *mZ_Y_,*mZ_pt_;
+  TH2 *mZ_Y_,*mZ_pt_,*pt_Y_;
 }; 
 
 #endif

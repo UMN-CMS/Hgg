@@ -29,9 +29,14 @@ void EffHistos::Book(TFileDirectory& tdf) {
   mZ_Y_->GetXaxis()->SetTitle("Y_{Z0}");
   mZ_Y_->GetYaxis()->SetTitle("m_{Z0}");
 
+  pt_Y_ = tdf.make<TH2F>("Z0_Y_v_pt","Z0_Y_v_pt", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, 50, 0, maxPt);
+  pt_Y_->GetXaxis()->SetTitle("Y_{Z0}");
+  pt_Y_->GetYaxis()->SetTitle("p_{T,Z0}");
+
   mZ_pt_ = tdf.make<TH2F>("Z0_pt_v_mass","Z0_pt_v_mass", 50,0, maxPt, 50, minZmass, maxZmass);
   mZ_pt_->GetXaxis()->SetTitle("p_{T,Z0}");
   mZ_pt_->GetYaxis()->SetTitle("m_{Z0}");
+
   
   e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta", 100, -5, 5);
   e1eta_ ->GetXaxis()->SetTitle("#eta_{e1}");
@@ -85,6 +90,7 @@ void EffHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtE
 
   mZ_Y_->Fill(zY,zMass);
   mZ_pt_->Fill(zPt,zMass);
+  pt_Y_->Fill(zY,zPt);
 
   e1eta_ -> Fill(e1eta);
   e1pt_  -> Fill(e1Pt);
