@@ -109,7 +109,7 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
         cms.PSet(
             name = cms.untracked.string('Tight-ECAL-Loose-ECAL'),
             Z = cms.untracked.vstring(),
-            e1 = cms.untracked.vstring('ACC(ECAL)', 
+            e1 = cms.untracked.vstring('ACC(ECAL+TRK)', 
                 'PT10', 
                 'Supercluster-Eta', 
                 'PT20', 
@@ -124,6 +124,25 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
                 'GsfTrack-Eta', 
                 'Iso-Pt', 
                 'ElectronId-Eta')
+        ), 
+        cms.PSet(
+            name = cms.untracked.string('Tight-ECAL-HF'),
+            Z = cms.untracked.vstring(),
+            e1 = cms.untracked.vstring('ACC(ECAL+TRK)', 
+                'PT10', 
+                'Supercluster-Eta', 
+                'PT20', 
+                'GsfTrack-Eta', 
+                'Iso-Pt', 
+                'ElectronId-Eta', 
+                'HLT-Eta'),
+            e2 = cms.untracked.vstring('ACC(HF)', 
+                'PT10', 
+                '', 
+                'PT20', 
+                '',
+                '',
+                'HF-ElectronId-Eta')
         ), 
         cms.PSet(
             name = cms.untracked.string('Acceptance-Tracker'),
@@ -146,7 +165,7 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
                 'Iso-Pt', 
                 'ElectronId-Eta', 
                 'HLT-Eta'),
-            e2 = cms.untracked.vstring('ACC(ANY-EEnotrk)', 
+            e2 = cms.untracked.vstring('ACC(ANY)', 
                 'PT10')
         ))
 )

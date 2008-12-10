@@ -28,7 +28,8 @@ EfficiencyCut::EfficiencyCut ( TH1F * histo ) {
   // 	    << " and pointer: " << theClonedEffHisto_ << std::endl;
   theClonedEffHisto_ ->SetDirectory(0);
   std::string variable = histo->GetName();
-  if (strstr(variable.c_str(),"eta")      || strstr(variable.c_str(),"Eta") ) theCutVariable_=cv_Eta;
+  if (strstr(variable.c_str(),"DetEta")      || strstr(variable.c_str(),"EtaDet") ) theCutVariable_=cv_DetEta;
+  else if (strstr(variable.c_str(),"eta")      || strstr(variable.c_str(),"Eta") ) theCutVariable_=cv_Eta;
   else if (strstr(variable.c_str(),"phi") || strstr(variable.c_str(),"Phi") ) theCutVariable_=cv_Phi;
   else if (strstr(variable.c_str(),"pt")  || strstr(variable.c_str(),"et")  ||
 	   strstr(variable.c_str(),"p_t") || strstr(variable.c_str(),"e_t")||
@@ -105,12 +106,13 @@ bool EfficiencyCut::passesCut(float variable) const
 } 
  
 
-bool EfficiencyCut::passesCut( const ::math::PtEtaPhiMLorentzVector& elec) const {
+bool EfficiencyCut::passesCut( const ZShapeElectron& elec) const {
   switch (theCutVariable_) {
-  case (cv_Eta) : return passesCut(elec.eta());
-  case (cv_Phi) : return passesCut(elec.phi());
-  case (cv_Pt) : return passesCut(elec.Pt());
-  case (cv_Energy) : return passesCut(elec.E());
+  case (cv_DetEta) : return passesCut(elec.detEta_);
+  case (cv_Eta) : return passesCut(elec.p4_.eta());
+  case (cv_Phi) : return passesCut(elec.p4_.phi());
+  case (cv_Pt) : return passesCut(elec.p4_.Pt());
+  case (cv_Energy) : return passesCut(elec.p4_.E());
   default: return false;
   }
 }

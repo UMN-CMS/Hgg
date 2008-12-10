@@ -9,7 +9,7 @@ void ZShapeEvent::dump() const {
   dump(std::cout);
 }
 void ZShapeEvent::dump(std::ostream& s) const {
-  s << "Vertex: " << z0_.x() << ", " << z0_.y() << ", " << z0_.z() << std::endl;
+  s << "Vertex: " << vtx_.x() << ", " << vtx_.y() << ", " << vtx_.z() << std::endl;
   for (int i=0; i<2; i++) {
     s << "Electron " << i+1;
     elec(i).dump(s);

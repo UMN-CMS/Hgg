@@ -9,15 +9,15 @@
 
 /** \class ZShapeEvent
   *  
-  * $Date: 2007/11/06 18:18:24 $
-  * $Revision: 1.1 $
+  * $Date: 2007/12/05 22:40:48 $
+  * $Revision: 1.2 $
   * \author J. Mans - Minnesota
   */
 class ZShapeEvent {
 public:
   ZShapeEvent();
   // primary vertex
-  ::math::XYZVector z0_;
+  ::math::XYZPoint vtx_;
   int n_elec;
 
   ZShapeElectron& elec(int i) { return ((i==0)?(*e1_):(*e2_)); }

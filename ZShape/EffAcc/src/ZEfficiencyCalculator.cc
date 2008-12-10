@@ -140,7 +140,7 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
     // apply all cuts and store results into ZEle objects
     for (std::map<std::string,EfficiencyCut*>::iterator cut=theCuts_.begin(); cut!=theCuts_.end(); cut++) {
       for (int ne=0; ne<2; ne++) {
-	evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne).p4_));
+	evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne)));
       }
     }
 
@@ -232,6 +232,7 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
       double dR=ROOT::Math::VectorUtil::DeltaR(me[0]->momentum(),ZeeElectron_itr->momentum());
       if (me[0]==ZeeElectron_itr || dR<zElectronsCone_) {
 	elecs[0]+=ZeeElectron_itr->p4();
+	evt_.vtx_=math::XYZPoint(ZeeElectron_itr->vertex().x(),ZeeElectron_itr->vertex().y(),ZeeElectron_itr->vertex().z());
 	ngot[0]++;
       } else {
 	dR=ROOT::Math::VectorUtil::DeltaR(me[1]->momentum(),ZeeElectron_itr->momentum());
@@ -246,6 +247,8 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
   
   // end loop on particles
   evt_.n_elec=ne;
+
+  evt_.dump(std::cout);
   
   /*
   std::cout << ngot[0] << "->" << elecs[0].energy() <<
@@ -262,6 +265,9 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
       return;
     }
 
+
+  evt_.elec(0).detEta_=evt_.elec(0).detectorEta(evt_.vtx_);
+  evt_.elec(1).detEta_=evt_.elec(1).detectorEta(evt_.vtx_);
 
   //
   // reorder electrons in pT
