@@ -13,17 +13,26 @@ void EffHistos::Book(TFileDirectory& tdf) {
   float maxY     = 5.5;
   float minZmass = 50;
   float maxZmass = 140;
+  const int yBinsPerUnitFine = 10;
+  const int yBinsPerUnitCoarse = 4;
 
   mZ_  = tdf.make<TH1F>("Z0_mass","Z0_mass", 50, minZmass, maxZmass);
   mZ_ ->GetXaxis()->SetTitle("m_{Z0} (GeV/c^{2}");
 
-  YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y", int((maxY*2)*4), -maxY, maxY);
+  YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y", int((maxY*2)*yBinsPerUnitFine), -maxY, maxY);
   YZ_ ->GetXaxis()->SetTitle("Y_{Z0}");
 
   ptZ_ = tdf.make<TH1F>("Z0_Pt","Z0_Pt", 100, 0, maxPt);
   ptZ_ ->GetXaxis()->SetTitle("p_{T,Z0}");
-  
 
+  mZ_Y_ = tdf.make<TH2F>("Z0_Y_v_mass","Z0_Y_v_mass", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, 50, minZmass, maxZmass);
+  mZ_Y_->GetXaxis()->SetTitle("Y_{Z0}");
+  mZ_Y_->GetYaxis()->SetTitle("m_{Z0}");
+
+  mZ_pt_ = tdf.make<TH2F>("Z0_pt_v_mass","Z0_pt_v_mass", 50,0, maxPt, 50, minZmass, maxZmass);
+  mZ_pt_->GetXaxis()->SetTitle("p_{T,Z0}");
+  mZ_pt_->GetYaxis()->SetTitle("m_{Z0}");
+  
   e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta", 100, -5, 5);
   e1eta_ ->GetXaxis()->SetTitle("#eta_{e1}");
 
@@ -73,6 +82,9 @@ void EffHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtE
   mZ_  -> Fill(zMass);
   YZ_  -> Fill(zY);
   ptZ_ -> Fill(zPt);
+
+  mZ_Y_->Fill(zY,zMass);
+  mZ_pt_->Fill(zPt,zMass);
 
   e1eta_ -> Fill(e1eta);
   e1pt_  -> Fill(e1Pt);
