@@ -38,7 +38,7 @@ EfficiencyCut::EfficiencyCut ( TH1F * histo ) {
   else {
     edm::LogWarning("ZShape") << "Unknown variable in efficiency cut: '" << variable << "'";
   }
-  //std::cout << "For CutVariable " <<  variable << " the type is " << theCutVariable_ << std::endl;
+  std::cout << "For CutVariable " <<  variable << " the type is " << theCutVariable_ << std::endl;
 }
 
 bool EfficiencyCut::passesCut(float variable) const

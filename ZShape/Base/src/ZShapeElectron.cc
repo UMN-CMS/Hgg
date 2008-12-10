@@ -38,5 +38,5 @@ double ZShapeElectron::detectorEta(const math::XYZPoint& vtx) const {
   } else { // EB correction
     de=asinh(sinh(de)+vtx.z()/EBr);
   }
-
+  return de;
 }
