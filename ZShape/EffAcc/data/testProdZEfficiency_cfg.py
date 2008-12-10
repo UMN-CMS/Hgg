@@ -142,7 +142,7 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
                 'Iso-Pt', 
                 'ElectronId-Eta', 
                 'HLT-Eta'),
-            e2 = cms.untracked.vstring('ACC(ANY)', 
+            e2 = cms.untracked.vstring('ACC(ANY-EEnotrk)', 
                 'PT10')
         ))
 )

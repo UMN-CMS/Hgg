@@ -7,6 +7,7 @@ void ZShapeStandardCuts::acceptanceCuts(ZShapeElectron& elec) const {
   elec.cutResult("ACC(ECAL+TRK)",theEtaSelector_.isInAcceptance(elec.p4_,EtaAcceptance::zone_ECAL) && (!theEtaSelector_.isInAcceptance(elec.p4_,EtaAcceptance::zone_EE_notracker)));
   elec.cutResult("ACC(HF)",theEtaSelector_.isInAcceptance(elec.p4_,EtaAcceptance::zone_HF));
   elec.cutResult("ACC(ANY)",theEtaSelector_.isInAcceptance(elec.p4_,EtaAcceptance::zone_ANY));
+  elec.cutResult("ACC(ANY-EEnotrk)",theEtaSelector_.isInAcceptance(elec.p4_,EtaAcceptance::zone_ANY) && (!theEtaSelector_.isInAcceptance(elec.p4_,EtaAcceptance::zone_EE_notracker));
 }
 
 void ZShapeStandardCuts::ptCuts(ZShapeElectron& elec) const {
