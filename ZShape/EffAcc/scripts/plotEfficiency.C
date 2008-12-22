@@ -1,3 +1,6 @@
+/*
+  Must run ".x EfficiencyStatistics.cc+" before running
+ */
 void determineText(const char* name, char* title, char* xaxisTitle, char*& fname);
 void plotEfficiency(const char* filename) {
 
