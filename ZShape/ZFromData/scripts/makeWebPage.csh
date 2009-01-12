@@ -49,7 +49,13 @@ end
 
 echo '<h3><A name="EB"><FONT color="Blue">2-D Efficiency Histograms</FONT></A><BR></h3>' >> ${PlotDir}/index.html
 
-foreach plot ( `/bin/ls ${PlotDir} |grep png |grep  "_Pt_EtaDet_"` )
+foreach plot ( `/bin/ls ${PlotDir} |grep png |grep  "eff_Pt_EtaDet_"` )
+      echo '<A HREF='${plot}'> <img height="300" src="'${plot}'"> </A>' >> ${PlotDir}/index.html
+   end
+   
+   echo '<h3><A name="EB"><FONT color="Blue">2-D Denominator Histograms</FONT></A><BR></h3>' >> ${PlotDir}/index.html
+
+foreach plot ( `/bin/ls ${PlotDir} |grep png |grep  "den_Pt_EtaDet_"` )
       echo '<A HREF='${plot}'> <img height="300" src="'${plot}'"> </A>' >> ${PlotDir}/index.html
    end
 

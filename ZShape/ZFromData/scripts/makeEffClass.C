@@ -1,4 +1,5 @@
 #include <TH1F.h>
+#include <TH2F.h>
 #include <TFile.h>
 #include <TCanvas.h>
 #include <map>
@@ -26,7 +27,8 @@ typedef struct{
 
 typedef struct{
   PhysVar_t var[PHYSVARS];
-  TH1F *eff2d;
+  TH2F *eff2d;
+  TH2F *den2d;
 } Histos_t;
 
 
@@ -116,9 +118,13 @@ EffHistos::getHistos(void)
          theHistos_[type].var[itype].den->GetXaxis()->SetTitle(PhysVec_[itype].c_str());
       }
       theHistos_[type].eff2d = 
-                (TH1F*) theFiles_[type]->Get(Form("sbs_eff_%s_%s",PhysVec_[1].c_str(),PhysVec_[0].c_str()));
+                (TH2F*) theFiles_[type]->Get(Form("sbs_eff_%s_%s",PhysVec_[1].c_str(),PhysVec_[0].c_str()));
       theHistos_[type].eff2d->GetXaxis()->SetTitle(PhysVec_[1].c_str());
       theHistos_[type].eff2d->GetYaxis()->SetTitle(PhysVec_[0].c_str());
+      theHistos_[type].den2d = 
+                (TH2F*) theFiles_[type]->Get(Form("sbs_den_%s_%s",PhysVec_[1].c_str(),PhysVec_[0].c_str()));
+      theHistos_[type].den2d->GetXaxis()->SetTitle(PhysVec_[1].c_str());
+      theHistos_[type].den2d->GetYaxis()->SetTitle(PhysVec_[0].c_str());
    }
 }
 
@@ -146,6 +152,10 @@ EffHistos::printIndividualHistos(const char *ftype, bool withcolor)
       theHistos_[type].eff2d->SetTitle(Form("%s %s",rtype,theHistos_[type].eff2d->GetTitle() ));
       if (withcolor) theHistos_[type].eff2d->SetLineColor(Cols_[type]);
       tempCan->Print(Form("sbs_eff_%s_%s_%s.%s",PhysVec_[1].c_str(),PhysVec_[0].c_str(),rtype,ftype));
+      theHistos_[type].den2d->Draw("colz");
+      theHistos_[type].den2d->SetTitle(Form("%s %s",rtype,theHistos_[type].den2d->GetTitle() ));
+      if (withcolor) theHistos_[type].den2d->SetLineColor(Cols_[type]);
+      tempCan->Print(Form("sbs_den_%s_%s_%s.%s",PhysVec_[1].c_str(),PhysVec_[0].c_str(),rtype,ftype));
    }
 
 }

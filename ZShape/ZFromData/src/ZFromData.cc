@@ -179,11 +179,19 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      if( tagprobes.isValid() )
       {
-	  //std::cout << "In tag probes " << std::endl;
+	  std::cout << "In tag probes " << std::endl;
+	  //--Here I pick a random T&Probe combination based on the event number
+	  int tpsize = tagprobes->size();
+	  int usetp = (tpsize > 0 ) ? (iEvent.id().event())%tpsize : 0;
+	  int tpnum = 0;
+	  //--End picking a random Tag and Probe combination
+	  std::cout << " tpnum " << tpnum << " usetp " << usetp << " tpsize " << tpsize << std::endl;
 	  reco::CandViewCandViewAssociation::const_iterator tpItr = tagprobes->begin();
-	  for( ; tpItr != tagprobes->end(); ++tpItr )
+	  for( ; tpItr != tagprobes->end(); ++tpItr,++tpnum)
 	  { 
-            //std::cout << "In tag probes Iterator " << std::endl;
+	    std::cout << " tpnum is " << tpnum <<  " usetp is " << usetp << std::endl;
+	    if (tpnum != usetp ) continue;
+            std::cout << "In tag probes Iterator " << std::endl;
 	    const reco::CandidateBaseRef &tag = tpItr->key;
 	    vector< pair<reco::CandidateBaseRef,double> > vprobes = (*tagprobes)[tag];
 
@@ -193,7 +201,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    evt_.elec(1).p4_=(vprobes[0].first)->p4();
 	//std::cout << "Got the 4-vectors " << std::endl;
 		 // If there are two probes with the tag continue
-	    if( vprobes.size() > 1 ) continue;
+	    if( vprobes.size() > 1 ) { std::cout << " More Than 2 Probes "<< std::endl; continue;}
 	//std::cout << "Only 2 probes " << std::endl;	
 		for( int itype=0; itype<(int)passProbeCandTags_.size(); ++itype ){
 	   //std::cout << "Looping over the types" << std::endl;
@@ -213,7 +221,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	       //bool l1Trigger = false;
 	       //bool hltTrigger = false;
            }
-       }
+         }
 	  }
    ///}
   //std::cout << " Ending this one loop woohoo " << std::endl;
@@ -232,7 +240,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   */
  
   if (evt_.n_elec!=2) return; // need 2 and only 2
-
+  std::cout << " There was 1 good pair " << std::endl;
   //
   // fill histograms for before any selection
   allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
