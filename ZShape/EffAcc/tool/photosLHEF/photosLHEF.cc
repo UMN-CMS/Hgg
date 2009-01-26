@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
   lhefOut.storeToFile(argv[2],lhefIn.getPretext());
 
   bool keep(false);
-  if(argc==4) keep=argv[3]; 
+  if(argc==4) keep=atoi(argv[3]); 
   
   while (lhefIn.loadNextEvent()) {
     event2hepevt(lhefIn.event);
