@@ -3,6 +3,10 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("Zefficiency")
 process.TimerService = cms.Service("TimerService")
 
+process.load('FWCore/MessageService/MessageLogger_cfi')
+
+process.MessageLogger.cerr.FwkReport.reportEvery=cms.untracked.int32(10000)
+
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True)
 )
@@ -28,23 +32,17 @@ process.source = cms.Source("PoolSource",
 )
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('histo_10M_partTESTESTTEST.root')
-)
-	
-process.ZIntoElectronSmearingProducer = cms.EDProducer("ZSmearingProducer",
-    zsrc = cms.untracked.InputTag("ZIntoElectronsEventProducer","ZEventParticles"),
-    quiet = cms.untracked.bool(True),
-    zElectronsCone = cms.double(0.08)
+    fileName = cms.string('histo_1M.root')
 )
 
 process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
     Effs = cms.untracked.VPSet(cms.PSet(
         effFile = cms.untracked.string('HLT-EtaDet.txt'),
-        name = cms.untracked.string('HLT-EtaDet')
+        name = cms.untracked.string('HLT-Eta')
     ), 
         cms.PSet(
             effFile = cms.untracked.string('ElectronId-EtaDet.txt'),
-            name = cms.untracked.string('ElectronId-EtaDet')
+            name = cms.untracked.string('ElectronId-Eta')
         ), 
         cms.PSet(
             effFile = cms.untracked.string('Iso-Pt.txt'),
@@ -52,7 +50,7 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
         ), 
         cms.PSet(
             effFile = cms.untracked.string('GsfTrack-EtaDet.txt'),
-            name = cms.untracked.string('GsfTrack-EtaDet')
+            name = cms.untracked.string('GsfTrack-Eta')
         ), 
         cms.PSet(
             effFile = cms.untracked.string('Supercluster-Eta.txt'),
@@ -60,15 +58,14 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
         ),
         cms.PSet(
             effFile = cms.untracked.string('HFEId-EtaDet.txt'),
-            name = cms.untracked.string('HFElectronId-EtaDet')
+            name = cms.untracked.string('HFElectronId-Eta')
         )
 
                                ),
     writeHistoBeforeEndJob = cms.untracked.bool(False),
-    zsrc = cms.untracked.InputTag("ZIntoElectronSmearingProducer","ZEventParticles"),
-    zElectronsCollection = cms.untracked.InputTag("ZIntoElectronSmearingProducer","ZEventParticles"),
+    zsrc = cms.untracked.InputTag("ZIntoElectronsEventProducer","ZEventParticles"),
     quiet = cms.untracked.bool(True),
-    zElectronsCone = cms.double(0.00),
+    zElectronsCone = cms.double(0.08),
     ZDefs = cms.untracked.VPSet(cms.PSet(
         name = cms.untracked.string('Golden-EB-EB'),
         Z = cms.untracked.vstring(),
@@ -77,18 +74,18 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
             'PT10', 
             'Supercluster-Eta', 
             'PT20', 
-            'GsfTrack-EtaDet', 
+            'GsfTrack-Eta', 
             'Iso-Pt', 
-            'ElectronId-EtaDet', 
-            'HLT-EtaDet'),
+            'ElectronId-Eta', 
+            'HLT-Eta'),
         e2 = cms.untracked.vstring('ACC(EB)', 
             'PT10', 
             'Supercluster-Eta', 
             'PT20', 
-            'GsfTrack-EtaDet', 
+            'GsfTrack-Eta', 
             'Iso-Pt', 
-            'ElectronId-EtaDet') #, 
-            #'HLT-EtaDet')
+            'ElectronId-Eta', 
+            'HLT-Eta')
     ), 
         cms.PSet(
             name = cms.untracked.string('Tight-EB-Loose-ECAL'),
@@ -97,52 +94,65 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
                 'PT10', 
                 'Supercluster-Eta', 
                 'PT20', 
-                'GsfTrack-EtaDet', 
+                'GsfTrack-Eta', 
                 'Iso-Pt', 
-                'ElectronId-EtaDet', 
-                'HLT-EtaDet'),
+                'ElectronId-Eta', 
+                'HLT-Eta'),
             e2 = cms.untracked.vstring('ACC(ECAL)', 
                 'PT10', 
                 'Supercluster-Eta', 
                 'PT20', 
-                'GsfTrack-EtaDet', 
+                'GsfTrack-Eta', 
                 'Iso-Pt', 
-                'ElectronId-EtaDet')
+                'ElectronId-Eta')
         ), 
         cms.PSet(
             name = cms.untracked.string('Tight-ECAL-Loose-ECAL'),
             Z = cms.untracked.vstring(),
-            e1 = cms.untracked.vstring('ACC(ECAL)', 
+            e1 = cms.untracked.vstring('ACC(ECAL+TRK)', 
                 'PT10', 
                 'Supercluster-Eta', 
                 'PT20', 
-                'GsfTrack-EtaDet', 
+                'GsfTrack-Eta', 
                 'Iso-Pt', 
-                'ElectronId-EtaDet', 
-                'HLT-EtaDet'),
+                'ElectronId-Eta', 
+                'HLT-Eta'),
             e2 = cms.untracked.vstring('ACC(ECAL)', 
                 'PT10', 
                 'Supercluster-Eta', 
                 'PT20', 
-                'GsfTrack-EtaDet', 
+                'GsfTrack-Eta', 
                 'Iso-Pt', 
-                'ElectronId-EtaDet')
+                'ElectronId-Eta')
         ), 
         cms.PSet(
             name = cms.untracked.string('Tight-ECAL-HF'),
             Z = cms.untracked.vstring(),
-            e1 = cms.untracked.vstring('ACC(ECAL)', 
+            e1 = cms.untracked.vstring('ACC(ECAL+TRK)', 
                 'PT10', 
                 'Supercluster-Eta', 
                 'PT20', 
-                'GsfTrack-EtaDet', 
+                'GsfTrack-Eta', 
                 'Iso-Pt', 
-                'ElectronId-EtaDet', 
-                'HLT-EtaDet'),
+                'ElectronId-Eta', 
+                'HLT-Eta'),
             e2 = cms.untracked.vstring('ACC(HF)', 
                 'PT10', 
-                'PT20',
-                'HFElectronId-EtaDet')
+                '', 
+                'PT20', 
+                '',
+                '',
+                'HF-ElectronId-Eta')
+        ), 
+        cms.PSet(
+            name = cms.untracked.string('Acceptance-Tracker'),
+            Z = cms.untracked.vstring(),
+            e1 = cms.untracked.vstring('ACC(ECAL+TRK)', 
+                'PT10', 
+                'PT20','PT20'),
+            e2 = cms.untracked.vstring('ACC(ANY-EEnotrk)', 
+                'PT10', 
+                'PT10','PT20')
         ), 
         cms.PSet(
             name = cms.untracked.string('Maximal'),
@@ -160,6 +170,6 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
         ))
 )
 
-process.p = cms.Path(process.ZIntoElectronSmearingProducer + process.mcEff)
+process.p = cms.Path(process.mcEff)
 
 
