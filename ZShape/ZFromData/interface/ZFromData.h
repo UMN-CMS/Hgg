@@ -115,6 +115,7 @@ private:
 
   // Z Definitions
   std::map<std::string, ZShapeZDef*> zdefs_;
+  std::map<std::string, bool> zptorder_;
 
   // when doing efficiency statistics runs
   struct StatsBox {

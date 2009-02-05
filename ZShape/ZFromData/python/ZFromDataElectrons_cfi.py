@@ -85,7 +85,7 @@ allSuperClusters = cms.EDFilter("CandViewMerger",
 # My final selection of superCluster candidates 
 theSuperClusters = cms.EDFilter("CandViewSelector",
     src = cms.InputTag("allSuperClusters"),
-    cut = cms.string('et  > 20.0 | ((abs( eta ) < 1.4442) | (abs( eta ) > 1.560 & abs( eta ) < 3.0) | (abs( eta ) > 3 & abs( eta ) < 5))')
+    cut = cms.string('et  > 10.0 | ((abs( eta ) < 1.4442) | (abs( eta ) > 1.560 & abs( eta ) < 3.0) | (abs( eta ) > 3 & abs( eta ) < 5))')
 )
 
 theEEHFGapSuperClusters =  cms.EDFilter("CandViewSelector",
@@ -124,7 +124,8 @@ HFElectronID = cms.EDFilter("CandViewSelector",
 )
 
 theGsfHf = cms.EDFilter("CandViewMerger",
-    src = cms.VInputTag(cms.InputTag("theGsfElectrons"), cms.InputTag("theHFSuperClusters"), cms.InputTag("theEEHFGapSuperClusters"))
+    #src = cms.VInputTag(cms.InputTag("theGsfElectrons"), cms.InputTag("theHFSuperClusters"), cms.InputTag("theEEHFGapSuperClusters"))
+    src = cms.VInputTag(cms.InputTag("theGsfElectrons"), cms.InputTag("theHFSuperClusters"))
 )
 
 #  isolation  ################
@@ -189,8 +190,8 @@ tpMapSuperClusters = cms.EDProducer("TagProbeProducer",
 
 tpMapGsfElectrons = cms.EDProducer("TagProbeProducer",
     MassMaxCut = cms.untracked.double(120.0),
-    TagCollection = cms.InputTag("theHLT"),
-    #TagCollection = cms.InputTag("theGsfElectrons"),
+    #TagCollection = cms.InputTag("theHLT"),
+    TagCollection = cms.InputTag("theGsfElectrons"),
     MassMinCut = cms.untracked.double(60.0),
     ProbeCollection = cms.InputTag("theGsfElectrons")
 )

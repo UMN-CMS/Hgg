@@ -6,11 +6,17 @@
 #include <cmath>
 #include "DataFormats/Common/interface/AssociationMap.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 #include "PhysicsTools/TagAndProbe/interface/CandidateAssociation.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
+#include "DataFormats/EgammaCandidates/interface/Electron.h"
+
+
+
 
 //
 // constructors and destructor
@@ -46,6 +52,7 @@ ZFromData::ZFromData(const edm::ParameterSet& iConfig) :
     for (std::vector<std::string>::iterator k=req2.begin(); k!=req2.end(); k++) 
       zdef->addCriterion(ZShapeZDef::crit_E2,*k);
     zdefs_[name]=zdef;
+    zptorder_[name] = i->getUntrackedParameter<bool>("ptorder");
   }
 
   //
@@ -195,13 +202,19 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    const reco::CandidateBaseRef &tag = tpItr->key;
 	    vector< pair<reco::CandidateBaseRef,double> > vprobes = (*tagprobes)[tag];
 
-	    ///math::XYZTLorentzVector tpP4 = tag->p4() + (vprobes[0].first)->p4();//Probably not needed for anything.
+	    math::XYZTLorentzVector tpP4 = tag->p4() + (vprobes[0].first)->p4();//Probably not needed for anything.
 	    
 	    evt_.elec(0).p4_=tag->p4();
 	    evt_.elec(1).p4_=(vprobes[0].first)->p4();
+		
+		reco::SuperClusterRef SCt = tag->get<reco::SuperClusterRef>();
+		reco::SuperClusterRef SCp = (vprobes[0].first)->get<reco::SuperClusterRef>();
+		evt_.elec(0).detEta_ = SCt->eta();
+		evt_.elec(1).detEta_ = SCp->eta();
+		
 	//std::cout << "Got the 4-vectors " << std::endl;
 		 // If there are two probes with the tag continue
-	    if( vprobes.size() > 1 ) { std::cout << " More Than 2 Probes "<< std::endl; continue;}
+	    if( vprobes.size() > 1 ) { std::cout << " More Than 2 Probes; Z Rapidity "<< tpP4.Rapidity() << " Mass " << sqrt ( tpP4.Dot(tpP4) ) << " PT " << tpP4.Pt()<< std::endl; continue;}
 	//std::cout << "Only 2 probes " << std::endl;	
 		for( int itype=0; itype<(int)passProbeCandTags_.size(); ++itype ){
 	   //std::cout << "Looping over the types" << std::endl;
@@ -239,6 +252,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::cout << "Returning " << numDataZ << " fellas " << std::endl;
   */
  
+  allCaseFirst_.Fill(evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
   if (evt_.n_elec!=2) return; // need 2 and only 2
   std::cout << " There was 1 good pair " << std::endl;
   //
@@ -276,33 +290,34 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       // selections done at first pass, no matter whether there are trials or not
       for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
 	ZPlots* plots=zplots_[q->first];
+        bool ptorder = zptorder_[q->first];
+        int e1 = 0;
+        int e2 = 1;
+        if (ptorder) if ( evt_.elec(0).p4_.Pt() < evt_.elec(1).p4_.Pt() ) {e1 = 1; e2 =0;}
+        
 	// acceptance is always the first cut
 	if (!q->second->pass(evt_,1,1,0,&pairing)) continue;
 	
+        if (pairing) {if (e1 < e2) {e1 = 1; e2 = 0;} else {e1 = 0; e2 = 1;} }
+        int e1n = e1;
+        int e2n = e2;
 	// fill standard histograms after acceptance
-	if (!pairing){
-	  plots->acceptance_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
-	  if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
-	}
-	else{
-	  plots->acceptance_.Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
-	  if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
-	}
+	plots->acceptance_.Fill(evt_.elec(e1).p4_, evt_.elec(e2).p4_);
+	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1).p4_, evt_.elec(e2).p4_, evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_);
 	
 	// next n-cuts
 	bool ok=true;
 	for (int j=1; ok && j<q->second->criteriaCount(ZShapeZDef::crit_E1); j++) {
 	  ok=q->second->pass(evt_,j+1,j+1,0,&pairing);
+          e1n = e1;
+          e2n = e2;
+          if (pairing) {if (e1 < e2) {e1n = 1; e2n = 0;} else {e1n = 0; e2n = 1;} }
 	  if (ok)
-	    if (!pairing) {
-	      plots->postCut_[j-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
-              if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
-	    }
-	    else{
-	      plots->postCut_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
-              if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
-	    }
-	}
+          {
+	    plots->postCut_[j-1].Fill(evt_.elec(e1n).p4_, evt_.elec(e2n).p4_);
+            if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n).p4_, evt_.elec(e2n).p4_, evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
+	  }
+      }
     }
 
 
@@ -334,7 +349,7 @@ void ZFromData::fillMCEvent(const HepMC::GenEvent* Evt) {
       const HepMC::GenVertex * vertex_=(*mcpart)->production_vertex();
 
       if (ne==0) {
-	evtMC_.z0_=::math::XYZVector(vertex_->position().x(),vertex_->position().y(),vertex_->position().z() );
+	evtMC_.vtx_=::math::XYZVector(vertex_->position().x(),vertex_->position().y(),vertex_->position().z() );
       }
       
       math::XYZTLorentzVector  momentum;
