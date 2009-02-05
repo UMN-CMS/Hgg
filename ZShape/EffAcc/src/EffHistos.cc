@@ -17,7 +17,7 @@ void EffHistos::Book(TFileDirectory& tdf) {
   const int yBinsPerUnitCoarse = 4;
 
   mZ_  = tdf.make<TH1F>("Z0_mass","Z0_mass;m_{Z0} (GeV/c^{2})", 50, minZmass, maxZmass);
-  YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y;Y_{Z0}", int((maxY*2)*yBinsPerUnitFine), -maxY, maxY);
+  YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y;Y_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY);
   ptZ_ = tdf.make<TH1F>("Z0_Pt","Z0_Pt;p_{T,Z0}", 100, 0, maxPt);
 
   e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta;#eta_{e1}", 100, -5, 5);
