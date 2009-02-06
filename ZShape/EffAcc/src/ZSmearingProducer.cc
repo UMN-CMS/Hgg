@@ -66,6 +66,7 @@ private:
   edm::InputTag m_srcTag;
   edm::InputTag zElectronsTag;
   bool quiet_;
+  bool doSmearing_;
   float zElectronsCone_;
   math::XYZPoint vtx_;
 
@@ -75,6 +76,7 @@ private:
 ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) : 
     m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("src",edm::InputTag("source"))),
     zElectronsTag(iConfig.getUntrackedParameter<edm::InputTag>("zElectronsCollection",edm::InputTag("ZIntoElectronsEventProducer:ZEventParticles"))),
+    doSmearing_(iConfig.getUntrackedParameter<bool>("doSmearing",false)),
     quiet_(iConfig.getUntrackedParameter<bool>("quiet",false)),
     zElectronsCone_(iConfig.getParameter<double>("zElectronsCone"))
 {
@@ -164,8 +166,8 @@ ZSmearingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   for (int electron = 0; electron < ne; ++electron)
     {
       //std::cout << " looking at electron " << electron << std::endl;
-      smearElectron(elecs[electron]);
-       //std::cout << " NNew E " << elecs[electron].E() << " new eta " << elecs[electron].eta() << " new et " << elecs[electron].Et()<< " new pt " << elecs[electron].pt() << std::endl;
+        if(doSmearing_) smearElectron(elecs[electron]);
+      //std::cout << " NNew E " << elecs[electron].E() << " new eta " << elecs[electron].eta() << " new et " << elecs[electron].Et()<< " new pt " << elecs[electron].pt() << std::endl;
     }  
 
   //put the corrected electrons back in the event
