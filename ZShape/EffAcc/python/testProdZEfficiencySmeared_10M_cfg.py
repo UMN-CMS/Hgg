@@ -24,18 +24,16 @@ process.source = cms.Source("PoolSource",
     'file:/data/whybee0c/user/jmmans/Zee_shape_10TeV_GEN/Zee_shape_10TeV_GEN_8.root',
     'file:/data/whybee0c/user/jmmans/Zee_shape_10TeV_GEN/Zee_shape_10TeV_GEN_9.root',
     'file:/data/whybee0c/user/jmmans/Zee_shape_10TeV_GEN/Zee_shape_10TeV_GEN_10.root'
-                                      )
+
+#   'file:/data/franzoni/cmssw/ph/januaryBinMigration_CMSSW_2_2_3/src/ZShape/EffAcc/python/myfile_pythia_1M_noUE.root'
+    )
 )
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('histo_10M_partTESTESTTEST.root')
 )
-	
-process.ZIntoElectronSmearingProducer = cms.EDProducer("ZSmearingProducer",
-    zsrc = cms.untracked.InputTag("ZIntoElectronsEventProducer","ZEventParticles"),
-    quiet = cms.untracked.bool(True),
-    zElectronsCone = cms.double(0.08)
-)
+
+process.load("ZShape.EffAcc.SmearedElectronsProducer_cfi")
 
 process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
     Effs = cms.untracked.VPSet(cms.PSet(
@@ -65,8 +63,8 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
 
                                ),
     writeHistoBeforeEndJob = cms.untracked.bool(False),
-    zsrc = cms.untracked.InputTag("ZIntoElectronSmearingProducer","ZEventParticles"),
-    zElectronsCollection = cms.untracked.InputTag("ZIntoElectronSmearingProducer","ZEventParticles"),
+    zsrc = cms.untracked.InputTag("SmearedElectronsProducer","ZEventParticles"),
+    zElectronsCollection = cms.untracked.InputTag("SmearedElectronsProducer","ZEventParticles"),
     quiet = cms.untracked.bool(True),
     zElectronsCone = cms.double(0.00),
     ZDefs = cms.untracked.VPSet(cms.PSet(
@@ -160,6 +158,4 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
         ))
 )
 
-process.p = cms.Path(process.ZIntoElectronSmearingProducer + process.mcEff)
-
-
+process.p = cms.Path(process.SmearedElectronsProducer + process.mcEff)
