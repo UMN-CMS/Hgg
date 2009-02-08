@@ -212,7 +212,7 @@ void EfficiencyStore::produceHistograms(TFile * rootFile){
   if(dimension_==1) produce1DHistograms(rootFile);
   //  else if(dimension_==2) produce2DHistograms(rootFile);
   else  {
-    std::cout<<"histogram dimension is: " << dimension_ << " but only 1 and 2 are valid." <<std::endl;
+    std::cout<<"*** histogram dimension is: " << dimension_ << " but only 1 and 2 are valid.\n" <<std::endl;
   }
     
   return;
