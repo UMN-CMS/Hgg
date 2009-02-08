@@ -14,6 +14,7 @@
 ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("src",edm::InputTag("source"))),
   zElectronsTag(iConfig.getUntrackedParameter<edm::InputTag>("zElectronsCollection",edm::InputTag("ZIntoElectronsEventProducer:ZEventParticles"))),
+  zTreeLevelElectronsTag(iConfig.getUntrackedParameter<edm::InputTag>("zTreeLevelElectronsCollection",edm::InputTag("ZIntoElectronsEventProducer" "ZEventEle3"))),
   quiet_(iConfig.getUntrackedParameter<bool>("quiet",false)),
   zElectronsCone_(iConfig.getParameter<double>("zElectronsCone"))
 {
@@ -44,7 +45,8 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
 
   for (std::vector<edm::ParameterSet>::iterator i=effs.begin(); i!=effs.end(); ++i) {
     std::string name=i->getUntrackedParameter<std::string>("name");
-    std::string file=i->getUntrackedParameter<std::string>("effFile");
+    edm::FileInPath filePath(i->getParameter<edm::FileInPath>("effFile")); 
+    std::string file=filePath.fullPath(); 
     //std::string var=i->getUntrackedParameter<std::string>("variable");
     loadEfficiency(name,file);
   }
@@ -108,19 +110,26 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   // find initial (unsmeared, unfiltered,...) HepMCProduct
   iEvent.getByLabel(m_srcTag, EvtHandle ) ;
 
+  //super-fast reconstructed electrons for efficiency propagation step (aka electrons 'cones') 
   Handle <GenParticleCollection> pZeeParticles;
   iEvent.getByLabel(zElectronsTag,pZeeParticles);
 
-  const GenParticleCollection * ZeeParticles = pZeeParticles.product();
+  //tree-level electrons ('truth') 
+  Handle <GenParticleCollection> pZeeTreeLevelParticles; 
+  iEvent.getByLabel(zTreeLevelElectronsTag,pZeeTreeLevelParticles); 
 
-  fillEvent(ZeeParticles);
+  const GenParticleCollection * ZeeParticles = pZeeParticles.product();
+  const GenParticleCollection * ZeeTreeLevelParticles = pZeeTreeLevelParticles.product(); 
+
+  fillEvent(ZeeParticles, ZeeTreeLevelParticles); 
 
   if (evt_.n_elec!=2) return; // need 2 and only 2
+  if (evt_.n_TLelec!=2) return; // need 2 and only 2 
 
   //
   // fill histograms for before any selection
-  allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
-  
+  allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+
   // these stages merely _fill_ bits.  They do not apply cuts!
   stdCuts_.acceptanceCuts(evt_.elec(0));
   stdCuts_.acceptanceCuts(evt_.elec(1));
@@ -157,37 +166,39 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 
       // selections done at first pass, no matter whether there are trials or not
       for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
+	// plots is EffHistos object pertaining to the present Z definition
 	ZPlots* plots=zplots_[q->first];
 	// acceptance is always the first cut
 	if (!q->second->pass(evt_,1,1,0,&pairing)) continue;
 	
 	// fill standard histograms after acceptance
-	if (!pairing) plots->acceptance_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
-	else plots->acceptance_.Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
+	if (!pairing) plots->acceptance_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+	else plots->acceptance_.Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());      
+
 	
 	// next n-cuts
 	bool ok=true;
 	for (int j=1; ok && j<q->second->criteriaCount(ZShapeZDef::crit_E1); j++) {
 	  ok=q->second->pass(evt_,j+1,j+1,0,&pairing);
-	  if (ok)
-	    if (!pairing) 
-	      plots->postCut_[j-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
-	    else
-	      plots->postCut_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
-	}
-      }
-    }// end if pass==0
+          if (ok) 
+            if (!pairing)  
+              plots->postCut_[j-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4());
+            else 
+              plots->postCut_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());
+        }// criteria  
+      }// Z definitions 
+    }// end if pass==0 
 
     // selections specific in case of trials
-    if (statsBox_.trials>0) {
-      ZShapeZDef* zdef=zdefs_[statsBox_.targetZDefStat];
-      if (zdef->pass(evt_,zdef->criteriaCount(ZShapeZDef::crit_E1),zdef->criteriaCount(ZShapeZDef::crit_E2),0,&pairing)) {
-	if (!pairing) 
-	  statsBox_.hists[pass].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
-	else
-	  statsBox_.hists[pass].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_);
-      }
-    }
+    if (statsBox_.trials>0) { 
+      ZShapeZDef* zdef=zdefs_[statsBox_.targetZDefStat]; 
+      if (zdef->pass(evt_,zdef->criteriaCount(ZShapeZDef::crit_E1),zdef->criteriaCount(ZShapeZDef::crit_E2),0,&pairing)) { 
+        if (!pairing)  
+          statsBox_.hists[pass].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+        else 
+          statsBox_.hists[pass].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4()); 
+      } 
+    } 
     pass++;
 
   } while (statsBox_.trials>0 && pass<statsBox_.trials);
@@ -195,8 +206,10 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   if (keep!=0) theCuts_[statsBox_.targetEffStat]=keep;
 }
 
-
-void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeeParticles) {
+void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeeParticles, 
+				      const reco::GenParticleCollection* ZeeTreeLevelParticles) 
+{
+  
   using namespace reco;
 
   ////////////////////////
@@ -221,7 +234,7 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
     }
 
 
-
+  // iterating over all particles checking if they fall in cone around electron 
   for(
       GenParticleCollection::const_iterator ZeeElectron_itr = ZeeParticles->begin();
       ZeeElectron_itr != ZeeParticles->end();
@@ -229,12 +242,13 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
       )
     {
 
-      double dR=ROOT::Math::VectorUtil::DeltaR(me[0]->momentum(),ZeeElectron_itr->momentum());
+      double dR=ROOT::Math::VectorUtil::DeltaR(me[0]->momentum(),ZeeElectron_itr->momentum()); 
+      // if particle is ele_0 or falls in its cone, add 4momentum to the cone_0 
       if (me[0]==ZeeElectron_itr || dR<zElectronsCone_) {
 	elecs[0]+=ZeeElectron_itr->p4();
 	evt_.vtx_=math::XYZPoint(ZeeElectron_itr->vertex().x(),ZeeElectron_itr->vertex().y(),ZeeElectron_itr->vertex().z());
 	ngot[0]++;
-      } else {
+      } else {  // if particle is ele_1 or falls in its cone, add 4momentum to the cone_1
 	dR=ROOT::Math::VectorUtil::DeltaR(me[1]->momentum(),ZeeElectron_itr->momentum());
 	if (me[1]==ZeeElectron_itr || dR<zElectronsCone_) {
 	  elecs[1]+=ZeeElectron_itr->p4();
@@ -242,6 +256,8 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
 	}
       }
     }
+  // storing cones as electrons 
+  //(note: in case cones were fed in in the first place, they are used) 
   evt_.elec(0).p4_=elecs[0];
   evt_.elec(1).p4_=elecs[1];
   
@@ -279,6 +295,42 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
   }
   evt_.dump(std::cout);
 
+
+  // take care of tree-level electrons 
+  ne=0; 
+  for(GenParticleCollection::const_iterator ZeeTreeLevelElectron_itr = ZeeTreeLevelParticles->begin(); 
+      ZeeTreeLevelElectron_itr != ZeeTreeLevelParticles->end(); 
+      ZeeTreeLevelElectron_itr++ 
+      ){ 
+    if (abs(ZeeTreeLevelElectron_itr->pdgId())==11)  
+      { 
+        if (ne<2) { 
+          me[ne]=ZeeTreeLevelElectron_itr; 
+          ne++; } 
+      } 
+  } 
+   
+  // end loop on particles 
+  evt_.n_TLelec=ne;
+
+  if (ne!= 2) 
+    { 
+      edm::LogWarning("ZEfficiencyCalculator") << " we need two tree-level electrons (pid: " << myPid << " ) while we have: " << ne; 
+      return; 
+    } 
+ 
+  evt_.elecTreeLevel(0).setP4(me[0]->p4()); 
+  evt_.elecTreeLevel(0).setCharge(me[0]->charge()); 
+  evt_.elecTreeLevel(0).setVertex(me[0]->vertex()); 
+  evt_.elecTreeLevel(0).setPdgId(me[0]->pdgId()); 
+  evt_.elecTreeLevel(0).setStatus(me[0]->status()); 
+ 
+  evt_.elecTreeLevel(1).setP4(me[1]->p4()); 
+  evt_.elecTreeLevel(1).setCharge(me[1]->charge()); 
+  evt_.elecTreeLevel(1).setVertex(me[1]->vertex()); 
+  evt_.elecTreeLevel(1).setPdgId(me[1]->pdgId()); 
+  evt_.elecTreeLevel(1).setStatus(me[1]->status());
+
 }  
   
 
@@ -298,8 +350,10 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
   allCase_.Book(subDir);
 
   //
-  // one directory for each Z definition
+  // one directory for plots for each Z definition
   for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
+    
+    // struct holding histograms for acc+all_cuts for each definition
     ZPlots* zplots=new ZPlots(q->second->criteriaCount(ZShapeZDef::crit_E1)-1); // -1 for acceptance
     
     TFileDirectory sd = fs->mkdir(q->first.c_str());
@@ -380,9 +434,27 @@ void ZEfficiencyCalculator::loadEfficiency(const std::string& name, const std::s
 }
 
 
+
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 ZEfficiencyCalculator::endJob() {
+  
+  // normalize matrix pre-cuts  
+  allCase_.WrapUp(); 
+  
+  // looping over Z definitions 
+  for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) { 
+    
+    zplots_[q->first]->acceptance_.WrapUp(); 
+    
+    // looping over cuts foreseen in given Z definition, normalize matrix for each (Zdef,cut) 
+    for (int i=1; i<q->second->criteriaCount(ZShapeZDef::crit_E1); ++i) { 
+      
+      zplots_[q->first]->postCut_[i-1].WrapUp(); 
+      
+    }// cuts of given z definition 
+  }// Z definitions 
+  
 }
 
 void ZEfficiencyCalculator::createAlternateEfficiencies() {
