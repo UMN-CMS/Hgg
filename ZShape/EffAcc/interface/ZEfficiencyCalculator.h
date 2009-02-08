@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.9 2008/05/01 14:18:24 franzoni Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.10 2008/07/21 11:34:56 mansj Exp $
 //
 //
 
@@ -63,7 +63,7 @@ private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
 
-  void fillEvent(const reco::GenParticleCollection* ZeeParticles);
+  void fillEvent(const reco::GenParticleCollection* ZeeParticles, const reco::GenParticleCollection* ZeeTreeLevelParticles); 
   void loadEfficiency(const std::string& name, const std::string& fname);
   void applyEfficiencies();
   void createAlternateEfficiencies();
@@ -76,6 +76,7 @@ private:
 
   edm::InputTag m_srcTag;
   edm::InputTag zElectronsTag;
+  edm::InputTag zTreeLevelElectronsTag;
   bool quiet_;
   float zElectronsCone_;
 
