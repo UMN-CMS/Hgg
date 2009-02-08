@@ -11,6 +11,7 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(1000000)
     )
 
+process.dumpEv = cms.EDAnalyzer("EventContentAnalyzer")
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
@@ -25,39 +26,39 @@ process.source = cms.Source("PoolSource",
     'file:/data/whybee0c/user/jmmans/Zee_shape_10TeV_GEN/Zee_shape_10TeV_GEN_9.root',
     'file:/data/whybee0c/user/jmmans/Zee_shape_10TeV_GEN/Zee_shape_10TeV_GEN_10.root'
 
-#   'file:/data/franzoni/cmssw/ph/januaryBinMigration_CMSSW_2_2_3/src/ZShape/EffAcc/python/myfile_pythia_1M_noUE.root'
+#     'file:/data/franzoni/cmssw/ph/januaryBinMigration_CMSSW_2_2_3/src/ZShape/EffAcc/python/myfile_pythia_1M.root'
     )
 )
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('histo_10M_partTESTESTTEST.root')
+    fileName = cms.string('histo_10M_partBUILDINGTTEST.root')
 )
 
 process.load("ZShape.EffAcc.SmearedElectronsProducer_cfi")
 
 process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
     Effs = cms.untracked.VPSet(cms.PSet(
-        effFile = cms.untracked.string('HLT-EtaDet.txt'),
+        effFile = cms.FileInPath('ZShape/EffAcc/data/HLT-EtaDet.txt'),
         name = cms.untracked.string('HLT-EtaDet')
     ), 
         cms.PSet(
-            effFile = cms.untracked.string('ElectronId-EtaDet.txt'),
+            effFile = cms.FileInPath('ZShape/EffAcc/data/ElectronId-EtaDet.txt'),
             name = cms.untracked.string('ElectronId-EtaDet')
         ), 
         cms.PSet(
-            effFile = cms.untracked.string('Iso-Pt.txt'),
+            effFile = cms.FileInPath('ZShape/EffAcc/data/Iso-Pt.txt'),
             name = cms.untracked.string('Iso-Pt')
         ), 
         cms.PSet(
-            effFile = cms.untracked.string('GsfTrack-EtaDet.txt'),
+            effFile = cms.FileInPath('ZShape/EffAcc/data/GsfTrack-EtaDet.txt'),
             name = cms.untracked.string('GsfTrack-EtaDet')
         ), 
         cms.PSet(
-            effFile = cms.untracked.string('Supercluster-Eta.txt'),
+            effFile = cms.FileInPath('ZShape/EffAcc/data/Supercluster-Eta.txt'),
             name = cms.untracked.string('Supercluster-Eta')
         ),
         cms.PSet(
-            effFile = cms.untracked.string('HFEId-EtaDet.txt'),
+            effFile = cms.FileInPath('ZShape/EffAcc/data/HFEId-EtaDet.txt'), 
             name = cms.untracked.string('HFElectronId-EtaDet')
         )
 
@@ -65,7 +66,7 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
     writeHistoBeforeEndJob = cms.untracked.bool(False),
     zsrc = cms.untracked.InputTag("SmearedElectronsProducer","ZEventParticles"),
     zElectronsCollection = cms.untracked.InputTag("SmearedElectronsProducer","ZEventParticles"),
-    quiet = cms.untracked.bool(True),
+    zTreeLevelElectronsCollection = cms.untracked.InputTag("ZIntoElectronsEventProducer","ZEventEle3"), quiet = cms.untracked.bool(True),
     zElectronsCone = cms.double(0.00),
     ZDefs = cms.untracked.VPSet(cms.PSet(
         name = cms.untracked.string('Golden-EB-EB'),
@@ -158,4 +159,8 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
         ))
 )
 
-process.p = cms.Path(process.SmearedElectronsProducer + process.mcEff)
+process.p = cms.Path(process.SmearedElectronsProducer
+                     + process.mcEff
+                     + process.dumpEv
+                     )
+ 
