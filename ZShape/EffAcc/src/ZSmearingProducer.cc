@@ -68,7 +68,9 @@ private:
   bool quiet_;
   bool doSmearing_;
   float zElectronsCone_;
+  int randomSeed_;
   math::XYZPoint vtx_;
+  TRandom3 *randomNum_;
 
 };
 
@@ -76,15 +78,18 @@ private:
 ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) : 
     m_srcTag(iConfig.getUntrackedParameter<edm::InputTag>("src",edm::InputTag("source"))),
     zElectronsTag(iConfig.getUntrackedParameter<edm::InputTag>("zElectronsCollection",edm::InputTag("ZIntoElectronsEventProducer:ZEventParticles"))),
-    doSmearing_(iConfig.getUntrackedParameter<bool>("doSmearing",false)),
     quiet_(iConfig.getUntrackedParameter<bool>("quiet",false)),
-    zElectronsCone_(iConfig.getParameter<double>("zElectronsCone"))
+    doSmearing_(iConfig.getUntrackedParameter<bool>("doSmearing",false)),
+    zElectronsCone_(iConfig.getParameter<double>("zElectronsCone")),
+    randomSeed_(iConfig.getParameter<int>("randomSeed"))
 {
   using namespace reco;
 
   //register my product
   produces<GenParticleCollection>("ZEventParticles");
-
+  
+  //Setting the random number to make things reproducable
+  randomNum_ = new TRandom3(randomSeed_);
 }
 
 
@@ -207,7 +212,7 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   //or are cut out by the acceptance cuts
   const double EBEEboundry = 1.5;
   const double EEHFbountry = 3.0;
-  //double eta = electron.eta();
+  double eta = electron.eta();
   double e  = electron.E();
   double et  = electron.Et();
   //double pt = electron.Pt();
@@ -233,7 +238,6 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   else if (fabs(deteta) < 5.0)
   {
     //Do HF Stuff
-    TRandom3 randomNum(0);
     double mysig = 0.13;
     if (e < 140. ) mysig = 0.34;
     else if (e < 210. ) mysig = 0.25;
@@ -242,15 +246,19 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
     else if (e < 840. ) mysig = 0.16;
     else if (e < 1120. ) mysig = 0.14;
     else if (e < 1400. ) mysig = 0.15;
-    Efrac = randomNum.Gaus(1.02,mysig);
+    Efrac = randomNum_->Gaus(1.02,mysig);
   }
   
+  //std::cout << " OLD E " << electron.E() << " new eta " << electron.eta() << " new et " << electron.Et() << " new pt " << electron.pt() <<  " mass : " << electron.M() << std::endl;
 
   //double pz = electron.pz();
-  electron.SetE(Efrac*e);
+  ///electron.SetE(Efrac*e);
   //electron.SetPt(pow(-e*e*(1-Efrac*Efrac)+pt*pt,0.5));
-  electron.SetPt(electron.Et());
+  ///electron.SetPt(electron.Et());
+  electron = math::PtEtaPhiELorentzVector(Efrac*e/cosh(eta),eta,electron.phi(),Efrac*e);
+ 
 
+  //std::cout << " cosh way " << Efrac*e/cosh(eta) << " Other way " << Efrac*e*sin(electron.theta()) << std::endl;
   //std::cout << " New E " << electron.E() << " new eta " << electron.eta() << " new et " << electron.Et() << " new pt " << electron.pt() <<  " mass : " << electron.M() << std::endl;
 }
 
@@ -291,19 +299,20 @@ double ZSmearingProducer::smearECAL(double eta, double et, char *det)
   double sigmaR = p0r + p1r*fabs(eta) + p2r*eta*eta;
   //std::cout << " Side " << det << " sigmaL " << sigmaL << " sigmaR " << sigmaR << std::endl;
 
-  TRandom3 randomNum(0);
-  double randomnumber = randomNum.Uniform(0,1); //(between 0 and 1)
+  double randomnumber = randomNum_->Uniform(0,1); //(between 0 and 1)
   double leftfraction = (1.0/(1.0+sigmaR/sigmaL));
+  double meancor = (sigmaR*sigmaR - sigmaL*sigmaL)/(pow(2.0*3.141596,0.5)*(sigmaL + sigmaR));
+  //std::cout << " Mean is " << meancor << std::endl;
   double frac = -1001.;
   if (randomnumber < leftfraction)
     {
-      double myfrac = randomNum.Gaus(1.01,sigmaL);
+      double myfrac = randomNum_->Gaus(1.0-meancor,sigmaL);
       frac = (1.0-fabs(1.0-myfrac));
       //std::cout << " Went Left Myfac is " << myfrac << " and final Frac is " << frac << std::endl; 
     }
   else
     {
-      double myfrac = randomNum.Gaus(1.01,sigmaR);
+      double myfrac = randomNum_->Gaus(1.0-meancor,sigmaR);
       frac = (1.0+fabs(1.0-myfrac));
       //std::cout << " Went Right Myfac is " << myfrac << " and final Frac is " << frac << std::endl; 
     }

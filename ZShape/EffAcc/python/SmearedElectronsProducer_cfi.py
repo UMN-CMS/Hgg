@@ -7,5 +7,6 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
     zsrc = cms.untracked.InputTag("ZIntoElectronsEventProducer","ZEventParticles"),
     doSmearing = cms.untracked.bool(True),
     quiet = cms.untracked.bool(True),
-    zElectronsCone = cms.double(0.08)
+    zElectronsCone = cms.double(0.08),
+    randomSeed = cms.int32(134)
 )
