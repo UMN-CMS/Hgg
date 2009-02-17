@@ -252,12 +252,12 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::cout << "Returning " << numDataZ << " fellas " << std::endl;
   */
  
-  allCaseFirst_.Fill(evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
+  allCaseFirst_.Fill(evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
   if (evt_.n_elec!=2) return; // need 2 and only 2
   std::cout << " There was 1 good pair " << std::endl;
   //
   // fill histograms for before any selection
-  allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_);
+  allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_,evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
   if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
 
   // these stages merely _fill_ bits.  They do not apply cuts!
@@ -298,11 +298,11 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// acceptance is always the first cut
 	if (!q->second->pass(evt_,1,1,0,&pairing)) continue;
 	
-        if (pairing) {if (e1 < e2) {e1 = 1; e2 = 0;} else {e1 = 0; e2 = 1;} }
+        if (pairing) {std::swap(e1,e2); }
         int e1n = e1;
         int e2n = e2;
 	// fill standard histograms after acceptance
-	plots->acceptance_.Fill(evt_.elec(e1).p4_, evt_.elec(e2).p4_);
+	plots->acceptance_.Fill(evt_.elec(e1).p4_, evt_.elec(e2).p4_,evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_);
 	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1).p4_, evt_.elec(e2).p4_, evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_);
 	
 	// next n-cuts
@@ -311,10 +311,10 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  ok=q->second->pass(evt_,j+1,j+1,0,&pairing);
           e1n = e1;
           e2n = e2;
-          if (pairing) {if (e1 < e2) {e1n = 1; e2n = 0;} else {e1n = 0; e2n = 1;} }
+          if (pairing) {std::swap(e1n,e2n); }
 	  if (ok)
           {
-	    plots->postCut_[j-1].Fill(evt_.elec(e1n).p4_, evt_.elec(e2n).p4_);
+	    plots->postCut_[j-1].Fill(evt_.elec(e1n).p4_, evt_.elec(e2n).p4_,evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
             if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n).p4_, evt_.elec(e2n).p4_, evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
 	  }
       }

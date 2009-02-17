@@ -336,15 +336,19 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
         const char *cuttype = (*zmcit).first.c_str();
         for(itvechists zmcvhit= (*zmcit).second.begin(), zfdvhit= (*zfdit).second.begin(); zmcvhit != (*zmcit).second.end() || zfdvhit != (*zfdit).second.end(); ++zmcvhit,++zfdvhit)
         {
-           std::cout << " woohoo " << (*zmcvhit)->GetName() << std::endl; 
-	   (*zfdvhit)->Draw("P");
+           std::cout << " woohoo " << (*zmcvhit)->GetName() << std::endl;
+	   (*zmcvhit)->Sumw2();
+	   (*zmcvhit)->Scale(scale_); 
+           if (strstr((*zmcvhit)->GetName(),"P_t"))(*zmcvhit)->Rebin();
+	   if ((*zfdvhit)->GetMaximum() > (*zmcvhit)->GetMaximum())(*zfdvhit)->Draw("P");
+           else (*zmcvhit)->Draw("hist");
            (*zmcvhit)->Draw("histsame");
            (*zmcvhit)->SetLineColor(kRed);
            (*zmcvhit)->SetLineWidth(2);
            (*zmcvhit)->SetFillColor(kWhite);
-           (*zmcvhit)->Sumw2();
-           if (strstr((*zmcvhit)->GetName(),"P_t"))(*zfdvhit)->GetXaxis()->SetRangeUser(0.,200.);
-           (*zmcvhit)->Scale(scale_);
+           //(*zmcvhit)->Sumw2();
+           if (strstr((*zmcvhit)->GetName(),"P_t")){(*zfdvhit)->GetXaxis()->SetRangeUser(0.,100.);(*zmcvhit)->GetXaxis()->SetRangeUser(0.,100.);}
+           //(*zmcvhit)->Scale(scale_);
            (*zfdvhit)->Draw("sameeP");
            (*zfdvhit)->SetMarkerStyle(kOpenCircle);
            (*zfdvhit)->SetMarkerSize(0.9);

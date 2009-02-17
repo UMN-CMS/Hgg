@@ -85,7 +85,7 @@ allSuperClusters = cms.EDFilter("CandViewMerger",
 # My final selection of superCluster candidates 
 theSuperClusters = cms.EDFilter("CandViewSelector",
     src = cms.InputTag("allSuperClusters"),
-    cut = cms.string('et  > 10.0 | ((abs( eta ) < 1.4442) | (abs( eta ) > 1.560 & abs( eta ) < 3.0) | (abs( eta ) > 3 & abs( eta ) < 5))')
+    cut = cms.string('et  > 10.0 & ((abs( eta ) < 1.4442) | (abs( eta ) > 1.560 & abs( eta ) < 3.0) | (abs( eta ) > 3 & abs( eta ) < 5))')
 )
 
 theEEHFGapSuperClusters =  cms.EDFilter("CandViewSelector",
@@ -114,7 +114,7 @@ electrons = cms.EDFilter("ElectronDuplicateRemover",
 
 theGsfElectrons = cms.EDFilter("GsfElectronSelector",
     src = cms.InputTag("electrons"),
-    cut = cms.string('et > 20.0 | ((abs( eta ) < 1.4442) | (abs( eta ) > 1.560 & abs( eta ) < 3.0))')
+    cut = cms.string('et > 20.0 & ((abs( eta ) < 1.4442) | (abs( eta ) > 1.560 & abs( eta ) < 3.0)) & (( caloEnergy * sin( caloPosition.theta ) )  > 20.0)')
 )
 
 
@@ -154,7 +154,8 @@ theId = cms.EDProducer("eidCandProducer",
 # Trigger  ##################
 theHLT = cms.EDProducer("eTriggerCandProducer",
     InputProducer = cms.InputTag('theId'),              
-    hltTag = cms.untracked.InputTag("hltL1NonIsoHLTNonIsoSingleElectronEt10TrackIsolFilter","","HLT")
+    #hltTag = cms.untracked.InputTag("hltL1NonIsoHLTNonIsoSingleElectronEt10TrackIsolFilter","","HLT")
+    hltTag = cms.untracked.InputTag("hltL1NonIsoHLTLooseIsoSingleElectronLWEt15TrackIsolFilter","","HLT") 
 )
 
 electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * theIsolation * eidRobust * theId * theHLT * HFElectronID )
