@@ -149,7 +149,8 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
     // apply all cuts and store results into ZEle objects
     for (std::map<std::string,EfficiencyCut*>::iterator cut=theCuts_.begin(); cut!=theCuts_.end(); cut++) {
       for (int ne=0; ne<2; ne++) {
-	evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne)));
+        //std::cout << " Looking at Cut " << cut->first << " Electron " << ne << std::endl;
+	evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne),efficiencies_[cut->first]->getEfftable()));
       }
     }
 
@@ -418,7 +419,7 @@ void ZEfficiencyCalculator::loadEfficiency(const std::string& name, const std::s
     TFile effFile(fname.c_str(),"READ");
     
     edm::LogInfo("ZShape") << "Reading ROOT " << fname << " for efficiency " << name;
-    EfficiencyStore* effs       = new EfficiencyStore(&effFile, name);
+    EfficiencyStore* effs       = new EfficiencyStore(&effFile, name); //Will need to put in a third parameter for the effbin format here
     TH1F* histo = effs->getValuesHisto1D();
     EfficiencyCut* theCut  = new   EfficiencyCut(histo);
     efficiencies_[name]=effs;

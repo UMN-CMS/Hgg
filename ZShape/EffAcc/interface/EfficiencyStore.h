@@ -1,7 +1,8 @@
-#ifndef EFFSTORE_INC
-#define EFFSTORE_INC
+#ifndef EFFSTORENEW_INC
+#define EFFSTORENEW_INC
 
 #include <string.h>
+#include "PhysicsTools/TagAndProbe/interface/EffTableLoader.h"
 
 #include <TH1.h>
 #include <TH2.h>
@@ -15,7 +16,7 @@ class EfficiencyStore {
 
   EfficiencyStore();
   //EfficiencyStore(TFile * file);
-  EfficiencyStore(TFile *file, std::string EffName ="" , std::string PhysVar ="" );
+  EfficiencyStore(TFile *file, std::string EffName ="", std::string EffBinsFile ="" );
   EfficiencyStore(const std::string & textFileName);
   
 
@@ -49,6 +50,9 @@ class EfficiencyStore {
 
   int   getDimension(){return dimension_;};
 
+  EffTableLoader* getEfftable(){return efftable_;};
+
+
  private:
   TFile * theFile_;
   std::string textFileName_;
@@ -61,13 +65,17 @@ class EfficiencyStore {
 
   int dimension_;
   std::string efficiencyName_;
+  std::string efficiencyBinsFileName_;
 
   std::string effName_;
-  std::string physVar_;
   void produceTxtFile1D();
   void produce1DHistograms(TFile * rootFile);
   //  void produce2DHistograms(TFile * rootFile);
   void produceTxtFile2D();
+
+  EffTableLoader* efftable_;
+ 
+  void doInit(void);
     
 
 };

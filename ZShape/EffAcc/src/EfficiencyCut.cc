@@ -5,6 +5,7 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 
+
 EfficiencyCut::EfficiencyCut ( void ) {
   std::cerr << "in EfficiencyCut void constructor" << std::endl ;
 }
@@ -38,6 +39,7 @@ EfficiencyCut::EfficiencyCut ( TH1F * histo ) {
   else {
     edm::LogWarning("ZShape") << "Unknown variable in efficiency cut: '" << variable << "'";
   }
+  if ( (theCutVariable_== cv_DetEta) && (strstr(variable.c_str(),"Pt"))) theCutVariable_=cv_DetEta_Pt;
   std::cout << "For CutVariable " <<  variable << " the type is " << theCutVariable_ << std::endl;
 }
 
@@ -105,14 +107,65 @@ bool EfficiencyCut::passesCut(float variable) const
 
 } 
  
+bool EfficiencyCut::passesCut(int index) const
+{
+   
+  int theBin =  index + 1;
+  if (theBin <= 0 ) 
+    {
+      return false; // underflow
+    }
+  if (theBin ==  ( theClonedEffHisto_->GetNbinsX()  +1)  ) 
+    {
+
+      return false; // underflow
+    }
+
+
+  float theEfficiency = theClonedEffHisto_->GetBinContent(theBin);
+
+  TRandom3 randomNum(0); // put this back
+  float randNum = randomNum.Uniform(0., 1.); // put this back
+
+    if ( randNum < theEfficiency ) 
+       {
+	   //std::cout << "EfficiencyCut passescut in cut: " <<  theClonedEffHisto_->GetTitle() <<  " which falls in bin: " << theBin << " and the cut was passed" 
+	  //            " (randNum: " << randNum << " eff: " << theEfficiency << ")" <<std::endl;
+	 // std::cout << " Returning TRUE " << std::endl;
+	 return true;
+       }
+   else{
+           //  std::cout << "iEfficiencyCut passescut n cut: " <<  theClonedEffHisto_->GetTitle() << " which falls in bin: " << theBin << " and the cut was not passed" 
+         //	" (randNum: " << randNum << " eff: " << theEfficiency << ")" << std::endl;
+           //   std::cout << " Returning FALSE " << std::endl;
+         return false;
+    }
+
+  std::cout << " Returning FALSE " << std::endl;
+  return false;
+
+} 
+
 
 bool EfficiencyCut::passesCut( const ZShapeElectron& elec) const {
   switch (theCutVariable_) {
-  case (cv_DetEta) : return passesCut(elec.detEta_);
-  case (cv_Eta) : return passesCut(elec.p4_.eta());
-  case (cv_Phi) : return passesCut(elec.p4_.phi());
-  case (cv_Pt) : return passesCut(elec.p4_.Pt());
-  case (cv_Energy) : return passesCut(elec.p4_.E());
+  case (cv_DetEta) : return passesCut(float(elec.detEta_));
+  case (cv_Eta) : return passesCut(float(elec.p4_.eta()));
+  case (cv_Phi) : return passesCut(float(elec.p4_.phi()));
+  case (cv_Pt) : return passesCut(float(elec.p4_.Pt()));
+  case (cv_Energy) : return passesCut(float(elec.p4_.E()));
   default: return false;
   }
 }
+
+
+bool EfficiencyCut::passesCut( const ZShapeElectron& elec, EffTableLoader* effTable) const {
+  switch (theCutVariable_) {
+  case (cv_DetEta_Pt) : {
+       int index = effTable->GetBandIndex(elec.p4_.Pt(),elec.detEta_);
+       //std::cout << " Index " << index << " Pt " << elec.p4_.Pt() << " DetEta " << elec.detEta_ << std::endl;
+       return passesCut(index);}
+  default: return passesCut(elec);
+  }
+}
+

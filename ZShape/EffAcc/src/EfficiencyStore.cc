@@ -11,27 +11,24 @@
 #include <TKey.h>
 
 #include "ZShape/EffAcc/interface/EfficiencyStore.h"
+#include "PhysicsTools/TagAndProbe/interface/EffTableLoader.h"
 
 EfficiencyStore::EfficiencyStore()
 {
   theFile_ =0;
-  values1DHisto_=0;   systPlus1DHisto_=0;
-  systMinus1DHisto_=0;  denominator1DHisto_=0;
-  values2DHisto_=0;  systPlus2DHisto_=0;
-  systMinus2DHisto_=0; denominator2DHisto_=0;
+  efftable_ =0;
+  doInit();
 
   textFileName_="";
   
 }
 
-EfficiencyStore::EfficiencyStore(TFile * file, std::string EffName, std::string PhysVar)
+EfficiencyStore::EfficiencyStore(TFile * file, std::string EffName, std::string EffBinsFile)
 { 
-  values1DHisto_=0;   systPlus1DHisto_=0;
-  systMinus1DHisto_=0;  denominator1DHisto_=0;
-  values2DHisto_=0;  systPlus2DHisto_=0;
-  systMinus2DHisto_=0; denominator2DHisto_=0;
+  doInit();
   effName_ = EffName;
-  physVar_ = PhysVar;
+  efficiencyBinsFileName_ = EffBinsFile;
+  efftable_ = new EffTableLoader(EffBinsFile);
   std::cout << "class EfficiencyStore created with root file: " << file->GetName() << std::endl;
   setRootFile(file);
   textFileName_="";
@@ -41,15 +38,22 @@ EfficiencyStore::EfficiencyStore(TFile * file, std::string EffName, std::string 
 EfficiencyStore::EfficiencyStore(const std::string & textFileName)
 { 
   theFile_ =0;
+  doInit();
+  textFileName_ = textFileName;
+  efftable_ = new EffTableLoader(textFileName_);
+  std::cout << "class EfficiencyStore created with text file: " << textFileName_ << std::endl;
+  produceHistograms(0);
+}
+
+
+void EfficiencyStore::doInit(void)
+{
   values1DHisto_=0;   systPlus1DHisto_=0;
   systMinus1DHisto_=0;  denominator1DHisto_=0;
   values2DHisto_=0;  systPlus2DHisto_=0;
   systMinus2DHisto_=0; denominator2DHisto_=0;
-  textFileName_ = textFileName;
-  std::cout << "class EfficiencyStore created with text file: " << textFileName_ << std::endl;
-  produceHistograms(0);
+
 }
-  
   
 
 //-----------------------------------------------------------------------------------//
@@ -85,9 +89,7 @@ void EfficiencyStore::setRootFile(TFile * file){
       
     //    std::cout << "object in file has name: " << key->GetName() << std::endl;
     TH1F * tmp1;    TH2F * tmp2;
-    if (strstr(key->GetName(),physVar_.c_str()))
-     {
-       if(  strstr(key->GetName(),"eff") &&   strcmp(key->GetClassName(),"TH1F")==0 )
+    if(  strstr(key->GetName(),"eff") &&   strcmp(key->GetClassName(),"TH1F")==0 )
          { 
    	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
 	   values1DHisto_ = (TH1F *) tmp1->Clone();
@@ -141,7 +143,6 @@ void EfficiencyStore::setRootFile(TFile * file){
 	   denominator2DHisto_ =  (TH2F *) tmp2->Clone();
 	   denominator2DHisto_->SetDirectory(0);
 	 }
-     }
   }
   std::cout << "leaving setRootFile  values1DHisto_ :" << values1DHisto_ << std::endl;
   
@@ -201,8 +202,8 @@ void EfficiencyStore::produceHistograms(TFile * rootFile){
 
   while ( 	is.getline(str,1000)){
     // std::cout << str <<"\n";
-    if ( strstr(str,"dimension:") )           sscanf(str, "dimension:%d",  &dimension_);
-    if ( strstr(str,"efficiency name:") )  sscanf(str, "efficiency name: %s",  effName);
+    if ( strstr(str,"#dimension:") )           sscanf(str, "#dimension:%d",  &dimension_);
+    if ( strstr(str,"#efficiency name:") )  sscanf(str, "#efficiency name: %s",  effName);
   }
   is.close();
   efficiencyName_ = std::string(effName);
@@ -252,14 +253,14 @@ void EfficiencyStore::produceTxtFile1D(){
   std::vector<float> systMinus1D;
   std::vector<float> denominator1D;
 
-  for (int u =1; u<(1+numBinvalues1D); u++)
+  for (int u =1; u<(1+numBinvalues1D); u++) 
     {
       binMin.push_back( values1DHisto_->GetBinLowEdge(u) );
       binMax.push_back( values1DHisto_->GetBinLowEdge(u) + values1DHisto_->GetBinWidth(u) );
       values1D.push_back( values1DHisto_->GetBinContent(u) );
       //systPlus1D.push_back( systPlus1DHisto_->GetBinContent(u) );
       //systMinus1D.push_back( systMinus1DHisto_->GetBinContent(u) );
-	  systPlus1D.push_back( 1.0 ); //To allow for no systematic histos
+      systPlus1D.push_back( 1.0 ); //To allow for no systematic histos
       systMinus1D.push_back( -1.0 ); //To allow for no systematic histos
       denominator1D.push_back( denominator1DHisto_->GetBinContent(u) );
     }
@@ -275,29 +276,34 @@ void EfficiencyStore::produceTxtFile1D(){
   the1DEffFile.open (textFileName_.c_str(),std::ios::out);
 
   the1DEffFile << "#put your comments after a '#'.\n";
-  the1DEffFile << "\nefficiency name: " << effName_ << "-" << physVar_  <<"\n";
-  the1DEffFile << "dimension: 1 \n\n\n";
-  the1DEffFile << "Nbin"
-	       << "\t" << "binMin"
-	       << "\t"  << "binMax"
-	       << "\t"  <<  "value"
-	       << "\t"  << "systP"
-	       << "\t"  << "systM"
-	       << "\t" << "denom"
+  the1DEffFile << "#efficiency name: " << effName_  <<"\n";
+  the1DEffFile << "#dimension: 1 \n\n\n";
+  the1DEffFile << " " << std::setw(10) << "#PtMin"
+	       << " " << std::setw(10) << "PtMax"
+	       << " " << std::setw(10)  << "EtaMin"
+	       << " " << std::setw(10)  <<  "EtaMax"
+	       << " " << std::setw(10)  << "NumParms"
+	       << " " << std::setw(10)  << "eff"
+	       << " " << std::setw(10) << "statp"
+	       << " " << std::setw(10) << "statm"
+	       << " " << std::setw(10) << "den"
 	       << "\n";
      
   if (the1DEffFile.is_open())
     {
 	
-      for (int r=0; r<numBinvalues1D; r++)
+      for (int r=0; r<numBinvalues1D; r++) 
 	{
-	  the1DEffFile << (r+1)
-		       << "\t" << std::setprecision(4) << binMin[r]
-		       << "\t" << std::setprecision(4) << binMax[r]
-		       << "\t" << std::setprecision(4) <<  values1D[r]
-		       << "\t" << std::setprecision(4) << systPlus1D[r]
-		       << "\t" << std::setprecision(4) << systMinus1D[r]
-		       << "\t" << std::setprecision(5) << denominator1D[r]
+          std::vector<std::pair<float, float> > EffInfo = efftable_->GetCellInfo(r);
+	  the1DEffFile << " " << std::setw(10) << std::setprecision(4) <<  EffInfo[0].first 
+		       << " " << std::setw(10) << std::setprecision(4) <<  EffInfo[0].second
+ 		       << " " << std::setw(10) << std::setprecision(4) <<  EffInfo[1].first 
+		       << " " << std::setw(10) << std::setprecision(4) <<  EffInfo[1].second
+		       << " " << std::setw(10) << std::setprecision(4) <<  4
+		       << " " << std::setw(10) << std::setprecision(4) <<  values1D[r]
+		       << " " << std::setw(10) << std::setprecision(4) << systPlus1D[r]
+		       << " " << std::setw(10) << std::setprecision(4) << systMinus1D[r]
+		       << " " << std::setw(10) << std::setprecision(5) << denominator1D[r]
 		       << "\n";
 	}
     }
@@ -310,59 +316,18 @@ void EfficiencyStore::produceTxtFile1D(){
   
 
 void EfficiencyStore::produce1DHistograms(TFile * rootFile){
-    
-  char str [1000];
-  int binNumber[1000];
-  float binMin[1000];     float binMax[1000];  float bins[1000];
-  float values[1000];     float systErrP[1000];     float systErrM[1000];
-  int   denominator[1000];
 
-  ifstream is(textFileName_.c_str());
-  // aiming at the table with numbers, inside the text file 
-  while ( !(strstr(str,"Nbin") &&	    strstr(str,"binMin") &&
-	    strstr(str,"binMax") &&	    strstr(str,"value") &&
-	    strstr(str,"systP") &&	    strstr(str,"systM") &&
-	    strstr(str,"denom"))
-	  )
-    {is.getline(str,1000);}
-    
-    
-  int binCounter=0;
-  while ( 	is.getline(str,1000)){
-    if ( strstr(str,"#") ) continue;
-    //std::cout << str << std::endl; // just for debug
-    sscanf (str,"%d %f %f %f %f %f %d", &binNumber[binCounter], &binMin[binCounter], &binMax[binCounter],
-	    &values[binCounter], &systErrP[binCounter], &systErrM[binCounter], &denominator[binCounter]);
-    binCounter++;
-  }
-  is.close();
-    
-  bins[0] = binMin[0];
-  for (int r=0; r<binCounter; r++)
-    {
-      std::cout << "bin: " << binNumber[r] << " index: " << r 
-		<< "  " << binMin[r] << " " <<  binMax[r] << " " <<  values[r] 
-		<< " " <<  systErrP[r] << " " <<  systErrM[r] << " " <<  denominator[r] << std::endl;
-
-      if(binMax[r] == binMin[r+1] || r==(binCounter-1) )
-	{bins[r+1]=binMax[r];}
-      else
-	{
-	  std::cout << "min and max do not match at bin " << r << " returning." << std::endl;
-	  return;
-	}
-    }
-    
+  int binCounter = efftable_->size();
 
   if (rootFile!=0) rootFile->cd();
-  std::string title = std::string("values_")+efficiencyName_;
-  TH1F * valuesHisto = new TH1F(title.c_str(),title.c_str(), binCounter, bins);
+  std::string title = std::string("values_")+efficiencyName_ + "EtaDet_Pt"; /// JUST A HACK for the MOMENT 
+  TH1F * valuesHisto = new TH1F(title.c_str(),title.c_str(), binCounter, 0, binCounter);
   title = std::string("systematicMinus_")+efficiencyName_;
-  TH1F * systematicMHisto = new TH1F(title.c_str(),title.c_str(), binCounter, bins);
+  TH1F * systematicMHisto = new TH1F(title.c_str(),title.c_str(), binCounter, 0, binCounter);
   title = std::string("systematicPlus_")+efficiencyName_;
-  TH1F * systematicPHisto = new TH1F(title.c_str(),title.c_str(), binCounter, bins);
+  TH1F * systematicPHisto = new TH1F(title.c_str(),title.c_str(), binCounter, 0, binCounter);
   title = std::string("denominator_")+efficiencyName_;
-  TH1F * denominatorHisto = new TH1F(title.c_str(),title.c_str(), binCounter, bins);
+  TH1F * denominatorHisto = new TH1F(title.c_str(),title.c_str(), binCounter, 0, binCounter);
 
   if (rootFile==0) {
     valuesHisto->SetDirectory(0);
@@ -375,12 +340,14 @@ void EfficiencyStore::produce1DHistograms(TFile * rootFile){
     denominator1DHisto_=denominatorHisto;
   }
 
+
   for (int u=1; u<=binCounter; u++)
     {
-      valuesHisto->SetBinContent(u,values[u-1]);
-      systematicPHisto->SetBinContent(u,systErrP[u-1]);
-      systematicMHisto->SetBinContent(u,systErrM[u-1]);
-      denominatorHisto->SetBinContent(u,denominator[u-1]);
+      std::vector<float> EffBinParms = efftable_->correctionEff(u-1);
+      valuesHisto->SetBinContent(u, EffBinParms[1]);
+      systematicPHisto->SetBinContent(u, EffBinParms[2]);
+      systematicMHisto->SetBinContent(u, EffBinParms[3]);
+      denominatorHisto->SetBinContent(u, EffBinParms[4]);
     }
 
   if (rootFile!=0) {
