@@ -339,7 +339,7 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
            std::cout << " woohoo " << (*zmcvhit)->GetName() << std::endl;
 	   (*zmcvhit)->Sumw2();
 	   (*zmcvhit)->Scale(scale_); 
-           if (strstr((*zmcvhit)->GetName(),"P_t"))(*zmcvhit)->Rebin();
+           //if (strstr((*zmcvhit)->GetName(),"P_t"))(*zmcvhit)->Rebin();
 	   if ((*zfdvhit)->GetMaximum() > (*zmcvhit)->GetMaximum())(*zfdvhit)->Draw("P");
            else (*zmcvhit)->Draw("hist");
            (*zmcvhit)->Draw("histsame");
