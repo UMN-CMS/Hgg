@@ -52,7 +52,7 @@ ZFromData::ZFromData(const edm::ParameterSet& iConfig) :
     for (std::vector<std::string>::iterator k=req2.begin(); k!=req2.end(); k++) 
       zdef->addCriterion(ZShapeZDef::crit_E2,*k);
     zdefs_[name]=zdef;
-    zptorder_[name] = i->getUntrackedParameter<bool>("ptorder");
+    zptorder_[name] = i->getUntrackedParameter<bool>("ptorder", false);
   }
 
   //
