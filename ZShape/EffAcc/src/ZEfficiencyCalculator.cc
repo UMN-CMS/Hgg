@@ -103,7 +103,6 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   using namespace std;
   using namespace cms;
   using namespace reco;
-  int pass=0;
 
   Handle< HepMCProduct > EvtHandle ;
    
@@ -138,19 +137,20 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   
   EfficiencyCut* keep=0;
 
+  int pass=0;
   do {
     if (statsBox_.trials>=1) {
       // swap to alternate universe
       if (pass==0) keep=theCuts_[statsBox_.targetEffStat];
       // after first iteration, override standard cut with alternate cut
-      theCuts_[statsBox_.targetEffStat]=statsBox_.alternateCuts[pass];
+      else theCuts_[statsBox_.targetEffStat]=statsBox_.alternateCuts[pass-1];
     }
 
     // apply all cuts and store results into ZEle objects
     for (std::map<std::string,EfficiencyCut*>::iterator cut=theCuts_.begin(); cut!=theCuts_.end(); cut++) {
       for (int ne=0; ne<2; ne++) {
         //std::cout << " Looking at Cut " << cut->first << " Electron " << ne << std::endl;
-	evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne),efficiencies_[cut->first]->getEfftable()));
+	evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne)));
       }
     }
 
@@ -191,18 +191,18 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
     }// end if pass==0 
 
     // selections specific in case of trials
-    if (statsBox_.trials>0) { 
+    if (statsBox_.trials>0 && pass>0) { 
       ZShapeZDef* zdef=zdefs_[statsBox_.targetZDefStat]; 
       if (zdef->pass(evt_,zdef->criteriaCount(ZShapeZDef::crit_E1),zdef->criteriaCount(ZShapeZDef::crit_E2),0,&pairing)) { 
         if (!pairing)  
-          statsBox_.hists[pass].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+          statsBox_.hists[pass-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
         else 
-          statsBox_.hists[pass].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4()); 
+          statsBox_.hists[pass-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4()); 
       } 
     } 
     pass++;
 
-  } while (statsBox_.trials>0 && pass<statsBox_.trials);
+  } while (statsBox_.trials>0 && pass<=statsBox_.trials);
 
   if (keep!=0) theCuts_[statsBox_.targetEffStat]=keep;
 }
@@ -294,7 +294,7 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
   if (pt2 > pt1){
     std::swap( evt_.elec(0), evt_.elec(1));
   }
-  evt_.dump(std::cout);
+  //  evt_.dump(std::cout);
 
 
   // take care of tree-level electrons 
@@ -386,10 +386,6 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
     zplots_[q->first]=zplots;
   }
  
-  // smearing the target efficiency according to statistics 
-  if (statsBox_.trials>0) createAlternateEfficiencies();
-
-
   // book trials histograms
   if (statsBox_.trials>0) {
     char dirname[1024];
@@ -397,13 +393,19 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
     sprintf(dirname,"EffStats_%s_%s",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str());     
     TFileDirectory pd = fs->mkdir(dirname);
     statsBox_.hists=std::vector<EffHistos>(statsBox_.trials);
+
+
+    TH1* val=efficiencies_[statsBox_.targetEffStat]->getValuesHisto1D();
+    
+    snprintf(dirname,1024,"Variations_%s_%s",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str());
+    statsBox_.cutsProfile=pd.make<TProfile>(dirname,dirname,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
+
     for (int j=0; j<statsBox_.trials;j++) {
       sprintf(dirname,"Trial%d",j+1);
       TFileDirectory td = pd.mkdir(dirname);
+      createAlternateEfficiencies(j, td);
       statsBox_.hists[j].Book(td);
-      //      statsBox_.rawHists[j]->SetDirectory(td);
     }
-    //    statsBox_.cutsProfile->SetDirectory(pd);
   }
 
 
@@ -421,14 +423,14 @@ void ZEfficiencyCalculator::loadEfficiency(const std::string& name, const std::s
     edm::LogInfo("ZShape") << "Reading ROOT " << fname << " for efficiency " << name;
     EfficiencyStore* effs       = new EfficiencyStore(&effFile, name); //Will need to put in a third parameter for the effbin format here
     TH1F* histo = effs->getValuesHisto1D();
-    EfficiencyCut* theCut  = new   EfficiencyCut(histo);
+    EfficiencyCut* theCut  = new   EfficiencyCut(histo,effs->indexer());
     efficiencies_[name]=effs;
     theCuts_[name]=theCut;
   } else {
     edm::LogInfo("ZShape") << "Reading TEXT " << fname << " for efficiency " << name;
     EfficiencyStore* effs       = new EfficiencyStore(fname);
     TH1F* histo = effs->getValuesHisto1D();
-    EfficiencyCut* theCut  = new   EfficiencyCut(histo);
+    EfficiencyCut* theCut  = new   EfficiencyCut(histo,effs->indexer());
     efficiencies_[name]=effs;
     theCuts_[name]=theCut;
   }
@@ -458,37 +460,31 @@ ZEfficiencyCalculator::endJob() {
   
 }
 
-void ZEfficiencyCalculator::createAlternateEfficiencies() {
-  if (statsBox_.trials<1) return;
+void ZEfficiencyCalculator::createAlternateEfficiencies(int cycle,TFileDirectory& fd) {
   EfficiencyStore* es=efficiencies_[statsBox_.targetEffStat];
 
   // the target efficiency to be smeared 
   TH1* val=es->getValuesHisto1D();
   TH1* denom=es->getDenominatorHisto1D();
 
-  for (int i=0; i<statsBox_.trials; ++i) {
-    char name[1024];
-    snprintf(name,1024,"StatEff_%s_%s_%d",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str(),i+1);
-    TH1F* randy=new TH1F(name,name,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
-    if (i==0) {
-      snprintf(name,1024,"Variations_%s_%s",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str());
-      statsBox_.cutsProfile=new TProfile(name,name,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
+  char name[1024];
+  snprintf(name,1024,"StatEff_%s_%s_%d",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str(),cycle+1);
+  TH1F* randy=fd.make<TH1F>(name,name,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
+
+  for (int j=1; j<=val->GetXaxis()->GetNbins(); j++) {
+    double ave=val->GetBinContent(j);
+    int den=int(denom->GetBinContent(j));
+    double rv=0;
+    if (den>0 && ave>0) { // HACK! (ave should be able to be zero) 
+      EfficiencyStatistics esd(ave,den);
+      esd.setRandom(&randomNum);
+      rv=esd.rand();
     }
-    for (int j=1; j<=val->GetXaxis()->GetNbins(); j++) {
-      double ave=val->GetBinContent(j);
-      int den=int(denom->GetBinContent(j));
-      double rv=0;
-      if (den>0 && ave>0) { // HACK! (ave should be able to be zero) 
-	EfficiencyStatistics esd(ave,den);
-	esd.setRandom(&randomNum);
-	rv=esd.rand();
-      }
-      randy->Fill(val->GetBinCenter(j),rv);
-      statsBox_.cutsProfile->Fill(val->GetBinCenter(j),rv);
-    }
-    statsBox_.rawHists.push_back(randy);
-    statsBox_.alternateCuts.push_back(new EfficiencyCut(randy));
+    randy->Fill(val->GetBinCenter(j),rv);
+    statsBox_.cutsProfile->Fill(val->GetBinCenter(j),rv);
   }
+  statsBox_.rawHists.push_back(randy);
+  statsBox_.alternateCuts.push_back(new EfficiencyCut(randy,es->indexer()));
 }
 
 
@@ -533,8 +529,8 @@ void ZEfficiencyCalculator::createAlternateZDefs(const std::string& targetZDefSy
     dMinusH->Fill(val->GetBinCenter(j), ave+dMinus);
   }
 
-  EfficiencyCut* thePlusCut  = new   EfficiencyCut(dPlusH);
-  EfficiencyCut* theMinusCut  = new   EfficiencyCut(dMinusH);
+  EfficiencyCut* thePlusCut  = new   EfficiencyCut(dPlusH, targetEff->indexer());
+  EfficiencyCut* theMinusCut  = new   EfficiencyCut(dMinusH, targetEff->indexer());
   theCuts_[dPlusName]=thePlusCut;
   theCuts_[dMinusName]=theMinusCut;
 

@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.10 2008/07/21 11:34:56 mansj Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.11 2009/02/08 22:12:13 franzoni Exp $
 //
 //
 
@@ -66,7 +66,7 @@ private:
   void fillEvent(const reco::GenParticleCollection* ZeeParticles, const reco::GenParticleCollection* ZeeTreeLevelParticles); 
   void loadEfficiency(const std::string& name, const std::string& fname);
   void applyEfficiencies();
-  void createAlternateEfficiencies();
+  void createAlternateEfficiencies(int cycle, TFileDirectory& fd);
   void createAlternateZDefs(const std::string& targetZDefSys, const std::string& targetEffSys);
 
   // ----------member data ---------------------------

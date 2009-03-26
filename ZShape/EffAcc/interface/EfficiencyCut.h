@@ -14,18 +14,15 @@ class EfficiencyCut
 {
   public :
 
-  EfficiencyCut( void );
-  EfficiencyCut( TH1F * histo);
+  EfficiencyCut( TH1F * histo, EffTableLoader* indexer);
 
-  bool passesCut( float variable ) const;
-  bool passesCut( int index ) const;
-  //  bool passesCut( const ::math::PtEtaPhiMLorentzVector& elec) const;
   bool passesCut( const ZShapeElectron& elec) const;
-  bool passesCut( const ZShapeElectron& elec, EffTableLoader* effTable) const;
+  EffTableLoader* indexer() const { return theIndexer; }
  private:
+  bool passesCut( int index ) const;
+  int indexOf( const ZShapeElectron& elec) const;
+  EffTableLoader* theIndexer;
   TH1F * theClonedEffHisto_;
-  //  TH1F * theTmpHisto_;
-  enum CutVariable { cv_DetEta, cv_Eta, cv_Phi, cv_Pt, cv_Energy, cv_DetEta_Pt, cv_Eta_Pt };
-  CutVariable theCutVariable_;
+  
 };
 #endif

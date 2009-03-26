@@ -18,7 +18,8 @@ class EfficiencyStore {
   //EfficiencyStore(TFile * file);
   EfficiencyStore(TFile *file, std::string EffName ="", std::string EffBinsFile ="" );
   EfficiencyStore(const std::string & textFileName);
-  
+
+  EffTableLoader* indexer() const { return efftable_; }
 
   //-----------------------------------------------------------------------------------//
   void setRootFile(TFile * file);  
