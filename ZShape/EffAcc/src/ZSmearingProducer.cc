@@ -246,7 +246,7 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
     else if (e < 840. ) mysig = 0.16;
     else if (e < 1120. ) mysig = 0.14;
     else if (e < 1400. ) mysig = 0.15;
-    Efrac = randomNum_->Gaus(1.02,mysig);
+    Efrac = randomNum_->Gaus(1.0,mysig);
   }
   
   //std::cout << " OLD E " << electron.E() << " new eta " << electron.eta() << " new et " << electron.Et() << " new pt " << electron.pt() <<  " mass : " << electron.M() << std::endl;
@@ -307,13 +307,13 @@ double ZSmearingProducer::smearECAL(double eta, double et, char *det)
   if (randomnumber < leftfraction)
     {
       double myfrac = randomNum_->Gaus(1.0-meancor,sigmaL);
-      frac = (1.0-fabs(1.0-myfrac));
+      frac = (1.0-meancor-fabs(1.0-meancor-myfrac));
       //std::cout << " Went Left Myfac is " << myfrac << " and final Frac is " << frac << std::endl; 
     }
   else
     {
       double myfrac = randomNum_->Gaus(1.0-meancor,sigmaR);
-      frac = (1.0+fabs(1.0-myfrac));
+      frac = (1.0-meancor+fabs(1.0-meancor-myfrac));
       //std::cout << " Went Right Myfac is " << myfrac << " and final Frac is " << frac << std::endl; 
     }
 
