@@ -7,6 +7,8 @@ typedef math::XYZTLorentzVector XYZTLorentzVector;
 
 void EffHistos::Book(TFileDirectory& tdf) {
 
+  booked_=true;
+
   // add here all extremes, tidily
   float pi       = 3.141593;
   float maxPt    = 400;
@@ -46,6 +48,11 @@ void EffHistos::Book(TFileDirectory& tdf) {
 
 void EffHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtEtaPhiMLorentzVector& e2, 
 		     const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2) { 
+
+  if (!booked_) {
+    std::cerr << "Attempt to fill without booking!\n";
+    return;
+  }
 
   XYZTLorentzVector p1(e1);
   XYZTLorentzVector p2(e2);
@@ -112,8 +119,13 @@ void EffHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtE
 
 
 void EffHistos::WrapUp(){ 
- 
+
   if( YZTL_YZ_==0 &&  YZTL_YZ_matrix_==0) return; 
+
+  if (!booked_) {
+    std::cerr << "Attempt to finish without booking!\n";
+    return;
+  }
  
   int numBinX =  YZTL_YZ_ ->GetNbinsX(); 
   int numBinY =  YZTL_YZ_ ->GetNbinsY(); 

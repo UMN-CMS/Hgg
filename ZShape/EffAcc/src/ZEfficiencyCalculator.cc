@@ -398,18 +398,17 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
     snprintf(dirname,1024,"Variations_%s",statsBox_.targetEffStat.c_str());
     statsBox_.cutsProfile=pd.make<TProfile>(dirname,dirname,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
 
-
     for (int j=0; j<statsBox_.trials;j++) {
       createAlternateEfficiencies(j, pd);
     }
 
     for (defs=zdefs_.begin(); defs!=zdefs_.end(); defs++) {
       TFileDirectory dd = pd.mkdir(defs->first);
+      statsBox_.hists[defs->first]=std::vector<EffHistos>(statsBox_.trials);
 
       for (int j=0; j<statsBox_.trials;j++) {
 	sprintf(dirname,"Trial%d",j+1);      
 	TFileDirectory td = dd.mkdir(dirname);      
-	statsBox_.hists[defs->first]=std::vector<EffHistos>(statsBox_.trials);
 	statsBox_.hists[defs->first][j].Book(td);
       }
     }
