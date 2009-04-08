@@ -58,14 +58,9 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   edm::LogInfo("ZShape") << "Number of trials requested: " << statsBox_.trials;
   if (statsBox_.trials>0) {
     statsBox_.targetEffStat=iConfig.getUntrackedParameter<std::string>("estat_eff");
-    statsBox_.targetZDefStat=iConfig.getUntrackedParameter<std::string>("estat_zdef");
 
     if (efficiencies_.find(statsBox_.targetEffStat)==efficiencies_.end()) {
       edm::LogError("ZShape") << "Unable to find efficiency '" <<statsBox_.targetEffStat << "' for statistical variations!";
-      statsBox_.trials=0;
-    }
-    if (zdefs_.find(statsBox_.targetZDefStat)==zdefs_.end()) {
-      edm::LogError("ZShape") << "Unable to find Z-definition '" <<statsBox_.targetZDefStat << "' for statistical variations!";
       statsBox_.trials=0;
     }
 
@@ -192,18 +187,21 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 
     // selections specific in case of trials
     if (statsBox_.trials>0 && pass>0) { 
-      ZShapeZDef* zdef=zdefs_[statsBox_.targetZDefStat]; 
-      if (zdef->pass(evt_,zdef->criteriaCount(ZShapeZDef::crit_E1),zdef->criteriaCount(ZShapeZDef::crit_E2),0,&pairing)) { 
-        if (!pairing)  
-          statsBox_.hists[pass-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
-        else 
-          statsBox_.hists[pass-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4()); 
-      } 
-    } 
+      for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
+     
+	ZShapeZDef* zdef=q->second; 
+	if (zdef->pass(evt_,zdef->criteriaCount(ZShapeZDef::crit_E1),zdef->criteriaCount(ZShapeZDef::crit_E2),0,&pairing)) { 
+	  if (!pairing)  
+	    statsBox_.hists[q->first][pass-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+	  else 
+	    statsBox_.hists[q->first][pass-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4()); 
+	}
+      }
+    }
     pass++;
 
   } while (statsBox_.trials>0 && pass<=statsBox_.trials);
-
+  
   if (keep!=0) theCuts_[statsBox_.targetEffStat]=keep;
 }
 
@@ -390,21 +388,30 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
   if (statsBox_.trials>0) {
     char dirname[1024];
     edm::LogInfo("ZShape") << "Making histograms for " << statsBox_.trials << " trials";
-    sprintf(dirname,"EffStats_%s_%s",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str());     
-    TFileDirectory pd = fs->mkdir(dirname);
-    statsBox_.hists=std::vector<EffHistos>(statsBox_.trials);
+    std::map<std::string, ZShapeZDef*>::const_iterator defs;
 
+    sprintf(dirname,"EffStats_%s",statsBox_.targetEffStat.c_str());     
+    TFileDirectory pd = fs->mkdir(dirname);
 
     TH1* val=efficiencies_[statsBox_.targetEffStat]->getValuesHisto1D();
-    
-    snprintf(dirname,1024,"Variations_%s_%s",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str());
+
+    snprintf(dirname,1024,"Variations_%s",statsBox_.targetEffStat.c_str());
     statsBox_.cutsProfile=pd.make<TProfile>(dirname,dirname,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
 
+
     for (int j=0; j<statsBox_.trials;j++) {
-      sprintf(dirname,"Trial%d",j+1);
-      TFileDirectory td = pd.mkdir(dirname);
-      createAlternateEfficiencies(j, td);
-      statsBox_.hists[j].Book(td);
+      createAlternateEfficiencies(j, pd);
+    }
+
+    for (defs=zdefs_.begin(); defs!=zdefs_.end(); defs++) {
+      TFileDirectory dd = pd.mkdir(defs->first);
+
+      for (int j=0; j<statsBox_.trials;j++) {
+	sprintf(dirname,"Trial%d",j+1);      
+	TFileDirectory td = dd.mkdir(dirname);      
+	statsBox_.hists[defs->first]=std::vector<EffHistos>(statsBox_.trials);
+	statsBox_.hists[defs->first][j].Book(td);
+      }
     }
   }
 
@@ -468,7 +475,7 @@ void ZEfficiencyCalculator::createAlternateEfficiencies(int cycle,TFileDirectory
   TH1* denom=es->getDenominatorHisto1D();
 
   char name[1024];
-  snprintf(name,1024,"StatEff_%s_%s_%d",statsBox_.targetEffStat.c_str(),statsBox_.targetZDefStat.c_str(),cycle+1);
+  snprintf(name,1024,"StatEff_%s_%d",statsBox_.targetEffStat.c_str(),cycle+1);
   TH1F* randy=fd.make<TH1F>(name,name,val->GetXaxis()->GetNbins(),val->GetXaxis()->GetXmin(),val->GetXaxis()->GetXmax());
 
   for (int j=1; j<=val->GetXaxis()->GetNbins(); j++) {
