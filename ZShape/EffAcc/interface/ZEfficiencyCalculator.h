@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.11 2009/02/08 22:12:13 franzoni Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.12 2009/03/26 16:42:40 mansj Exp $
 //
 //
 
@@ -92,10 +92,10 @@ private:
 
   // when doing efficiency statistics runs
   struct StatsBox {
-    std::string targetEffStat, targetZDefStat;
+    std::string targetEffStat;
     int trials;
     std::vector<EfficiencyCut*> alternateCuts;
-    std::vector<EffHistos> hists;
+    std::map<std::string, std::vector<EffHistos> > hists;
     std::vector<TH1*> rawHists;
     TProfile* cutsProfile;
   } statsBox_;
