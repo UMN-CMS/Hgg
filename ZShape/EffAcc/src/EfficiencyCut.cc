@@ -4,11 +4,11 @@
 #include "TRandom3.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-TRandom* EfficiencyCut::randomGenerator_; 
+TRandom* EfficiencyCut::randomGenerator_=0; 
 
 EfficiencyCut::EfficiencyCut ( TH1F * histo, EffTableLoader* ind) : theIndexer(ind) {
 
-  if (randomGenerator_=0) randomGenerator_=new TRandom3(0);
+  if (randomGenerator_==0) randomGenerator_=new TRandom3(0);
   
   if(! histo)
     {

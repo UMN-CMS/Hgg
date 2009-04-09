@@ -8,7 +8,7 @@ process.options = cms.untracked.PSet(
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000000)
+    input = cms.untracked.int32(100000)
     )
 
 process.dumpEv = cms.EDAnalyzer("EventContentAnalyzer")
@@ -31,7 +31,7 @@ process.source = cms.Source("PoolSource",
 )
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('histo_10M_partBUILDINGTTEST.root')
+    fileName = cms.string('histo_100k_test.root')
 )
 
 process.load("ZShape.EffAcc.SmearedElectronsProducer_cfi")
@@ -161,6 +161,5 @@ process.mcEff = cms.EDFilter("ZEfficiencyCalculator",
 
 process.p = cms.Path(process.SmearedElectronsProducer
                      + process.mcEff
-                     + process.dumpEv
                      )
  

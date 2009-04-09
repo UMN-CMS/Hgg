@@ -16,6 +16,13 @@ source = cms.Source("PythiaSource",
 
      PythiaParameters = cms.PSet(
 
+    pythiaPylistVerbosity = cms.untracked.int32(0),
+    filterEfficiency = cms.untracked.double(1.000),
+    pythiaHepMCVerbosity = cms.untracked.bool(False),
+    comEnergy = cms.untracked.double(10000.0),
+    crossSection = cms.untracked.double(1232),
+    maxEventsToPrint = cms.untracked.int32(0),
+
          parameterSets = cms.vstring(
              'pythiaUESettings', 
              'processParameters'
@@ -27,11 +34,12 @@ source = cms.Source("PythiaSource",
         'PARJ(71)=10 .  ! for which ctau  10 mm',
         'MSTP(2)=1      ! which order running alphaS',
         'MSTP(33)=0     ! no K factors in hard cross sections',
-        'MSTP(51)=7     ! structure function chosen',
+        'MSTP(51)=10042     ! CTEQ6L1 structure function chosen',
+        'MSTP(52)=2     ! work with LHAPDF', 
         'MSTP(81)=1     ! multiple parton interactions 1 is Pythia default',
         'MSTP(82)=4     ! Defines the multi-parton model',
         'MSTU(21)=1     ! Check on possible errors during program execution',
-        'PARP(82)=1.9409   ! pt cutoff for multiparton interactions',
+        'PARP(82)=1.8387   ! pt cutoff for multiparton interactions',
         'PARP(89)=1960. ! sqrts for which PARP82 is set',
         'PARP(83)=0.5   ! Multiple interactions: matter distrbn parameter',
         'PARP(84)=0.4   ! Multiple interactions: matter distribution parameter',
@@ -49,7 +57,7 @@ source = cms.Source("PythiaSource",
     processParameters = cms.vstring(
         "MSEL=0                  !User defined processes",
         "MSUB(1)=1               !Incl Z0/gamma* production",
-        "MSTP(43)=2              !Only Z0", 
+        "MSTP(43)=3              !Both Z0 and gamma*", 
         "MDME(174,1)=0           !Z decay into d dbar",        
         "MDME(175,1)=0           !Z decay into u ubar",
         "MDME(176,1)=0           !Z decay into s sbar",
@@ -61,7 +69,8 @@ source = cms.Source("PythiaSource",
         "MDME(184,1)=0           !Z decay into mu- mu+",
         "MDME(185,1)=0           !Z decay into nu_mu nu_mubar",
         "MDME(186,1)=0           !Z decay into tau- tau+",
-        "MDME(187,1)=0           !Z decay into nu_tau nu_taubar"
+        "MDME(187,1)=0           !Z decay into nu_tau nu_taubar",
+        "CKIN(1)=40.       !Minimum sqrt(s_hat) value (=Z mass)"
     )
 
          
