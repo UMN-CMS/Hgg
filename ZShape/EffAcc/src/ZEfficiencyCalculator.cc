@@ -125,11 +125,12 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
 
   // these stages merely _fill_ bits.  They do not apply cuts!
-  stdCuts_.acceptanceCuts(evt_.elec(0));
-  stdCuts_.acceptanceCuts(evt_.elec(1));
-  stdCuts_.ptCuts(evt_.elec(0));
-  stdCuts_.ptCuts(evt_.elec(1));
-  
+  for (int ne=0; ne<2; ne++) {
+    stdCuts_.acceptanceCuts(evt_.elec(ne));
+    stdCuts_.ptCuts(evt_.elec(ne));
+    stdCuts_.dummyCuts(evt_.elec(ne));
+  }
+    
   EfficiencyCut* keep=0;
 
   int pass=0;
