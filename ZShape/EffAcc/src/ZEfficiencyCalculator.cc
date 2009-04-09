@@ -141,11 +141,18 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
       else theCuts_[statsBox_.targetEffStat]=statsBox_.alternateCuts[pass-1];
     }
 
-    // apply all cuts and store results into ZEle objects
-    for (std::map<std::string,EfficiencyCut*>::iterator cut=theCuts_.begin(); cut!=theCuts_.end(); cut++) {
+    if (pass==0) {
+      // apply all cuts and store results into ZEle objects
+      for (std::map<std::string,EfficiencyCut*>::iterator cut=theCuts_.begin(); cut!=theCuts_.end(); cut++) {
+	for (int ne=0; ne<2; ne++) {
+	  //std::cout << " Looking at Cut " << cut->first << " Electron " << ne << std::endl;
+	  evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne)));
+	}
+      }
+    } else {
+      EfficiencyCut* statCut=theCuts_[statsBox_.targetEffStat];
       for (int ne=0; ne<2; ne++) {
-        //std::cout << " Looking at Cut " << cut->first << " Electron " << ne << std::endl;
-	evt_.elec(ne).cutResult(cut->first,cut->second->passesCut(evt_.elec(ne)));
+	evt_.elec(ne).cutResult(statsBox_.targetEffStat,statCut->passesCut(evt_.elec(ne),keep->lastRandomLevel()));
       }
     }
 

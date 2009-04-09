@@ -10,6 +10,8 @@
 //
 // holds efficiency info and performs the cut. Recognizes well-knonw variables
 
+class TRandom;
+
 class EfficiencyCut
 {
   public :
@@ -17,12 +19,16 @@ class EfficiencyCut
   EfficiencyCut( TH1F * histo, EffTableLoader* indexer);
 
   bool passesCut( const ZShapeElectron& elec) const;
+  bool passesCut( const ZShapeElectron& elec, float level ) const;
   EffTableLoader* indexer() const { return theIndexer; }
+  float lastRandomLevel() const { return lastRandomLevel_; }
  private:
-  bool passesCut( int index ) const;
+  bool passesCut( int index, float level=-1 ) const;
   int indexOf( const ZShapeElectron& elec) const;
   EffTableLoader* theIndexer;
   TH1F * theClonedEffHisto_;
-  
+  mutable float lastRandomLevel_;
+
+  static TRandom* randomGenerator_;
 };
 #endif

@@ -4,8 +4,11 @@
 #include "TRandom3.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
+TRandom* EfficiencyCut::randomGenerator_; 
 
 EfficiencyCut::EfficiencyCut ( TH1F * histo, EffTableLoader* ind) : theIndexer(ind) {
+
+  if (randomGenerator_=0) randomGenerator_=new TRandom3(0);
   
   if(! histo)
     {
@@ -22,7 +25,7 @@ EfficiencyCut::EfficiencyCut ( TH1F * histo, EffTableLoader* ind) : theIndexer(i
   theClonedEffHisto_ ->SetDirectory(0);
 }
  
-bool EfficiencyCut::passesCut(int index) const
+bool EfficiencyCut::passesCut(int index, float level) const
 {
    
   int theBin =  index + 1;
@@ -39,8 +42,11 @@ bool EfficiencyCut::passesCut(int index) const
 
   float theEfficiency = theClonedEffHisto_->GetBinContent(theBin);
 
-  TRandom3 randomNum(0); // put this back
-  float randNum = randomNum.Uniform(0., 1.); // put this back
+ 
+  float randNum;
+  if (level<0) randNum=randomGenerator_->Uniform(0.,1.);
+  else randNum=level;
+  lastRandomLevel_=randNum;
 
     if ( randNum < theEfficiency ) 
        {
@@ -64,6 +70,10 @@ bool EfficiencyCut::passesCut(int index) const
 
 bool EfficiencyCut::passesCut( const ZShapeElectron& elec) const {
   return passesCut(indexOf(elec));
+}
+
+bool EfficiencyCut::passesCut( const ZShapeElectron& elec, float level) const {
+  return passesCut(indexOf(elec),level);
 }
 
 
