@@ -72,6 +72,11 @@ private:
   math::XYZPoint vtx_;
   TRandom3 *randomNum_;
 
+  struct {
+    double stocastic;
+    double constant;
+  } HFParams_;
+
 };
 
 
@@ -84,6 +89,10 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
     randomSeed_(iConfig.getParameter<int>("randomSeed"))
 {
   using namespace reco;
+
+  edm::ParameterSet ps=iConfig.getParameter<edm::ParameterSet>("HF");
+  HFParams_.stocastic=ps.getParameter<double>("stocastic");
+  HFParams_.constant=ps.getParameter<double>("constant");
 
   //register my product
   produces<GenParticleCollection>("ZEventParticles");
@@ -237,15 +246,9 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   }
   else if (fabs(deteta) < 5.0)
   {
-    //Do HF Stuff
-    double mysig = 0.13;
-    if (e < 140. ) mysig = 0.34;
-    else if (e < 210. ) mysig = 0.25;
-    else if (e < 420. ) mysig = 0.20;
-    else if (e < 560. ) mysig = 0.18;
-    else if (e < 840. ) mysig = 0.16;
-    else if (e < 1120. ) mysig = 0.14;
-    else if (e < 1400. ) mysig = 0.15;
+
+    double mysig = HFParams_.stocastic/sqrt(std::max(e,1.0))+HFParams_.constant;
+
     Efrac = randomNum_->Gaus(1.0,mysig);
   }
   
