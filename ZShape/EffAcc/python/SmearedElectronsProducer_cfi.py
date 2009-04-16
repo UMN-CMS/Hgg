@@ -10,7 +10,8 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
                                           zElectronsCone = cms.double(0.08),
                                           randomSeed = cms.int32(134),
                                           HF = cms.PSet(
-                                             stocastic = cms.double(2.765),
-                                             constant = cms.double(0.056)
+                                             stocastic = cms.double(2.8554),
+                                             constant = cms.double(0.054798)
+                                             #tuned by kevin on 04-16-09
                                           )
 )
