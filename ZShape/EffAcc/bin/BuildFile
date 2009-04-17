@@ -15,3 +15,10 @@
   <use name=rootcore>
   <use name=ZShape/EffAcc>
 </bin>
+
+<bin file=efficiencyTxt2Plots.cpp>
+  <use name=root>
+  <use name=rootcore>
+  <use name=ZShape/EffAcc>
+</bin>
+

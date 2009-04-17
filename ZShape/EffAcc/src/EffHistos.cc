@@ -18,35 +18,49 @@ void EffHistos::Book(TFileDirectory& tdf) {
   // const int yBinsPerUnitFine = 10;
   const int yBinsPerUnitCoarse = 4;
 
+  float detetaBins[104] = {-5., -4.9, -4.8, -4.7, -4.6, -4.5, -4.4, -4.3, -4.2, -4.1, -4., -3.9, -3.8, -3.7, -3.6,  //14
+                       -3.5, -3.4, -3.3,  -3.2, -3.1, -3., //6
+                       -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.89, -1.78, -1.67,  //13
+                       -1.56, -1.4442, -1.35, -1.257, -1.163, -1.127,  -1.02, -0.913, -0.806, -0.770,  //10
+                       -0.667, -.564, -0.461, -0.423, -0.32, -0.22, -0.12, -0.018, 0.018, 0.12, 0.22, 0.32,  0.423, 0.461, 0.564,0.667, //16
+                       0.770, 0.806, 0.913, 1.02, 1.127, 1.163,  1.257, 1.35, 1.4442, //9
+                       1.56, 1.67, 1.78, 1.89, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, //14
+                       3., 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, //10
+                       4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5. }; //11
+ 
   mZ_  = tdf.make<TH1F>("Z0_mass","Z0_mass;m_{Z0} (GeV/c^{2})", 50, minZmass, maxZmass);
   YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y;Y_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY);
-  ptZ_ = tdf.make<TH1F>("Z0_Pt","Z0_Pt;p_{T,Z0}", 100, 0, maxPt);
+  ptZ_ = tdf.make<TH1F>("Z0_Pt","Z0_Pt;p_{T,Z0}", 200, 0, maxPt);
 
-  e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta;#eta_{e1}", 100, -5, 5);
-  e2eta_ = tdf.make<TH1F>("e2_eta","e2_eta;#eta_{e2}", 100, -5, 5);
+  mZTL_  = tdf.make<TH1F>("Z0_massTL","Z0_M Tree Level;m_{Z0} (GeV/c^{2})", 50, minZmass, maxZmass);
+  YZTL_  = tdf.make<TH1F>("Z0_YTL","Z0_Y Tree Level;Y_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY);
+  ptZTL_ = tdf.make<TH1F>("Z0_PtTL","Z0_Pt Tree Level;p_{T,Z0}", 200, 0, maxPt);
+
+  e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta;detector #eta_{e1}", 103, detetaBins);
+  e2eta_ = tdf.make<TH1F>("e2_eta","e2_eta;detector #eta_{e2}", 103, detetaBins);
   e1phi_ = tdf.make<TH1F>("e1_phi","e1_phi;#phi_{e1}", 100, -pi, pi);
   e2phi_ = tdf.make<TH1F>("e2_phi","e2_phi;#phi_{e2}", 100,  -pi, pi);
   e1pt_  = tdf.make<TH1F>("e1_P_t","e1_P_t;p_{T,e1}", 200, 0, maxPt);
   e2pt_  = tdf.make<TH1F>("e2_P_t","e2_P_t;p_{T,e2}", 200, 0, maxPt);
-
+ 
   //Now make the 2-D histograms
 
   mZ_Y_ = tdf.make<TH2F>("Z0_Y_v_mass","Z0_Y_v_mass;Y_{Z0};m_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, 50, minZmass, maxZmass);
   pt_Y_ = tdf.make<TH2F>("Z0_Y_v_pt","Z0_Y_v_pt;Y_{Z0};p_{T,Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, 50, 0, maxPt);
   mZ_pt_ = tdf.make<TH2F>("Z0_pt_v_mass","Z0_pt_v_mass;p_{T,Z0};m_{Z0}", 50,0, maxPt, 50, minZmass, maxZmass);
 
-  e1eta_YZ_    = tdf.make<TH2F>("e1_eta_vs_Z0Y","e1_eta_vs_Z0Y;#eta_{e1};Y_{Z0}", 50, -5, 5,int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY );
-  e2eta_YZ_    = tdf.make<TH2F>("e2_eta_vs_Z0Y","e2_eta_vs_Z0Y;#eta_{e2};Y_{Z0}", 50, -5, 5,int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY );
-  e1eta_ptZ_   = tdf.make<TH2F>("e1_eta_vs_Ptz","e1_eta_vs_PtZ;#eta_{e1};p_{T,Z0}", 50, -5, 5,50, 0, maxPt );
-  e2eta_ptZ_   = tdf.make<TH2F>("e2_eta_vs_Ptz","e2_eta_vs_PtZ;#eta_{e2};p_{T,Z0}", 50, -5, 5,50, 0, maxPt );
-  e1eta_e2eta_ = tdf.make<TH2F>("e1_eta_vs_e2_eta","e1_eta_vs_e2_eta;#eta_{e1};#eta_{e2}", 50, -5, 5,50, -5, 5 );
+  e1eta_YZ_    = tdf.make<TH2F>("e1_eta_vs_Z0Y","e1_eta_vs_Z0Y;detector #eta_{e1};Y_{Z0}", 50, -5, 5,int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY );
+  e2eta_YZ_    = tdf.make<TH2F>("e2_eta_vs_Z0Y","e2_eta_vs_Z0Y;detector #eta_{e2};Y_{Z0}", 50, -5, 5,int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY );
+  e1eta_ptZ_   = tdf.make<TH2F>("e1_eta_vs_Ptz","e1_eta_vs_PtZ;detector #eta_{e1};p_{T,Z0}", 50, -5, 5,50, 0, maxPt );
+  e2eta_ptZ_   = tdf.make<TH2F>("e2_eta_vs_Ptz","e2_eta_vs_PtZ;detector #eta_{e2};p_{T,Z0}", 50, -5, 5,50, 0, maxPt );
+  e1eta_e2eta_ = tdf.make<TH2F>("e1_eta_vs_e2_eta","e1_eta_vs_e2_eta;detector #eta_{e1};detector #eta_{e2}", 50, -5, 5,50, -5, 5 );
  
   YZTL_YZ_       = tdf.make<TH2F>("YZTL_vs_YZ","YZTL_vs_YZ;Y_{Z};Y_{ZtreeLevel}",int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY,int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY); 
   YZTL_YZ_matrix_= tdf.make<TH2F>("YZTL_vs_YZ_matrix","YZTL_vs_YZ_matrix;Y_{Z};Y_{ZtreeLevel}",int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY,int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY); 
 
 }
 
-void EffHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtEtaPhiMLorentzVector& e2, 
+void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2, 
 		     const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2) { 
 
   if (!booked_) {
@@ -54,8 +68,10 @@ void EffHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtE
     return;
   }
 
-  XYZTLorentzVector p1(e1);
-  XYZTLorentzVector p2(e2);
+  
+  XYZTLorentzVector p1(e1.p4_);
+  XYZTLorentzVector p2(e2.p4_);
+
   XYZTLorentzVector pTL1(eTL1); 
   XYZTLorentzVector pTL2(eTL2); 
 
@@ -75,23 +91,26 @@ void EffHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtE
   float zY    = pZ.Rapidity();
   float zPt   = pZ.Pt();
 
-  float e1eta = p1.Eta();
+  float e1eta = e1.detEta_;
   float e1phi = p1.Phi();
   float e1Pt  = p1.Pt();
   
-  float e2eta = p2.Eta();
+  float e2eta = e2.detEta_;
   float e2phi = p2.Phi();
   float e2Pt  = p2.Pt();
 
-  float zTLY = pTLZ.Rapidity(); 
+  float zTLMass = sqrt ( pTLZ.Dot(pTLZ) );
+  float zTLY    = pTLZ.Rapidity();
+  float zTLPt   = pTLZ.Pt();
+  
 
   mZ_  -> Fill(zMass);
   YZ_  -> Fill(zY);
   ptZ_ -> Fill(zPt);
 
-  //mZ_Y_->Fill(zY,zMass); // this was being filled twice! 
-  //mZ_pt_->Fill(zPt,zMass); // this was being filled twice! 
-  //pt_Y_->Fill(zY,zPt); // this was being filled twice! 
+  mZTL_  -> Fill(zTLMass);
+  YZTL_  -> Fill(zTLY);
+  ptZTL_ -> Fill(zTLPt);
 
   e1eta_ -> Fill(e1eta);
   e1pt_  -> Fill(e1Pt);

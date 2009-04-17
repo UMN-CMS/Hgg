@@ -75,6 +75,11 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
 
   createAlternateZDefs(targetZDefSys_,targetEffSys_);
 
+  //
+  // setting some invariant mass limits
+  massLow_  = iConfig.getUntrackedParameter<double>("MassLow",60.0);
+  massHigh_ = iConfig.getUntrackedParameter<double>("MassHigh",120.0);
+
 }
 
 
@@ -122,7 +127,15 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 
   //
   // fill histograms for before any selection
-  allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+  allCase_.Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+
+  math::PtEtaPhiMLorentzVector ZP4 = evt_.elec(0).p4_ + evt_.elec(1).p4_;
+  double invmass = sqrt ( ZP4.Dot(ZP4) );
+  if (invmass < massLow_ || invmass > massHigh_ )
+    {
+     edm::LogWarning("ZEfficiencyCalculator") << " The invariant mass " << invmass << "  is out of range ( " <<massLow_ << " to " << massHigh_ <<  " )  ";
+     return;
+    }
 
   // these stages merely _fill_ bits.  They do not apply cuts!
   for (int ne=0; ne<2; ne++) {
@@ -176,8 +189,8 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 	if (!q->second->pass(evt_,1,1,0,&pairing)) continue;
 	
 	// fill standard histograms after acceptance
-	if (!pairing) plots->acceptance_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
-	else plots->acceptance_.Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());      
+	if (!pairing) plots->acceptance_.Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+	else plots->acceptance_.Fill(evt_.elec(1), evt_.elec(0), evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());      
 
 	
 	// next n-cuts
@@ -186,9 +199,9 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 	  ok=q->second->pass(evt_,j+1,j+1,0,&pairing);
           if (ok) 
             if (!pairing)  
-              plots->postCut_[j-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4());
+              plots->postCut_[j-1].Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4());
             else 
-              plots->postCut_[j-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());
+              plots->postCut_[j-1].Fill(evt_.elec(1), evt_.elec(0), evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());
         }// criteria  
       }// Z definitions 
     }// end if pass==0 
@@ -200,9 +213,9 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 	ZShapeZDef* zdef=q->second; 
 	if (zdef->pass(evt_,zdef->criteriaCount(ZShapeZDef::crit_E1),zdef->criteriaCount(ZShapeZDef::crit_E2),0,&pairing)) { 
 	  if (!pairing)  
-	    statsBox_.hists[q->first][pass-1].Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+	    statsBox_.hists[q->first][pass-1].Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
 	  else 
-	    statsBox_.hists[q->first][pass-1].Fill(evt_.elec(1).p4_, evt_.elec(0).p4_, evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4()); 
+	    statsBox_.hists[q->first][pass-1].Fill(evt_.elec(1), evt_.elec(0), evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4()); 
 	}
       }
     }

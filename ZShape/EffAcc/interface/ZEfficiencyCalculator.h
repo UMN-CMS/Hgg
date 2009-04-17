@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.12 2009/03/26 16:42:40 mansj Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.13 2009/04/08 21:07:47 mansj Exp $
 //
 //
 
@@ -115,6 +115,10 @@ private:
     std::vector<EffHistos> postCut_;
   };
   std::map<std::string,ZPlots*> zplots_;
+
+  // invariant mass cuts
+  double massLow_ ;
+  double massHigh_;
 };
 
 

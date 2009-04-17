@@ -44,10 +44,17 @@ Implementation:
 
 #include "ZShape/Base/interface/ZShapeElectron.h"
 
+#include "PhysicsTools/TagAndProbe/interface/EffTableLoader.h"
+
+
+#include <TF1.h>
+#include <TMath.h>
+#include <math.h>
+
 //
 // class decleration
 //
-
+Double_t crystalBall(Double_t *x, Double_t *par);
 
 class ZSmearingProducer : public edm::EDProducer {
 public:
@@ -59,7 +66,10 @@ private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
   void smearElectron(math::PtEtaPhiELorentzVector &electron) ;
+
   double smearECAL (double eta, double et, char *det);
+  double smearECALCB (double eta, double et, char *det);
+
       
   // ----------member data ---------------------------
 
@@ -71,6 +81,8 @@ private:
   int randomSeed_;
   math::XYZPoint vtx_;
   TRandom3 *randomNum_;
+  EffTableLoader *smearTable_;
+  TF1 *crystalball_;
 
   struct {
     double stocastic;
@@ -99,6 +111,11 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   
   //Setting the random number to make things reproducable
   randomNum_ = new TRandom3(randomSeed_);
+
+  edm::FileInPath filePath(iConfig.getParameter<edm::FileInPath>("SmearTable"));
+  std::string smeartablefile = filePath.fullPath();
+  smearTable_ = new EffTableLoader(smeartablefile);
+  crystalball_ =  new TF1("crystal", crystalBall ,0.1,1.3,5,"");
 }
 
 
@@ -210,7 +227,8 @@ ZSmearingProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   iEvent.put(pZeeParticlesN,"ZEventParticles");
   
-  
+
+
 }
 
 //Function that does the smearing of an electron
@@ -236,13 +254,13 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   if (fabs(deteta) < EBEEboundry )
   {
     //Do EB stuff
-    Efrac = smearECAL(deteta,et, "EB");
+    Efrac = smearECALCB(deteta,et, "EB");
    
   }
   else if (fabs(deteta) < EEHFbountry)
   {
     //Do EE Stuff
-    Efrac = smearECAL(deteta,et, "EE");
+    Efrac = smearECALCB(deteta,et, "EE");
   }
   else if (fabs(deteta) < 5.0)
   {
@@ -263,6 +281,43 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
 
   //std::cout << " cosh way " << Efrac*e/cosh(eta) << " Other way " << Efrac*e*sin(electron.theta()) << std::endl;
   //std::cout << " New E " << electron.E() << " new eta " << electron.eta() << " new et " << electron.Et() << " new pt " << electron.pt() <<  " mass : " << electron.M() << std::endl;
+}
+
+Double_t crystalBall(Double_t *x, Double_t *par)
+{
+  Double_t t = (x[0]-par[2])/par[3];
+  if (par[0] < 0) t = -t;
+
+  Double_t absAlpha = fabs((Double_t)par[0]);
+
+  if (t >= -absAlpha) {
+    return par[4]*exp(-0.5*t*t);
+  }
+  else {
+    Double_t a =  TMath::Power(par[1]/absAlpha,par[1])*exp(-0.5*absAlpha*absAlpha);
+    Double_t b= par[1]/absAlpha - absAlpha;
+
+    return par[4]*(a/TMath::Power(b - t, par[1]));
+  }
+
+}
+
+double ZSmearingProducer::smearECALCB(double eta, double et, char *det)
+{
+  //First I need to find which efficiency bin we need
+  int index = smearTable_->GetBandIndex(et,eta);
+  //Then I need to get the crystal ball paramters from that bin
+  std::vector<float> parVals = smearTable_->correctionEff(index);
+  double myVals[10];
+  for ( uint val = 0; val < parVals.size(); ++val)
+  {
+      myVals[val] = parVals[val]; 
+  }
+  //Then I need to set the crystal ball parameters for the function
+  //crystalBall *cryballfunc = new crystalBall();
+  crystalball_->SetParameters(&myVals[1]);
+  //lastly, I need to get a random number from the function
+  return crystalball_->GetRandom();
 }
 
 //Method for smearing ECAL
@@ -322,6 +377,8 @@ double ZSmearingProducer::smearECAL(double eta, double et, char *det)
 
   return frac;
 }
+
+
 
 // ------------ Method called once each job just before starting event loop  ------------
 void ZSmearingProducer::beginJob(const edm::EventSetup&)
