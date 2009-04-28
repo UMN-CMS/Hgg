@@ -10,11 +10,12 @@ void EffHistos::Book(TFileDirectory& tdf) {
   booked_=true;
 
   // add here all extremes, tidily
-  float pi       = 3.141593;
-  float maxPt    = 400;
-  float maxY     = 5.5;
-  float minZmass = 50;
-  float maxZmass = 140;
+  const float pi       = 3.141593;
+  const float maxPt    = 400;
+  const float maxY     = 5.5;
+  const float minZmass = 50;
+  const float maxZmass = 150;
+  const int binsZmass  = 50;
   // const int yBinsPerUnitFine = 10;
   const int yBinsPerUnitCoarse = 4;
 
@@ -28,7 +29,7 @@ void EffHistos::Book(TFileDirectory& tdf) {
                        3., 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, //10
                        4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5. }; //11
  
-  mZ_  = tdf.make<TH1F>("Z0_mass","Z0_mass;m_{Z0} (GeV/c^{2})", 50, minZmass, maxZmass);
+  mZ_  = tdf.make<TH1F>("Z0_mass","Z0_mass;m_{Z} (GeV/c^{2})", binsZmass, minZmass, maxZmass);
   YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y;Y_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY);
   ptZ_ = tdf.make<TH1F>("Z0_Pt","Z0_Pt;p_{T,Z0}", 200, 0, maxPt);
 
@@ -45,9 +46,9 @@ void EffHistos::Book(TFileDirectory& tdf) {
  
   //Now make the 2-D histograms
 
-  mZ_Y_ = tdf.make<TH2F>("Z0_Y_v_mass","Z0_Y_v_mass;Y_{Z0};m_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, 50, minZmass, maxZmass);
-  pt_Y_ = tdf.make<TH2F>("Z0_Y_v_pt","Z0_Y_v_pt;Y_{Z0};p_{T,Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, 50, 0, maxPt);
-  mZ_pt_ = tdf.make<TH2F>("Z0_pt_v_mass","Z0_pt_v_mass;p_{T,Z0};m_{Z0}", 50,0, maxPt, 50, minZmass, maxZmass);
+  mZ_Y_ = tdf.make<TH2F>("Z0_Y_v_mass","Z0_Y_v_mass;Y_{Z0};m_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, binsZmass, minZmass, maxZmass);
+  pt_Y_ = tdf.make<TH2F>("Z0_Y_v_pt","Z0_Y_v_pt;Y_{Z0};p_{T,Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, 50, 0, maxPt/4.0);
+  mZ_pt_ = tdf.make<TH2F>("Z0_pt_v_mass","Z0_pt_v_mass;p_{T,Z0};m_{Z0}", 50,0, maxPt/4.0, binsZmass, minZmass, maxZmass);
 
   e1eta_YZ_    = tdf.make<TH2F>("e1_eta_vs_Z0Y","e1_eta_vs_Z0Y;detector #eta_{e1};Y_{Z0}", 50, -5, 5,int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY );
   e2eta_YZ_    = tdf.make<TH2F>("e2_eta_vs_Z0Y","e2_eta_vs_Z0Y;detector #eta_{e2};Y_{Z0}", 50, -5, 5,int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY );

@@ -15,5 +15,4 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
        constant = cms.double(0.054798)
         #tuned by kevin on 04-16-09
     )
-
 )
