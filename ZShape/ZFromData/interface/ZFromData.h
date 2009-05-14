@@ -73,7 +73,6 @@ private:
   };
 
   void fillMCEvent(const HepMC::GenEvent* evt);
-  void loadEfficiency(const std::string& name, const std::string& fname);
   void applyEfficiencies();
   void createAlternateEfficiencies();
   void createAlternateZDefs(const std::string& targetZDefSys, const std::string& targetEffSys);
@@ -106,9 +105,6 @@ private:
   bool        writeHistoConservatively_;
   TFile*      histoFile_;
 
-  // the efficiency objects: strings identify the cuts efficiencies and corresponding cuts
-  std::map<std::string, EfficiencyStore*> efficiencies_;
-  std::map<std::string, EfficiencyCut*> theCuts_;
   
   // object which applies the eta and pt cuts
   ZShapeStandardCuts stdCuts_;

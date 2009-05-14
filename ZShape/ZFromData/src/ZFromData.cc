@@ -61,12 +61,12 @@ ZFromData::ZFromData(const edm::ParameterSet& iConfig) :
   
   std::vector<edm::ParameterSet> effs =iConfig.getUntrackedParameter< std::vector<edm::ParameterSet> >("Effs");
 
-  for (std::vector<edm::ParameterSet>::iterator i=effs.begin(); i!=effs.end(); ++i) {
-    std::string name=i->getUntrackedParameter<std::string>("name");
-    std::string file=i->getUntrackedParameter<std::string>("effFile");
+  //for (std::vector<edm::ParameterSet>::iterator i=effs.begin(); i!=effs.end(); ++i) {
+  //  std::string name=i->getUntrackedParameter<std::string>("name");
+  //  std::string file=i->getUntrackedParameter<std::string>("effFile");
     //std::string var=i->getUntrackedParameter<std::string>("variable");
-    loadEfficiency(name,file);
-  }
+  //   loadEfficiency(name,file);
+  // }
 
 
   //
@@ -132,7 +132,7 @@ ZFromData::ZFromData(const edm::ParameterSet& iConfig) :
    // ******************************************* //
    
 
-
+   std::cout << " Done with the constructor " << std::endl;
 }
 
 
@@ -252,13 +252,13 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::cout << "Returning " << numDataZ << " fellas " << std::endl;
   */
  
-  allCaseFirst_.Fill(evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
+  allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
   if (evt_.n_elec!=2) return; // need 2 and only 2
   std::cout << " There was 1 good pair " << std::endl;
   //
   // fill histograms for before any selection
-  allCase_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_,evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
-  if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0).p4_, evt_.elec(1).p4_, evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
+  allCase_.Fill(evt_.elec(0), evt_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
+  if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0), evt_.elec(1), evtMC_.elec(0), evtMC_.elec(1));
 
   // these stages merely _fill_ bits.  They do not apply cuts!
   stdCuts_.acceptanceCuts(evt_.elec(0));
@@ -266,7 +266,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   stdCuts_.ptCuts(evt_.elec(0));
   stdCuts_.ptCuts(evt_.elec(1));
   //std::cout << "MYevt Start 3" << std::endl;
-  EfficiencyCut* keep=0;
+  //EfficiencyCut* keep=0;
   //std::cout << "Got the 4-vectors " << std::endl;
  
     
@@ -302,8 +302,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         int e1n = e1;
         int e2n = e2;
 	// fill standard histograms after acceptance
-	plots->acceptance_.Fill(evt_.elec(e1).p4_, evt_.elec(e2).p4_,evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_);
-	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1).p4_, evt_.elec(e2).p4_, evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_);
+	plots->acceptance_.Fill(evt_.elec(e1), evt_.elec(e2),evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_);
+	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1), evt_.elec(e2), evtMC_.elec(e1), evtMC_.elec(e2));
 	
 	// next n-cuts
 	bool ok=true;
@@ -314,8 +314,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (pairing) {std::swap(e1n,e2n); }
 	  if (ok)
           {
-	    plots->postCut_[j-1].Fill(evt_.elec(e1n).p4_, evt_.elec(e2n).p4_,evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
-            if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n).p4_, evt_.elec(e2n).p4_, evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
+	    plots->postCut_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
+            if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n));
 	  }
       }
     }
@@ -349,7 +349,7 @@ void ZFromData::fillMCEvent(const HepMC::GenEvent* Evt) {
       const HepMC::GenVertex * vertex_=(*mcpart)->production_vertex();
 
       if (ne==0) {
-	evtMC_.vtx_=::math::XYZVector(vertex_->position().x(),vertex_->position().y(),vertex_->position().z() );
+	evtMC_.vtx_=::math::XYZPoint(vertex_->position().x(),vertex_->position().y(),vertex_->position().z() );
       }
       
       math::XYZTLorentzVector  momentum;
@@ -358,6 +358,7 @@ void ZFromData::fillMCEvent(const HepMC::GenEvent* Evt) {
       
       if (ne<2) {
 	evtMC_.elec(ne).p4_=momentum;
+        evtMC_.elec(ne).detEta_= evtMC_.elec(ne).detectorEta(evtMC_.vtx_);
       }     
       ne++;
 
@@ -390,6 +391,8 @@ void ZFromData::fillMCEvent(const HepMC::GenEvent* Evt) {
   if (pt2 > pt1){
     std::swap( evtMC_.elec(0), evtMC_.elec(1));
   }
+
+  
 }  
   
 
@@ -459,27 +462,6 @@ ZFromData::beginJob(const edm::EventSetup&)
 
 }
 
-
-void ZFromData::loadEfficiency(const std::string& name, const std::string& fname) {
-
-  if (fname.find(".root")!=std::string::npos) {
-    TFile effFile(fname.c_str(),"READ");
-    
-    edm::LogInfo("ZShape") << "Reading ROOT " << fname << " for efficiency " << name;
-    EfficiencyStore* effs       = new EfficiencyStore(&effFile, name);
-    TH1F* histo = effs->getValuesHisto1D();
-    EfficiencyCut* theCut  = new   EfficiencyCut(histo);
-    efficiencies_[name]=effs;
-    theCuts_[name]=theCut;
-  } else {
-    edm::LogInfo("ZShape") << "Reading TEXT " << fname << " for efficiency " << name;
-    EfficiencyStore* effs       = new EfficiencyStore(fname);
-    TH1F* histo = effs->getValuesHisto1D();
-    EfficiencyCut* theCut  = new   EfficiencyCut(histo);
-    efficiencies_[name]=effs;
-    theCuts_[name]=theCut;
-  }
-}
 
 
 // ------------ method called once each job just after ending the event loop  ------------

@@ -6,8 +6,9 @@
 ##
 ## Argument 1 is the directory that contains the plots 
 ##
-
+set mydir=`pwd`
 set PlotDir=$1
+set plottype=$2
 
 cat > ${PlotDir}/index.html <<EOF
 <HTML>
@@ -18,6 +19,8 @@ cat > ${PlotDir}/index.html <<EOF
 <FONT color="Black">
 <h2><A name="EB"><FONT color="Black">ZShape Result Web Pages for `date`</FONT></A><BR></h2>
 <a href="Compare">Link to MC to Data comparision histograms</a>
+<p></p>
+<a href="FinalCompare">Link to FINAL MC to Data comparision histograms</a>
 <h3><A name="EB"><FONT color="Blue">Result Histograms</FONT></A><BR></h3>
 
 <A HREF=ZResult_With_MC_Z0_Y.png> <img height="300" src="ZResult_With_MC_Z0_Y.png"> </A>
@@ -29,7 +32,7 @@ This is also compared to the GENERATOR rapidity distribution in RED and the MC d
 
 EOF
 
-foreach FromData (`/bin/ls ${PlotDir} |grep "ZFromData_" `)
+foreach FromData (`/bin/ls ${PlotDir} |grep "ZFromData_"| grep "png"  `)
    echo '<A HREF='${FromData}'> <img height="300" src="'${FromData}'"> </A>' >> ${PlotDir}/index.html
 end
 
@@ -43,7 +46,7 @@ echo '<p>These are the combined reconstructed Z Rapidity distributions. This is 
 
 echo '<h3><A name="EB"><FONT color="Blue">Efficiency X Acceptance For Single Z Definitions</FONT></A><BR></h3>' >> ${PlotDir}/index.html
 
-foreach EffAcc (`/bin/ls ${PlotDir} |grep "ZMC_EffAcc_" `)
+foreach EffAcc (`/bin/ls ${PlotDir} |grep "ZMC_EffAcc_" | grep "png" `)
    echo '<A HREF='${EffAcc}'> <img height="300" src="'${EffAcc}'"> </A>' >> ${PlotDir}/index.html
 end
 
@@ -61,6 +64,7 @@ echo '<A HREF=ZMCRAPFull_Z0_Y.png> <img height="300" src="ZMCRAPFull_Z0_Y.png"> 
 
 
 #NOW I MOVE ONTO THE COMPARISON SCRIPTS
+set oldPlotDir=${PlotDir}
 set PlotDir=${PlotDir}/Compare
 cat > ${PlotDir}/index.html <<EOF
 <HTML>
@@ -102,6 +106,47 @@ foreach Ztype ( Tight-ECAL-Loose-ECAL Tight-ECAL-HF )
    endif
 end
 
+
+if (`echo $plottype | grep -c "eps"` > 0 ) then
+foreach FromData (`/bin/ls ${PlotDir} |grep ".eps"`)
+   ~/eps2pdf.perl ${PlotDir}/$FromData
+end
+
+mv *pdf ${PlotDir}/.
+
+foreach FromData (`/bin/ls ${PlotDir}/.. |grep ".eps"`)
+   ~/eps2pdf.perl ${PlotDir}/../$FromData
+end
+
+mv *pdf ${PlotDir}/../.
+
+endif
+
+
+
+mv  ${PlotDir}/Z_CompareFINAL* ${PlotDir}/../FinalCompare/.
+
+
+set PlotDir=${oldPlotDir}/FinalCompare
+echo $PlotDir
+cat > ${PlotDir}/index.html <<EOF
+<HTML>
+
+<HEAD><TITLE>ZShape MC to Data FINAL Comparison WebPages for `date`</TITLE></HEAD>
+ 
+<BODY link="Red">
+<FONT color="Black">
+<h2><A name="EB"><FONT color="Black">ZShape Web Pages for `date`</FONT></A><BR></h2>
+<h3><A name="EB"><FONT color="Blue">Final Comparison Histograms</FONT></A><BR></h3>
+
+EOF
+
+foreach Ztype ( Tight-ECAL-Loose-ECAL Tight-ECAL-HF )
+   echo '<h2 id="'${Ztype}'"><A name="EB"><FONT color="Black">Comparisons for type '${Ztype}'</FONT></A><BR></h2>' >> ${PlotDir}/index.html
+   foreach FromData (`/bin/ls ${PlotDir} |grep ".png" | grep "Z_CompareFINAL" | grep $Ztype` )
+      echo '<A HREF='${FromData}'> <img height="400" src="'${FromData}'"> </A>' >> ${PlotDir}/index.html
+   end
+end
 
 
 #end of ZShape web page making script

@@ -5,6 +5,7 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/Vector3D.h"
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+#include "ZShape/Base/interface/ZShapeElectron.h"
 
 // holds histograms for Z and e+/- quantities
 // filled to carachterize candidates' pupulation at every step along selection path
@@ -13,7 +14,7 @@ class EffExtraHistos {
 
  public:
   void Book(TFileDirectory& tfd);
-  void Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtEtaPhiMLorentzVector& e2,const ::math::PtEtaPhiMLorentzVector& em1, const ::math::PtEtaPhiMLorentzVector& em2);
+  void Fill(const ZShapeElectron& e1, const ZShapeElectron& e2,const ZShapeElectron& em1, const ZShapeElectron& em2);
 
  private:
   TH1 *DmZ_,*DYZ_, *DptZ_;

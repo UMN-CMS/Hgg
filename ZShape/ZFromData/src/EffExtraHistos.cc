@@ -14,11 +14,23 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
   float minZmass = 50;
   float maxZmass = 140;
 
+
+  float detetaBins[104] = {-5., -4.9, -4.8, -4.7, -4.6, -4.5, -4.4, -4.3, -4.2, -4.1, -4., -3.9, -3.8, -3.7, -3.6,  //14
+                       -3.5, -3.4, -3.3,  -3.2, -3.1, -3., //6
+                       -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.89, -1.78, -1.67,  //13
+                       -1.56, -1.4442, -1.35, -1.257, -1.163, -1.127,  -1.02, -0.913, -0.806, -0.770,  //10
+                       -0.667, -.564, -0.461, -0.423, -0.32, -0.22, -0.12, -0.018, 0.018, 0.12, 0.22, 0.32,  0.423, 0.461, 0.564,0.667, //16
+                       0.770, 0.806, 0.913, 1.02, 1.127, 1.163,  1.257, 1.35, 1.4442, //9
+                       1.56, 1.67, 1.78, 1.89, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, //14
+                       3., 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, //10
+                       4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5. }; //11
+ 
+ 
   DmZ_  = tdf.make<TH1F>("Z0_mass_Delta","Z0_mass_Delta;Delta m_{Z0} (GeV/c^{2})", 50, -60, 60);  
   DYZ_  = tdf.make<TH1F>("Z0_Y_Delta","Z0_Y_Delta;Y_{Z0}", int((maxY*2)*4), -maxY, maxY);  
   DptZ_ = tdf.make<TH1F>("Z0_Pt_Delta","Z0_Pt_Delta;p_{T,Z0}", 100, -50., 50.); 
-  De1eta_ = tdf.make<TH1F>("e1_eta_Delta","e1_eta_Delta;#eta_{e1}", 100, -5, 5);  
-  De2eta_ = tdf.make<TH1F>("e2_eta_Delta","e2_eta_Delta;#eta_{e2}", 100, -5, 5);
+  De1eta_ = tdf.make<TH1F>("e1_eta_Delta","e1_eta_Delta;detector #eta_{e1}", 103, detetaBins);  
+  De2eta_ = tdf.make<TH1F>("e2_eta_Delta","e2_eta_Delta;detector #eta_{e2}", 103, detetaBins);
   De1phi_ = tdf.make<TH1F>("e1_phi_Delta","e1_phi_Delta;#phi_{e1}", 100, -pi, pi);  
   De2phi_ = tdf.make<TH1F>("e2_phi_Delta","e2_phi_Delta;#phi_{e2}", 100,  -pi, pi);  
   De1pt_  = tdf.make<TH1F>("e1_P_t_Delta","e1_P_t_Delta;p_{T,e1}", 200, -50., 50.);  
@@ -26,24 +38,24 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
 
   MCmZ_  = tdf.make<TH1F>("Z0_mass_MC","Z0_mass_MC;m_{Z0} (GeV/c^{2})", 60, 35., 150.);  
   MCYZ_  = tdf.make<TH1F>("Z0_Y_MC","Z0_Y_MC;Y_{Z0}", int((maxY*2)*4), -maxY, maxY);  
-  MCptZ_ = tdf.make<TH1F>("Z0_Pt_MC","Z0_Pt_MC;p_{T,Z0}", 100, 0., maxPt); 
-  MCe1eta_ = tdf.make<TH1F>("e1_eta_MC","e1_eta_MC;#eta_{e1}", 100, -5, 5);  
-  MCe2eta_ = tdf.make<TH1F>("e2_eta_MC","e2_eta_MC;#eta_{e2}", 100, -5, 5);
+  MCptZ_ = tdf.make<TH1F>("Z0_Pt_MC","Z0_Pt_MC;p_{T,Z0}", 200, 0., maxPt); 
+  MCe1eta_ = tdf.make<TH1F>("e1_eta_MC","e1_eta_MC;detector #eta_{e1}", 103, detetaBins);  
+  MCe2eta_ = tdf.make<TH1F>("e2_eta_MC","e2_eta_MC;detector #eta_{e2}", 103, detetaBins);
   MCe1phi_ = tdf.make<TH1F>("e1_phi_MC","e1_phi_MC;#phi_{e1}", 100, -pi, pi);  
   MCe2phi_ = tdf.make<TH1F>("e2_phi_MC","e2_phi_MC;#phi_{e2}", 100,  -pi, pi);  
   MCe1pt_  = tdf.make<TH1F>("e1_P_t_MC","e1_P_t_MC;p_{T,e1}", 200, 0., maxPt);  
   MCe2pt_  = tdf.make<TH1F>("e2_P_t_MC","e2_P_t_MC;p_{T,e2}", 200, 0., maxPt);
 }
 
-void EffExtraHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math::PtEtaPhiMLorentzVector& e2, const ::math::PtEtaPhiMLorentzVector& em1, const ::math::PtEtaPhiMLorentzVector& em2) {
+void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, const ZShapeElectron& em1, const ZShapeElectron& em2) {
 
-  XYZTLorentzVector p1(e1);
-  XYZTLorentzVector p2(e2);
+  XYZTLorentzVector p1(e1.p4_);
+  XYZTLorentzVector p2(e2.p4_);
 
   XYZTLorentzVector pZ = p1 + p2 ;
 
-  XYZTLorentzVector pm1(em1);
-  XYZTLorentzVector pm2(em2);
+  XYZTLorentzVector pm1(em1.p4_);
+  XYZTLorentzVector pm2(em2.p4_);
 
   XYZTLorentzVector pmZ = pm1 + pm2 ;
   //  debug
@@ -57,11 +69,11 @@ void EffExtraHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math
   float zY    = pZ.Rapidity();
   float zPt   = pZ.Pt();
 
-  float e1eta = p1.Eta();
+  float e1eta = e1.detEta_;
   float e1phi = p1.Phi();
   float e1Pt  = p1.Pt();
   
-  float e2eta = p2.Eta();
+  float e2eta = e2.detEta_;
   float e2phi = p2.Phi();
   float e2Pt  = p2.Pt();
 
@@ -69,11 +81,11 @@ void EffExtraHistos::Fill(const ::math::PtEtaPhiMLorentzVector& e1, const ::math
   float zmY    = pmZ.Rapidity();
   float zmPt   = pmZ.Pt();
 
-  float em1eta = pm1.Eta();
+  float em1eta = em1.detEta_;
   float em1phi = pm1.Phi();
   float em1Pt  = pm1.Pt();
   
-  float em2eta = pm2.Eta();
+  float em2eta = em2.detEta_;
   float em2phi = pm2.Phi();
   float em2Pt  = pm2.Pt();
 
