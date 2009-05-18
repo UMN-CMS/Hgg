@@ -265,6 +265,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   stdCuts_.acceptanceCuts(evt_.elec(1));
   stdCuts_.ptCuts(evt_.elec(0));
   stdCuts_.ptCuts(evt_.elec(1));
+  stdCuts_.dummyCuts(evt_.elec(0));
+  stdCuts_.dummyCuts(evt_.elec(1));
   //std::cout << "MYevt Start 3" << std::endl;
   //EfficiencyCut* keep=0;
   //std::cout << "Got the 4-vectors " << std::endl;
