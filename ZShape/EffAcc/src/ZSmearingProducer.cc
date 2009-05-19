@@ -4,7 +4,7 @@
 // Class:      ZSmearingProducer
 // 
 /**\class ZSmearingProducer ZSmearingProducer.cc ZShape/ZSmearingProducer/src/ZSmearingProducer.cc
-
+  
 Description: <one line class summary>
 Produces pair of electrons (GenParticleCollection) from Z decay as generated with Phytia
 Implementation:
@@ -55,6 +55,8 @@ Implementation:
 // class decleration
 //
 Double_t crystalBall(Double_t *x, Double_t *par);
+Double_t EBRes(Double_t *x,Double_t *par);
+Double_t EERes(Double_t *x,Double_t *par);
 
 class ZSmearingProducer : public edm::EDProducer {
 public:
@@ -69,7 +71,7 @@ private:
 
   double smearECAL (double eta, double et, char *det);
   double smearECALCB (double eta, double et, char *det);
-
+  double getSigma (double eta, double et, char *det);
       
   // ----------member data ---------------------------
 
@@ -88,6 +90,21 @@ private:
     double stocastic;
     double constant;
   } HFParams_;
+  
+  struct {
+    double sigma[4];
+	double alpha;
+	double N;
+	double mean;
+  } EBPrams_;
+
+  struct {
+    double sigma[3];
+	double alpha;
+	double N;
+	double mean;
+  } EEPrams_;
+
 
 };
 
@@ -101,10 +118,29 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
     randomSeed_(iConfig.getParameter<int>("randomSeed"))
 {
   using namespace reco;
-
+  //Get HF Smearing Parameters
   edm::ParameterSet ps=iConfig.getParameter<edm::ParameterSet>("HF");
   HFParams_.stocastic=ps.getParameter<double>("stocastic");
   HFParams_.constant=ps.getParameter<double>("constant");
+
+  //Get EB Smearing Parameters
+  ps=iConfig.getParameter<edm::ParameterSet>("EB");
+  EBPrams_.sigma[0]=ps.getParameter<double>("p0");
+  EBPrams_.sigma[1]=ps.getParameter<double>("p1");
+  EBPrams_.sigma[2]=ps.getParameter<double>("p2");
+  EBPrams_.sigma[3]=ps.getParameter<double>("c");
+  EBPrams_.alpha=ps.getParameter<double>("alpha");
+  EBPrams_.mean=ps.getParameter<double>("mean");
+  EBPrams_.N=ps.getParameter<double>("n");
+
+  //Get EE Smearing Parameters
+  ps=iConfig.getParameter<edm::ParameterSet>("EE");
+  EEPrams_.sigma[0]=ps.getParameter<double>("p0");
+  EEPrams_.sigma[1]=ps.getParameter<double>("p1");
+  EEPrams_.sigma[2]=ps.getParameter<double>("p2");
+  EEPrams_.alpha=ps.getParameter<double>("alpha");
+  EEPrams_.mean=ps.getParameter<double>("mean");
+  EEPrams_.N=ps.getParameter<double>("n");
 
   //register my product
   produces<GenParticleCollection>("ZEventParticles");
@@ -254,7 +290,7 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   if (fabs(deteta) < EBEEboundry )
   {
     //Do EB stuff
-    Efrac = smearECALCB(deteta,et, "EB");
+    Efrac = smearECALCB(deteta,e, "EB");
    
   }
   else if (fabs(deteta) < EEHFbountry)
@@ -264,10 +300,74 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   }
   else if (fabs(deteta) < 5.0)
   {
-
     double mysig = HFParams_.stocastic/sqrt(std::max(e,1.0))+HFParams_.constant;
-
+    double  etaFact=sinh(eta)/sinh(deteta);
     Efrac = randomNum_->Gaus(1.0,mysig);
+    double newEta=deteta;
+    double perc = randomNum_->Uniform(100);
+    double unif = randomNum_->Uniform(0.64,0.9);
+    double sign = (deteta < 0.) ?(-1.) : (1.); //added to know the + or - sign.
+    double etabias=0.0144;
+    if((fabs(deteta)>2.964)&&(fabs(deteta)<=3)){
+      newEta=deteta;
+    }else if ((fabs(deteta)>3)&&(fabs(deteta)<=3.034)){
+      if(perc<=15){newEta=deteta;
+      }else if((perc>15)&&((perc<=57))){
+        newEta=sign*(3.0515+etabias);
+      }else if((perc>57)&&((perc<=100))){newEta=sign*(unif*0.175+2.964+etabias);
+      }
+    }else if ((fabs(deteta)>3.034)&&(fabs(deteta)<=3.104)){
+      if(perc<=3){newEta=deteta;
+      }else if((perc>3)&&((perc<=51))){
+        newEta=sign*(3.0515+etabias);
+      }else if((perc>51)&&((perc<=100))){
+        newEta=sign*(unif*0.175+2.964+etabias);
+      }
+    }else if ((fabs(deteta)>3.104)&&(fabs(deteta)<=3.139)){
+      if(perc<=30){newEta=sign*(3.0515+etabias);
+      }else if((perc>30)&&((perc<=100))){
+        newEta=deteta;
+      }
+    }else if ((fabs(deteta)>3.104)&&(fabs(deteta)<=3.139)){
+      if(perc<=30){
+        newEta=sign*(3.0515+etabias);
+      }else if((perc>30)&&((perc<=100))){
+        newEta=deteta;
+      }
+    }else if ((fabs(deteta)>3.1915)&&(fabs(deteta)<=3.279)){
+      if(perc<=53){
+        newEta=sign*(3.22650+etabias);
+      }else if((perc>53)&&((perc<=100))){
+        newEta=deteta;
+      }
+    }else if ((fabs(deteta)>3.3665)&&(fabs(deteta)<=3.454)){
+      if(perc<=42){
+        newEta=sign*(3.4015+etabias);
+      }else if((perc>42)&&((perc<=100))){
+        newEta=deteta;
+      }
+    }else if ((fabs(deteta)>3.5415)&&(fabs(deteta)<=3.629)){
+      if(perc<=35){
+        newEta=sign*(3.5765+etabias);
+      }else if((perc>35)&&((perc<=100))){
+        newEta=deteta;
+      }
+    }else if ((fabs(deteta)>3.7165)&&(fabs(deteta)<=3.804)){
+      if(perc<=25){
+        newEta=sign*(3.7515+etabias);
+      }else if((perc>25)&&((perc<=100))){
+        newEta=deteta;
+      }else if ((fabs(deteta)>3.89135)&&(fabs(deteta)<=3.9786)){
+      if(perc<=20){
+        newEta=sign*(3.926+etabias);
+      }else if((perc>20)&&((perc<=100))){
+        newEta=deteta;
+      }
+    
+      }
+
+    }
+   eta=(asinh(etaFact*sinh(newEta)));
   }
   
   //std::cout << " OLD E " << electron.E() << " new eta " << electron.eta() << " new et " << electron.Et() << " new pt " << electron.pt() <<  " mass : " << electron.M() << std::endl;
@@ -302,8 +402,50 @@ Double_t crystalBall(Double_t *x, Double_t *par)
 
 }
 
+Double_t EBRes(Double_t *x,Double_t *par) {
+  if (x[0] < 0.01 ) return 100.;
+  Double_t p0 = par[0]/x[0] + par[3];
+  Double_t p1 = par[1]/x[0];
+  Double_t p2 = par[2]/x[0];
+  return (p0+p1*fabs(x[1])+p2*x[1]*x[1]);
+}
+
+Double_t EERes(Double_t *x,Double_t *par) {
+  if (x[0] < 0.01 ) return 100.;
+  Double_t p0 = par[0]/x[0];
+  Double_t p1 = par[1]/x[0];
+  Double_t p2 = par[2]/x[0];
+  return (p0+p1*fabs(x[1])+p2*x[1]*x[1]);
+}
+
+double ZSmearingProducer::getSigma(double eta, double et, char *det)
+{
+  double x[2];
+  x[0] = et;
+  x[1] = eta;
+  
+  if ( det == "EB")
+  {
+     return (EBRes(x,EBPrams_.sigma));
+  }
+  else if ( det == "EE")
+  {
+     return (EERes(x,EEPrams_.sigma));
+  }
+  else return 1.0;
+}
+
 double ZSmearingProducer::smearECALCB(double eta, double et, char *det)
 {
+  double params[5];
+  params[3] = getSigma(eta, et, det);
+  params[0] = ( det == "EB" ) ? (EBPrams_.alpha) : (EEPrams_.alpha);
+  params[1] = ( det == "EB" ) ? (EBPrams_.N) : (EEPrams_.N);
+  params[2] = ( det == "EB" ) ? (EBPrams_.mean) : (EEPrams_.mean);
+  params[4] = 100.;
+  crystalball_->SetParameters(params);
+  return crystalball_->GetRandom();
+  /*Crystal Ball from a binned file.
   //First I need to find which efficiency bin we need
   int index = smearTable_->GetBandIndex(et,eta);
   //Then I need to get the crystal ball paramters from that bin
@@ -318,6 +460,8 @@ double ZSmearingProducer::smearECALCB(double eta, double et, char *det)
   crystalball_->SetParameters(&myVals[1]);
   //lastly, I need to get a random number from the function
   return crystalball_->GetRandom();
+  */
+
 }
 
 //Method for smearing ECAL
