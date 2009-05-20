@@ -26,6 +26,7 @@ const char* labelFor(int i) {
 }
 
 #include "tdrstyle.C"
+#include "zrapidityStandard.C"
 
 void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
   TDirectory* basedir=f->Get("mcEff");
@@ -95,7 +96,8 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
     work->SetLineColor(colorFor(n));
     work->SetLineWidth(2);
     if (i==0) {
-      work->GetYaxis()->SetTitle("Efficiency*Acceptance");
+      work->GetYaxis()->SetTitle("#epsilon #times A");
+      work->GetXaxis()->SetTitle("Y_{Z}");
       work->GetYaxis()->SetTitleOffset(1.2);
       work->SetTitle(0);
       work->SetStats(false);
@@ -125,15 +127,7 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
   tl2->SetFillColor(0);
   tl2->Draw("SAME");
 
-  TText* tt=new TText(0.8,0.92,"Preliminary");
-  tt->SetNDC();
-  tt->SetTextSize(0.03);
-  tt->Draw();
-  TDatime now;
-  TText* tt2=new TText(0.8,0.90,now.AsString());
-  tt2->SetNDC();
-  tt2->SetTextSize(0.013);
-  tt2->Draw();
+  zrap_Prelim(0.8,0.77,0.8,0.74);
 
   char stuff[1024];
   if (post==0) sprintf(stuff,"effacc_bycut.png");
@@ -152,7 +146,9 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
   final2->SetLineWidth(2);
   finalt->SetLineWidth(2);
 
-  final->GetYaxis()->SetTitle("Efficiency*Acceptance");
+  final->GetYaxis()->SetTitle("#epsilon #times A");
+  final->GetXaxis()->SetTitle("Y_{Z}");
+
   final->GetYaxis()->SetTitleOffset(1.2);
   final->SetTitle(0);
   final->SetStats(false);
@@ -177,15 +173,7 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
   tl3->AddEntry(finalt,"Total");
   tl3->Draw();
 
-  tt=new TText(0.2,0.92,"Preliminary");
-  tt->SetNDC();
-  tt->SetTextSize(0.03);
-  tt->Draw();
-  TDatime now;
-  tt2=new TText(0.2,0.90,now.AsString());
-  tt2->SetNDC();
-  tt2->SetTextSize(0.013);
-  tt2->Draw();
+  zrap_Prelim(0.3,0.9,0.3,0.87);
 
   if (post==0) sprintf(stuff,"effacc_bytype.png");
   else sprintf(stuff,"effacc_bytype_%s.png",post);
@@ -197,6 +185,8 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
   if (post==0) sprintf(stuff,"effacc.txt");
   else sprintf(stuff,"effacc_%s.txt",post);
   FILE* stats=fopen(stuff,"wt");
+
+  TDatime now;
 
   fprintf(stats,"#Bin Y_min Y_max Eff*Acc %s\n",now.AsString());
 
