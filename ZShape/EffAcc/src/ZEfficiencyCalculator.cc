@@ -30,11 +30,14 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
     std::string name=i->getUntrackedParameter<std::string>("name");
     std::vector<std::string> req1=i->getUntrackedParameter<std::vector<std::string> >("e1");
     std::vector<std::string> req2=i->getUntrackedParameter<std::vector<std::string> >("e2");
+    std::vector<std::string> reqZ=i->getUntrackedParameter<std::vector<std::string> >("Z");
     ZShapeZDef* zdef=new ZShapeZDef();
     for (std::vector<std::string>::iterator k=req1.begin(); k!=req1.end(); k++) 
       zdef->addCriterion(ZShapeZDef::crit_E1,*k);
     for (std::vector<std::string>::iterator k=req2.begin(); k!=req2.end(); k++) 
       zdef->addCriterion(ZShapeZDef::crit_E2,*k);
+    for (std::vector<std::string>::iterator k=reqZ.begin(); k!=reqZ.end(); k++) 
+      zdef->addCriterion(ZShapeZDef::crit_Z,*k);
     zdefs_[name]=zdef;
   }
 
@@ -74,11 +77,6 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   edm::LogInfo("ZShape") << "esys_eff: " << targetEffSys_ << "   while esys_zdef: "<< targetZDefSys_;  
 
   createAlternateZDefs(targetZDefSys_,targetEffSys_);
-
-  //
-  // setting some invariant mass limits
-  massLow_  = iConfig.getUntrackedParameter<double>("MassLow",60.0);
-  massHigh_ = iConfig.getUntrackedParameter<double>("MassHigh",120.0);
 
 }
 
@@ -128,14 +126,6 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   //
   // fill histograms for before any selection
   allCase_.Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
-
-  math::PtEtaPhiMLorentzVector ZP4 = evt_.elec(0).p4_ + evt_.elec(1).p4_;
-  double invmass = sqrt ( ZP4.Dot(ZP4) );
-  if (invmass < massLow_ || invmass > massHigh_ )
-    {
-     edm::LogWarning("ZEfficiencyCalculator") << " The invariant mass " << invmass << "  is out of range ( " <<massLow_ << " to " << massHigh_ <<  " )  ";
-     return;
-    }
 
   // these stages merely _fill_ bits.  They do not apply cuts!
   for (int ne=0; ne<2; ne++) {
@@ -202,7 +192,17 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
               plots->postCut_[j-1].Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4());
             else 
               plots->postCut_[j-1].Fill(evt_.elec(1), evt_.elec(0), evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());
+	} // now the Z cuts
+	for (int j=0; ok && j<q->second->criteriaCount(ZShapeZDef::crit_Z); j++) {
+	  ok=q->second->pass(evt_,1000,1000,j+1,&pairing);
+	  
+          if (ok) 
+            if (!pairing)  
+              plots->zCut_[j].Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4());
+            else 
+              plots->zCut_[j].Fill(evt_.elec(1), evt_.elec(0), evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());	
         }// criteria  
+       
       }// Z definitions 
     }// end if pass==0 
 
@@ -351,6 +351,7 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
   evt_.elecTreeLevel(1).setPdgId(me[1]->pdgId()); 
   evt_.elecTreeLevel(1).setStatus(me[1]->status());
 
+  evt_.afterLoad();
 }  
   
 
@@ -374,7 +375,7 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
   for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
     
     // struct holding histograms for acc+all_cuts for each definition
-    ZPlots* zplots=new ZPlots(q->second->criteriaCount(ZShapeZDef::crit_E1)-1); // -1 for acceptance
+    ZPlots* zplots=new ZPlots(q->second->criteriaCount(ZShapeZDef::crit_E1)-1,q->second->criteriaCount(ZShapeZDef::crit_Z)); // -1 for acceptance
     
     TFileDirectory sd = fs->mkdir(q->first.c_str());
 
@@ -401,6 +402,17 @@ ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
       td = sd.mkdir(dirname);
       zplots->postCut_[i-1].Book(td);
     }
+    int iOffset=q->second->criteriaCount(ZShapeZDef::crit_E1);
+    for (int i=0; i<q->second->criteriaCount(ZShapeZDef::crit_Z); ++i) {
+      char dirname[1024];
+      std::string c1=q->second->criteria(ZShapeZDef::crit_Z,i);
+
+      sprintf(dirname,"C%02d-%s",i+iOffset,c1.c_str());
+
+      // one sub-dir for each step of selection
+      td = sd.mkdir(dirname);
+      zplots->zCut_[i].Book(td);
+    }    
 
     zplots_[q->first]=zplots;
   }
@@ -478,9 +490,15 @@ ZEfficiencyCalculator::endJob() {
     zplots_[q->first]->acceptance_.WrapUp(); 
     
     // looping over cuts foreseen in given Z definition, normalize matrix for each (Zdef,cut) 
-    for (int i=1; i<q->second->criteriaCount(ZShapeZDef::crit_E1); ++i) { 
+    //    for (int i=1; i<q->second->criteriaCount(ZShapeZDef::crit_E1); ++i) { 
+    for (unsigned int i=1; i<=zplots_[q->first]->postCut_.size(); ++i) { 
       
       zplots_[q->first]->postCut_[i-1].WrapUp(); 
+      
+    }// cuts of given z definition 
+    for (unsigned int i=0; i<zplots_[q->first]->zCut_.size(); ++i) { 
+      
+      zplots_[q->first]->zCut_[i].WrapUp(); 
       
     }// cuts of given z definition 
   }// Z definitions 

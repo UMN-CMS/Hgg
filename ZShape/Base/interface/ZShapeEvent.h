@@ -10,8 +10,8 @@
 
 /** \class ZShapeEvent
   *  
-  * $Date: 2008/12/10 14:15:52 $
-  * $Revision: 1.3 $
+  * $Date: 2009/02/08 22:19:24 $
+  * $Revision: 1.4 $
   * \author J. Mans - Minnesota
   */
 class ZShapeEvent {
@@ -22,6 +22,9 @@ public:
   int n_elec;
   int n_TLelec;
 
+  double m() const { return mass_; }
+  double Y() const { return rap_; }
+
   ZShapeElectron& elec(int i) { return ((i==0)?(*e1_):(*e2_)); }
   const ZShapeElectron& elec(int i) const { return ((i==0)?(*e1_):(*e2_)); }
   reco::GenParticle& elecTreeLevel(int i) { return ((i==0)?(*eTL1_):(*eTL2_)); }
@@ -31,6 +34,7 @@ public:
   virtual void clear();
   virtual void dump(std::ostream& s) const;
   virtual void dump() const;
+  void afterLoad();
 private:
   virtual ZShapeElectron* allocateElectron();
   virtual reco::GenParticle* allocateTreeLevelElectron();
@@ -38,6 +42,7 @@ private:
   ZShapeElectron* e2_;
   reco::GenParticle * eTL1_;
   reco::GenParticle * eTL2_;
+  double mass_, rap_;
 };
 
 #endif

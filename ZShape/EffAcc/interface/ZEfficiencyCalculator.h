@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.13 2009/04/08 21:07:47 mansj Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.14 2009/04/17 13:42:08 haupt Exp $
 //
 //
 
@@ -110,9 +110,10 @@ private:
 
   // at each step of selection for any z-definition
   struct ZPlots {
-    ZPlots(int nc) : postCut_(nc) { }
+    ZPlots(int nc, int nz) : postCut_(nc),zCut_(nz) { }
     EffHistos acceptance_;
     std::vector<EffHistos> postCut_;
+    std::vector<EffHistos> zCut_;
   };
   std::map<std::string,ZPlots*> zplots_;
 
