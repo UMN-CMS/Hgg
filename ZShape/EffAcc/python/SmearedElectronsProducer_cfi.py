@@ -16,18 +16,19 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
         #tuned by kevin on 04-16-09
     ),
     EB = cms.PSet(
-       p0 = cms.double(0.166),
-       p1 = cms.double(-0.176),
-       p2 = cms.double(0.793),
-       c = cms.double(0.011),
-       alpha = cms.double(1.1),
-       mean = cms.double(1.00),
-       n = cms.double(3.0) 	   
+       #tuned by j. Mans on 05-22-09
+       p0 = cms.double(0.035),
+       p1 = cms.double(1.06),
+       p2 = cms.double(4.78),
+       c = cms.double(0.007),
+       alpha = cms.double(1.90),
+       mean = cms.double(0.996),
+       n = cms.double(2.2) 	   
     ),
      EE = cms.PSet(
-       p0 = cms.double(6.29),
-       p1 = cms.double(-4.53),
-       p2 = cms.double(0.95),
+       p0 = cms.double(0.8),
+       p1 = cms.double(0.72),
+       p2 = cms.double(0.15),
        alpha = cms.double(1.2),
        mean = cms.double(1.013),
        n = cms.double(3.0) 	

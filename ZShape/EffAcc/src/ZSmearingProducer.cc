@@ -404,24 +404,27 @@ Double_t crystalBall(Double_t *x, Double_t *par)
 
 Double_t EBRes(Double_t *x,Double_t *par) {
   if (x[0] < 0.01 ) return 100.;
+  //  Double_t p0 = par[0]/x[0] + par[3];
+  //  Double_t p1 = par[1]/x[0];
+  //  Double_t p2 = par[2]/x[0];
   Double_t p0 = par[0]/x[0] + par[3];
-  Double_t p1 = par[1]/x[0];
-  Double_t p2 = par[2]/x[0];
-  return (p0+p1*fabs(x[1])+p2*x[1]*x[1]);
+  Double_t p1 = par[0]*par[1]/x[0];
+  Double_t p2 = par[0]*par[2]/x[0];
+  return (p0-p1*fabs(x[1])+p2*x[1]*x[1]);
 }
 
 Double_t EERes(Double_t *x,Double_t *par) {
   if (x[0] < 0.01 ) return 100.;
   Double_t p0 = par[0]/x[0];
-  Double_t p1 = par[1]/x[0];
-  Double_t p2 = par[2]/x[0];
-  return (p0+p1*fabs(x[1])+p2*x[1]*x[1]);
+  Double_t p1 = par[1]*par[0]/x[0];
+  Double_t p2 = par[2]*par[0]/x[0];
+  return (p0-p1*fabs(x[1])+p2*x[1]*x[1]);
 }
 
 double ZSmearingProducer::getSigma(double eta, double et, char *det)
 {
   double x[2];
-  x[0] = et;
+  x[0] = (et<1)?(0):sqrt(et); // energy for EB
   x[1] = eta;
   
   if ( det == "EB")
