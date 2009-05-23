@@ -69,9 +69,11 @@ private:
   virtual void endJob() ;
   void smearElectron(math::PtEtaPhiELorentzVector &electron) ;
 
-  double smearECAL (double eta, double et, char *det);
-  double smearECALCB (double eta, double et, char *det);
-  double getSigma (double eta, double et, char *det);
+  enum MyDetType { mdt_EB, mdt_EE, mdt_HF };
+
+  double smearECAL (double eta, double et, MyDetType det);
+  double smearECALCB (double eta, double et, MyDetType det);
+  double getSigma (double eta, double et, MyDetType det);
       
   // ----------member data ---------------------------
 
@@ -89,6 +91,7 @@ private:
   struct {
     double stocastic;
     double constant;
+    double mean;
   } HFParams_;
   
   struct {
@@ -122,6 +125,7 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   edm::ParameterSet ps=iConfig.getParameter<edm::ParameterSet>("HF");
   HFParams_.stocastic=ps.getParameter<double>("stocastic");
   HFParams_.constant=ps.getParameter<double>("constant");
+  HFParams_.mean=ps.getParameter<double>("mean");
 
   //Get EB Smearing Parameters
   ps=iConfig.getParameter<edm::ParameterSet>("EB");
@@ -290,19 +294,19 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   if (fabs(deteta) < EBEEboundry )
   {
     //Do EB stuff
-    Efrac = smearECALCB(deteta,e, "EB");
+    Efrac = smearECALCB(deteta,e, mdt_EB);
    
   }
   else if (fabs(deteta) < EEHFbountry)
   {
     //Do EE Stuff
-    Efrac = smearECALCB(deteta,et, "EE");
+    Efrac = smearECALCB(deteta,et, mdt_EE);
   }
   else if (fabs(deteta) < 5.0)
   {
     double mysig = HFParams_.stocastic/sqrt(std::max(e,1.0))+HFParams_.constant;
     double  etaFact=sinh(eta)/sinh(deteta);
-    Efrac = randomNum_->Gaus(1.0,mysig);
+    Efrac = randomNum_->Gaus(HFParams_.mean,mysig);
     double newEta=deteta;
     double perc = randomNum_->Uniform(100);
     double unif = randomNum_->Uniform(0.64,0.9);
@@ -421,33 +425,34 @@ Double_t EERes(Double_t *x,Double_t *par) {
   return (p0-p1*fabs(x[1])+p2*x[1]*x[1]);
 }
 
-double ZSmearingProducer::getSigma(double eta, double et, char *det)
+double ZSmearingProducer::getSigma(double eta, double et, MyDetType det)
 {
   double x[2];
   x[0] = (et<1)?(0):sqrt(et); // energy for EB
   x[1] = eta;
   
-  if ( det == "EB")
+  if ( det == mdt_EB)
   {
      return (EBRes(x,EBPrams_.sigma));
   }
-  else if ( det == "EE")
+  else if ( det == mdt_EE)
   {
      return (EERes(x,EEPrams_.sigma));
   }
   else return 1.0;
 }
 
-double ZSmearingProducer::smearECALCB(double eta, double et, char *det)
+double ZSmearingProducer::smearECALCB(double eta, double et, MyDetType det)
 {
   double params[5];
   params[3] = getSigma(eta, et, det);
-  params[0] = ( det == "EB" ) ? (EBPrams_.alpha) : (EEPrams_.alpha);
-  params[1] = ( det == "EB" ) ? (EBPrams_.N) : (EEPrams_.N);
-  params[2] = ( det == "EB" ) ? (EBPrams_.mean) : (EEPrams_.mean);
+  params[0] = ( det == mdt_EB ) ? (EBPrams_.alpha) : (EEPrams_.alpha);
+  params[1] = ( det == mdt_EB ) ? (EBPrams_.N) : (EEPrams_.N);
+  params[2] = ( det == mdt_EB) ? (EBPrams_.mean) : (1.0);
   params[4] = 100.;
+  double sf = ( det == mdt_EB) ? (1.0) : (EEPrams_.mean);
   crystalball_->SetParameters(params);
-  return crystalball_->GetRandom();
+  return crystalball_->GetRandom()*sf;
   /*Crystal Ball from a binned file.
   //First I need to find which efficiency bin we need
   int index = smearTable_->GetBandIndex(et,eta);
@@ -468,7 +473,7 @@ double ZSmearingProducer::smearECALCB(double eta, double et, char *det)
 }
 
 //Method for smearing ECAL
-double ZSmearingProducer::smearECAL(double eta, double et, char *det)
+double ZSmearingProducer::smearECAL(double eta, double et, MyDetType det)
 {
   double p0r = 0.;
   double p1r = 0.;
@@ -477,7 +482,7 @@ double ZSmearingProducer::smearECAL(double eta, double et, char *det)
   double p1l = 0.;
   double p2l = 0.;
 
-  if ( det == "EB" ) 
+  if ( det == mdt_EB ) 
     {
       //First the right, then the left sides sigma
       p0r = 0.0028 + 0.380/et;
@@ -488,7 +493,7 @@ double ZSmearingProducer::smearECAL(double eta, double et, char *det)
       p1l = 0.0185 - 0.410/et;
       p2l = -0.010 + 0.789/et;
     }
-  else if ( det == "EE" ) 
+  else if ( det == mdt_EE ) 
     {
       p0r = +6.29/et;
       p1r = -4.53/et;
