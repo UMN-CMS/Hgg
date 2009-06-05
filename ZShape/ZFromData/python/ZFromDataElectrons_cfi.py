@@ -135,37 +135,41 @@ theGsfHf = cms.EDFilter("CandViewMerger",
     src = cms.VInputTag(cms.InputTag("theGsfElectrons"), cms.InputTag("theHFSuperClusters"))
 )
 
-from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositEcalFromHits_cff import *
-from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositHcalFromHits_cff import *
 from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositTk_cff import *
+from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositEcalFromHits_cff import *
+from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositHcalFromTowers_cff import *
 eleIsoDepositTk.src = cms.InputTag('theGsfElectrons')
 eleIsoDepositEcalFromHits.src = cms.InputTag('theTrackerIsolation')
-eleIsoDepositHcalFromHits.src = cms.InputTag('theEcalIsolation')
+eleIsoDepositHcalFromTowers.src = cms.InputTag('theEcalIsolation')
 
 
 theTrackerIsolation = cms.EDProducer("IsolatedElectronCandProducer",
-                                             electronProducer = cms.InputTag('theGsfElectrons'),
-                                             IsolationProducer = cms.InputTag('eleIsoFromDepsTk'),
-                                             isoCutEB = cms.double(4.3),
-                                             isoCutEE = cms.double(7.0),
-                                             EBEEBound = cms.double(1.5)
-                                     )
+	electronProducer = cms.InputTag('theGsfElectrons'),
+        #electronProducer = cms.InputTag('pixelMatchGsfElectrons'),
+	IsolationProducer = cms.InputTag('eleIsoFromDepsTk'),
+	isoCutEB = cms.double(7.2),
+	isoCutEE = cms.double(5.1),
+	EBEEBound = cms.double(1.5)
+)
 
 theEcalIsolation = cms.EDProducer("IsolatedElectronCandProducer",
-                                          electronProducer = cms.InputTag('theTrackerIsolation'),
-                                          IsolationProducer = cms.InputTag('eleIsoFromDepsEcalFromHits'),
-                                          isoCutEB = cms.double(0.0),
-                                          isoCutEE = cms.double(5.8),
-                                          EBEEBound = cms.double(1.5)
-                                  )
+	electronProducer = cms.InputTag('theTrackerIsolation'),
+        #electronProducer = cms.InputTag('electrons'),
+        #electronProducer = cms.InputTag('pixelMatchGsfElectrons'),
+	IsolationProducer = cms.InputTag('eleIsoFromDepsEcalFromHits'),
+	isoCutEB = cms.double(5.7),
+	isoCutEE = cms.double(5.0),
+	EBEEBound = cms.double(1.5)
+)
 
 theIsolation = cms.EDProducer("IsolatedElectronCandProducer",
-                                      electronProducer = cms.InputTag('theEcalIsolation'),
-                                      IsolationProducer = cms.InputTag('eleIsoFromDepsHcalFromHits'),
-                                      isoCutEB = cms.double(8.1),
-                                      isoCutEE = cms.double(5.6),
-                                      EBEEBound = cms.double(1.5)
-                              )
+	electronProducer = cms.InputTag('theEcalIsolation'),
+        #electronProducer = cms.InputTag('pixelMatchGsfElectrons'),
+	IsolationProducer = cms.InputTag('eleIsoFromDepsHcalFromTowers'),
+	isoCutEB = cms.double(8.1),
+	isoCutEE = cms.double(3.4),
+	EBEEBound = cms.double(1.5)
+)
 
 
 #  isolation  ################
@@ -186,37 +190,37 @@ import RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi
 eidRobust = RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi.eidCutBasedExt.clone()
 eidRobust.src = cms.InputTag('theIsolation')
 eidRobust.looseEleIDCuts = cms.PSet(
-            invEMinusInvP = cms.vdouble(0.02, 0.02, 0.02, 0.02, 0.02,
-                                                    0.02, 0.02, 0.02, 0.02),
-                    EoverPInMin = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0,
-                                                          0.0, 0.0, 0.0, 0.0),
-                    EoverPOutMin = cms.vdouble(0.7, 1.7, 0.9, 0.6, 0.7,
-                                                           1.7, 0.9, 0.6, 0.5),
-                    sigmaEtaEtaMin = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0,
-                                                             0.0, 0.0, 0.0, 0.0),
-                    EoverPOutMax = cms.vdouble(2.5, 999.0, 2.2, 999.0, 2.5,
-                                                           999.0, 2.2, 999.0, 999.0),
-                    EoverPInMax = cms.vdouble(999.0, 999.0, 999.0, 999.0, 999.0,
-                                                          999.0, 999.0, 999.0, 999.0),
-                    deltaPhiOut = cms.vdouble(0.011, 999.0, 999.0, 999.0, 0.02,
-                                                          999.0, 999.0, 999.0, 999.0),
-                    sigmaEtaEtaMax = cms.vdouble(0.0103, 0.0103, 0.0103, 0.0103, 0.0103,
-                                                             0.0285, 0.0285, 0.0285, 0.0285),
-                    deltaPhiIn = cms.vdouble(0.02, 0.06, 0.06, 0.08, 0.02,
-                                                         0.06, 0.06, 0.08, 0.08),
-                    HoverE = cms.vdouble(0.06, 0.06, 0.07, 0.08, 0.06,
-                                                     0.06, 0.07, 0.08, 0.12),
-                    sigmaPhiPhiMin = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0,
-                                                             0.0, 0.0, 0.0, 0.0),
-                    bremFraction = cms.vdouble(0.2, 0.2, 0.2, 0.2, 0.2,
-                                                           0.2, 0.2, 0.2, 0.2),
-                    deltaEtaIn = cms.vdouble(0.0085, 0.0085, 0.0085, 0.0085, 0.0085,
-                                                         0.0079, 0.0079, 0.0079, 0.0079),
-                    E9overE25 = cms.vdouble(0.8, 0.7, 0.7, 0.5, 0.8,
-                                                        0.8, 0.8, 0.8, 0.5),
-                    sigmaPhiPhiMax = cms.vdouble(999.0, 999.0, 999.0, 999.0, 999.0,
-                                                             999.0, 999.0, 999.0, 999.0)
-                )
+        invEMinusInvP = cms.vdouble(0.02, 0.02, 0.02, 0.02, 0.02, 
+            0.02, 0.02, 0.02, 0.02),
+        EoverPInMin = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0, 
+            0.0, 0.0, 0.0, 0.0),
+        EoverPOutMin = cms.vdouble(0.7, 1.7, 0.9, 0.6, 0.7, 
+            1.7, 0.9, 0.6, 0.5),
+        sigmaEtaEtaMin = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0, 
+            0.0, 0.0, 0.0, 0.0),
+        EoverPOutMax = cms.vdouble(2.5, 999.0, 2.2, 999.0, 2.5, 
+            999.0, 2.2, 999.0, 999.0),
+        EoverPInMax = cms.vdouble(999.0, 999.0, 999.0, 999.0, 999.0, 
+            999.0, 999.0, 999.0, 999.0),
+        deltaPhiOut = cms.vdouble(0.011, 999.0, 999.0, 999.0, 0.02, 
+            999.0, 999.0, 999.0, 999.0),
+        sigmaEtaEtaMax = cms.vdouble(0.010, 0.010, 0.010, 0.010, 0.010, 
+            0.028, 0.028, 0.028, 0.028),
+        deltaPhiIn = cms.vdouble(0.02, 0.06, 0.06, 0.08, 0.02, 
+            0.06, 0.06, 0.08, 0.08),
+        HoverE = cms.vdouble(0.06, 0.06, 0.07, 0.08, 0.06, 
+            0.06, 0.07, 0.08, 0.12),
+        sigmaPhiPhiMin = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0, 
+            0.0, 0.0, 0.0, 0.0),
+        bremFraction = cms.vdouble(0.2, 0.2, 0.2, 0.2, 0.2, 
+            0.2, 0.2, 0.2, 0.2),
+        deltaEtaIn = cms.vdouble(0.0071, 0.0071, 0.0071, 0.0071, 0.0071, 
+            0.0066, 0.0066, 0.0066, 0.0066),
+        E9overE25 = cms.vdouble(0.8, 0.7, 0.7, 0.5, 0.8, 
+            0.8, 0.8, 0.8, 0.5),
+        sigmaPhiPhiMax = cms.vdouble(999.0, 999.0, 999.0, 999.0, 999.0, 
+            999.0, 999.0, 999.0, 999.0)
+    )
 eidRobust.useEoverPOut = cms.vint32(0, 0, 0)
 eidRobust.useHoverE = cms.vint32(0, 0, 0)
 eidRobust.useE9overE25 = cms.vint32(0, 0, 0)
@@ -238,7 +242,7 @@ theHLT = cms.EDProducer("eTriggerCandProducer",
 )
 
 #electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * theIsolation * eidRobust * theId * theHLT * HFElectronID )
-electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * eleIsoDepositTk * eleIsoFromDepsTk * theTrackerIsolation * eleIsoDepositEcalFromHits * eleIsoFromDepsEcalFromHits * theEcalIsolation * eleIsoDepositHcalFromHits * eleIsoFromDepsHcalFromHits * theIsolation  * eidRobust * theId * theHLT * HFElectronID )
+electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * eleIsoDepositTk * eleIsoFromDepsTk * theTrackerIsolation * eleIsoDepositEcalFromHits * eleIsoFromDepsEcalFromHits * theEcalIsolation * eleIsoDepositHcalFromTowers * eleIsoFromDepsHcalFromTowers * theIsolation  * eidRobust * theId * theHLT * HFElectronID )
 
 
 
