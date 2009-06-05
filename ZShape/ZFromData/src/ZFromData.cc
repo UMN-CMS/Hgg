@@ -46,11 +46,14 @@ ZFromData::ZFromData(const edm::ParameterSet& iConfig) :
     std::string name=i->getUntrackedParameter<std::string>("name");
     std::vector<std::string> req1=i->getUntrackedParameter<std::vector<std::string> >("e1");
     std::vector<std::string> req2=i->getUntrackedParameter<std::vector<std::string> >("e2");
+    std::vector<std::string> reqZ=i->getUntrackedParameter<std::vector<std::string> >("Z");
     ZShapeZDef* zdef=new ZShapeZDef();
     for (std::vector<std::string>::iterator k=req1.begin(); k!=req1.end(); k++) 
       zdef->addCriterion(ZShapeZDef::crit_E1,*k);
     for (std::vector<std::string>::iterator k=req2.begin(); k!=req2.end(); k++) 
       zdef->addCriterion(ZShapeZDef::crit_E2,*k);
+    for (std::vector<std::string>::iterator k=reqZ.begin(); k!=reqZ.end(); k++) 
+      zdef->addCriterion(ZShapeZDef::crit_Z,*k);
     zdefs_[name]=zdef;
     zptorder_[name] = i->getUntrackedParameter<bool>("ptorder", false);
   }
