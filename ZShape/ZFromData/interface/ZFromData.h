@@ -92,6 +92,7 @@ private:
 
   std::map<std::string, EffInfo*> effInfo_;
   edm::InputTag tnpProducer_;
+  edm::InputTag gsfProducer_; //added to count the number of gsf's above 20
 
   //Iso and hlt information
   ///HLTisPassed _HLTpassed;
@@ -136,12 +137,14 @@ private:
 
   // at each step of selection for any z-definition
   struct ZPlots {
-    ZPlots(int nc) : postCut_(nc), postCutExtra_(nc) { }
+    ZPlots(int nc, int nz) : postCut_(nc), postCutExtra_(nc), zCut_(nz), zCutExtra_(nz) { }
     ///ZPlots(int nc) : postCut_(nc) { }
     EffHistos acceptance_;
     EffExtraHistos acceptanceExtra_; //added for the extra histos
     std::vector<EffHistos> postCut_;
     std::vector<EffExtraHistos> postCutExtra_; //added for the extra histos
+    std::vector<EffHistos> zCut_;
+    std::vector<EffExtraHistos> zCutExtra_; //added for the extra histos
   };
   std::map<std::string,ZPlots*> zplots_;
   TRandom3 *random_;

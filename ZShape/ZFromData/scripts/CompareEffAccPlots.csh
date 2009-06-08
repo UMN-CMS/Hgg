@@ -33,7 +33,9 @@ gStyle->SetTitleAlign(22);
 .L compareEffAcc.C++
 //81.17
 //8.0593665
-EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE/ZeeFromDataJeremyTEMPLATE/histoJeremy09_only1hlt_TRIAL.root","/data/whybee0c/user/haupt/Electrons/TNPTREE/testProdZEfficiencySmeared_10MTEMPLATE/histo_10M_part.root",zdefvec, 8.0593665);
+//16.118733
+//6.88835 for M20.... (cross fingers)...
+EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE/ZeeFromDataJeremyTEMPLATE/histoJeremy09_only1hlt_TRIAL_Z20.root","/data/whybee0c/user/haupt/Electrons/TNPTREE/testProdZEfficiencySmeared_10MTEMPLATE/histo_10M_part.root",zdefvec, 6.88835);
 myEffAccHistos->getFiles();
 myEffAccHistos->getHistos();
 myEffAccHistos->printSumHistos("${filetype}");

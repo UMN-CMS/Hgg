@@ -14,7 +14,7 @@
 #include "PhysicsTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
 #include "DataFormats/EgammaCandidates/interface/Electron.h"
-
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
 
 
@@ -77,6 +77,8 @@ ZFromData::ZFromData(const edm::ParameterSet& iConfig) :
   //This is the Zee association map that we will start the efficiencies on
   tnpProducer_ =  iConfig.getUntrackedParameter<edm::InputTag >("TagProbeProducer");
    
+  //Collection of GsfElectrons greater than 20 GeV pt.
+  gsfProducer_ =  iConfig.getUntrackedParameter<edm::InputTag >("GsfProducer");
   //The Isolation & HLT  Parameters
   ///_HLTpassed.Init(iConfig);
   ///_Isopassed.Init(iConfig);
@@ -174,6 +176,20 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   evt_.clear();
   //std::cout << " Checking an Event " << std::endl;
    
+  //First set the number of Gsf Electrons above 20 GeV
+  edm::Handle< reco::GsfElectronCollection> electronHandle;
+  try
+    {
+      iEvent.getByLabel(gsfProducer_,electronHandle);
+    }
+  catch(cms::Exception &ex)
+    {
+      edm::LogError("ZFromData::GsfElectron ") << "Error! Can't get collection " << 
+	gsfProducer_;
+      throw ex;
+    }
+   evt_.n_gsf20 = electronHandle->size();
+
   
   // Fill some information about the tag & probe collections
   //int nrtp = 0;
@@ -232,7 +248,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		   //std::cout << "doing the cuts themselves " << std::endl;
 		   evt_.elec(0).cutResult(cutName_[itype], ProbePassProbeOverlap(tag,passprobes,exactMatch_[itype]));
 		   evt_.elec(1).cutResult(cutName_[itype], ProbePassProbeOverlap(vprobes[0].first,passprobes,exactMatch_[itype]));
-           evt_.n_elec=2;
+		   evt_.n_elec=2;
 	       // Did this tag cause a L1 and/or HLT trigger?
 	       //bool l1Trigger = false;
 	       //bool hltTrigger = false;
@@ -257,6 +273,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
  
   allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
   if (evt_.n_elec!=2) return; // need 2 and only 2
+  evt_.afterLoad(); //added to be consistent 
   std::cout << " There was 1 good pair " << std::endl;
   //
   // fill histograms for before any selection
@@ -322,7 +339,19 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    plots->postCut_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
             if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n));
 	  }
-      }
+        }// now the Z cuts
+	for (int j=0; ok && j<q->second->criteriaCount(ZShapeZDef::crit_Z); j++) {
+	  ok=q->second->pass(evt_,1000,1000,j+1,&pairing);
+          e1n = e1;
+          e2n = e2;	  
+          if (pairing) {std::swap(e1n,e2n); }
+          if (ok) 
+          {
+            plots->zCut_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
+            if (extraHistos_) plots->zCutExtra_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n), evtMC_.elec(e2n));
+          }	
+        }// criteria 
+        
     }
 
 
@@ -430,7 +459,7 @@ ZFromData::beginJob(const edm::EventSetup&)
   //
   // one directory for each Z definition
   for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
-    ZPlots* zplots=new ZPlots(q->second->criteriaCount(ZShapeZDef::crit_E1)-1); // -1 for acceptance
+    ZPlots* zplots=new ZPlots(q->second->criteriaCount(ZShapeZDef::crit_E1)-1, q->second->criteriaCount(ZShapeZDef::crit_Z)); // -1 for acceptance
 
     TFileDirectory sd = fs->mkdir(q->first.c_str());
 
@@ -458,6 +487,19 @@ ZFromData::beginJob(const edm::EventSetup&)
       
        //if (extraHistos_){td->cd(); zplots->postCutExtra_[i-1].Book();}
       if (extraHistos_){ zplots->postCutExtra_[i-1].Book(td);}
+    }
+
+    int iOffset=q->second->criteriaCount(ZShapeZDef::crit_E1);
+    for (int i=0; i<q->second->criteriaCount(ZShapeZDef::crit_Z); ++i) {
+      char dirname[1024];
+      std::string c1=q->second->criteria(ZShapeZDef::crit_Z,i);
+
+      sprintf(dirname,"C%02d-%s",i+iOffset,c1.c_str());
+
+      // one sub-dir for each step of selection
+      td = sd.mkdir(dirname);
+      zplots->zCut_[i].Book(td);
+      if (extraHistos_){ zplots->zCutExtra_[i].Book(td);}
     }
 
     zplots_[q->first]=zplots;

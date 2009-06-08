@@ -124,6 +124,10 @@ theGsfElectrons = cms.EDFilter("GsfElectronSelector",
     cut = cms.string('et > 10.0 & ((abs( caloPosition.eta ) < 1.4442) | (abs( caloPosition.eta ) > 1.560 & abs( caloPosition.eta ) < 3.0)) & (( caloEnergy * sin( caloPosition.theta ) )  > 5.0) & pt < 105.0 ')
 )
 
+thePt20GsfElectrons = cms.EDFilter("GsfElectronSelector",
+    src = cms.InputTag("electrons"),
+    cut = cms.string('pt > 20.0 & (( caloEnergy * sin( caloPosition.theta ) )  > 10.0)')
+)
 
 HFElectronID = cms.EDFilter("CandViewSelector",
     src = cms.InputTag("hfRecoEcalCandidate"),
@@ -242,7 +246,7 @@ theHLT = cms.EDProducer("eTriggerCandProducer",
 )
 
 #electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * theIsolation * eidRobust * theId * theHLT * HFElectronID )
-electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * eleIsoDepositTk * eleIsoFromDepsTk * theTrackerIsolation * eleIsoDepositEcalFromHits * eleIsoFromDepsEcalFromHits * theEcalIsolation * eleIsoDepositHcalFromTowers * eleIsoFromDepsHcalFromTowers * theIsolation  * eidRobust * theId * theHLT * HFElectronID )
+electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * thePt20GsfElectrons * eleIsoDepositTk * eleIsoFromDepsTk * theTrackerIsolation * eleIsoDepositEcalFromHits * eleIsoFromDepsEcalFromHits * theEcalIsolation * eleIsoDepositHcalFromTowers * eleIsoFromDepsHcalFromTowers * theIsolation  * eidRobust * theId * theHLT * HFElectronID )
 
 
 
