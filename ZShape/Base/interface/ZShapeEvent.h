@@ -10,8 +10,8 @@
 
 /** \class ZShapeEvent
   *  
-  * $Date: 2009/02/08 22:19:24 $
-  * $Revision: 1.4 $
+  * $Date: 2009/05/20 22:39:05 $
+  * $Revision: 1.5 $
   * \author J. Mans - Minnesota
   */
 class ZShapeEvent {
@@ -21,6 +21,7 @@ public:
   ::math::XYZPoint vtx_;
   int n_elec;
   int n_TLelec;
+  int n_gsf20;
 
   double m() const { return mass_; }
   double Y() const { return rap_; }

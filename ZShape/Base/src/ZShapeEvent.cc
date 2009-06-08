@@ -27,7 +27,7 @@ void ZShapeEvent::clear() {
   elec(0).clear();
   elec(1).clear();
   n_elec=0;
-
+  n_gsf20=0;
 
   if(eTL1_==0) eTL1_=allocateTreeLevelElectron();
   if(eTL2_==0) eTL2_=allocateTreeLevelElectron();

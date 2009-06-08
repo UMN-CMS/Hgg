@@ -11,8 +11,8 @@ class ZShapeEvent;
   * These cuts apply to the first electron, the second electron, and then
   * the di-electron. 
   * 
-  * $Date: 2007/12/05 22:40:49 $
-  * $Revision: 1.2 $
+  * $Date: 2009/05/20 22:39:05 $
+  * $Revision: 1.3 $
   * \author J. Mans - Minnesota
   */
 class ZShapeZDef {
@@ -33,7 +33,7 @@ private:
   bool passZ(const ZShapeEvent& evt, int nz) const;
   std::vector<std::string> m_requirements[3];
   
-  enum ZReqType { zr_Undef, zr_Mass, zr_Rapidity };
+  enum ZReqType { zr_Undef, zr_Mass, zr_Rapidity, zr_NGsf20 };
   struct ZReqStruct {
     ZReqType reqType;
     double lower, upper;
