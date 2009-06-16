@@ -195,9 +195,11 @@ EffAccHistos::getHistos(void)
    for (itvecstring mine = ZDefVec_.begin(); mine != ZDefVec_.end(); ++mine)
    {
       std::cout << " The Z Defs under consideration are " << (*mine) << std::endl;
-      FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
+      //FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
+      FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
+      //MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
+      MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
 
-      MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
 
       namedvechists ZFDhist;
       namedvechists ZMChist;
@@ -210,7 +212,8 @@ EffAccHistos::getHistos(void)
           if ( strcmp(key->GetClassName(),"TDirectoryFile")==0 ) std::cout << "This is a " <<key->GetClassName() << " named " << key->GetName() << std::endl;
           else continue;
           TDirectory *ZMCdirtemp = ZMCdir->GetDirectory(key->GetName());
-          if (strstr(key->GetName(),"C08")) continue;
+          //if (strstr(key->GetName(),"C08")) continue;
+	  //if (strstr(key->GetName(),"C03")) continue;
           TDirectory *ZFDdirtemp = ZFDdir->GetDirectory(key->GetName());
           TIter nextd(ZMCdirtemp->GetListOfKeys());
           TKey * keyd;
@@ -422,7 +425,7 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
            //if (strstr((*zmcvhit)->GetName(),"Pt"))(*zmcvhit)->Rebin();
 	   if ((*zfdvhit)->GetMaximum() > (*zmcvhit)->GetMaximum())(*zfdvhit)->Draw("P");
            else (*zmcvhit)->Draw("hist");
-           if (strstr(cuttype,"C07")) lastplot = true;
+           if (strstr(cuttype,"C08")) lastplot = true;
            (*zmcvhit)->Draw("histsame");
            (*zmcvhit)->SetLineColor(kRed);
            (*zmcvhit)->SetLineWidth(2);

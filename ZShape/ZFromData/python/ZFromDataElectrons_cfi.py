@@ -92,7 +92,7 @@ thepreSuperClusters = cms.EDFilter("PdgIdAndStatusCandViewSelector",
 # My final selection of superCluster candidates 
 theSuperClusters = cms.EDFilter("CandViewSelector",
     src = cms.InputTag("allSuperClusters"),
-    cut = cms.string('et  > 5.0 & ((abs( eta ) < 1.4442) | (abs( eta ) > 1.560 & abs( eta ) < 3.0) | (abs( eta ) > 3 & abs( eta ) < 5))')
+    cut = cms.string('et  > 5.0')
 )
 
 theEEHFGapSuperClusters =  cms.EDFilter("CandViewSelector",
@@ -121,7 +121,7 @@ electrons = cms.EDFilter("ElectronDuplicateRemover",
 
 theGsfElectrons = cms.EDFilter("GsfElectronSelector",
     src = cms.InputTag("electrons"),
-    cut = cms.string('et > 10.0 & ((abs( caloPosition.eta ) < 1.4442) | (abs( caloPosition.eta ) > 1.560 & abs( caloPosition.eta ) < 3.0)) & (( caloEnergy * sin( caloPosition.theta ) )  > 5.0) & pt < 105.0 ')
+    cut = cms.string('et > 10.0 & pt < 105.0')
 )
 
 thePt20GsfElectrons = cms.EDFilter("GsfElectronSelector",
@@ -193,44 +193,10 @@ from RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi import *
 import RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi
 eidRobust = RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi.eidCutBasedExt.clone()
 eidRobust.src = cms.InputTag('theIsolation')
-eidRobust.looseEleIDCuts = cms.PSet(
-        invEMinusInvP = cms.vdouble(0.02, 0.02, 0.02, 0.02, 0.02, 
-            0.02, 0.02, 0.02, 0.02),
-        EoverPInMin = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0, 
-            0.0, 0.0, 0.0, 0.0),
-        EoverPOutMin = cms.vdouble(0.7, 1.7, 0.9, 0.6, 0.7, 
-            1.7, 0.9, 0.6, 0.5),
-        sigmaEtaEtaMin = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0, 
-            0.0, 0.0, 0.0, 0.0),
-        EoverPOutMax = cms.vdouble(2.5, 999.0, 2.2, 999.0, 2.5, 
-            999.0, 2.2, 999.0, 999.0),
-        EoverPInMax = cms.vdouble(999.0, 999.0, 999.0, 999.0, 999.0, 
-            999.0, 999.0, 999.0, 999.0),
-        deltaPhiOut = cms.vdouble(0.011, 999.0, 999.0, 999.0, 0.02, 
-            999.0, 999.0, 999.0, 999.0),
-        sigmaEtaEtaMax = cms.vdouble(0.010, 0.010, 0.010, 0.010, 0.010, 
-            0.028, 0.028, 0.028, 0.028),
-        deltaPhiIn = cms.vdouble(0.02, 0.06, 0.06, 0.08, 0.02, 
-            0.06, 0.06, 0.08, 0.08),
-        HoverE = cms.vdouble(0.06, 0.06, 0.07, 0.08, 0.06, 
-            0.06, 0.07, 0.08, 0.12),
-        sigmaPhiPhiMin = cms.vdouble(0.0, 0.0, 0.0, 0.0, 0.0, 
-            0.0, 0.0, 0.0, 0.0),
-        bremFraction = cms.vdouble(0.2, 0.2, 0.2, 0.2, 0.2, 
-            0.2, 0.2, 0.2, 0.2),
-        deltaEtaIn = cms.vdouble(0.0071, 0.0071, 0.0071, 0.0071, 0.0071, 
-            0.0066, 0.0066, 0.0066, 0.0066),
-        E9overE25 = cms.vdouble(0.8, 0.7, 0.7, 0.5, 0.8, 
-            0.8, 0.8, 0.8, 0.5),
-        sigmaPhiPhiMax = cms.vdouble(999.0, 999.0, 999.0, 999.0, 999.0, 
-            999.0, 999.0, 999.0, 999.0)
-    )
-eidRobust.useEoverPOut = cms.vint32(0, 0, 0)
-eidRobust.useHoverE = cms.vint32(0, 0, 0)
-eidRobust.useE9overE25 = cms.vint32(0, 0, 0)
-eidRobust.useDeltaEtaIn = cms.vint32(0, 0, 0)
-eidRobust.useDeltaPhiIn = cms.vint32(0, 0, 0)
-eidRobust.useDeltaPhiOut = cms.vint32(0, 0, 0)
+eidRobust.robustEleIDCuts = cms.PSet(
+            barrel = cms.vdouble(999.9, 0.010, 999.9, 0.0071),
+            endcap = cms.vdouble(999.9, 0.028, 999.9, 0.0066)
+                )
 
 
 theId = cms.EDProducer("eidCandProducer",
@@ -275,14 +241,16 @@ tpMapSuperClusters = cms.EDProducer("TagProbeProducer",
     #TagCollection = cms.InputTag("theHLT"),
     TagCollection = cms.InputTag("theSuperClusters"),
     MassMinCut = cms.untracked.double(60.0),
-    ProbeCollection = cms.InputTag("theSuperClusters")
+    ProbeCollection = cms.InputTag("theSuperClusters"),
+    RequireOS = cms.untracked.bool(False)
 )
 
 tpMappreSuperClusters = cms.EDProducer("TagProbeProducer",
     MassMaxCut = cms.untracked.double(130.0),
     TagCollection = cms.InputTag("theHLT"),
     MassMinCut = cms.untracked.double(50.0),
-    ProbeCollection = cms.InputTag("thepreSuperClusters")
+    ProbeCollection = cms.InputTag("thepreSuperClusters"),
+    RequireOS = cms.untracked.bool(False)
 )
 
 tpMapGsfElectrons = cms.EDProducer("TagProbeProducer",
@@ -290,35 +258,41 @@ tpMapGsfElectrons = cms.EDProducer("TagProbeProducer",
     #TagCollection = cms.InputTag("theHLT"),
     TagCollection = cms.InputTag("theGsfElectrons"),
     MassMinCut = cms.untracked.double(60.0),
-    ProbeCollection = cms.InputTag("theGsfElectrons")
+    ProbeCollection = cms.InputTag("theGsfElectrons"),
+    RequireOS = cms.untracked.bool(False)
 )
 
 tpMapIsolation = cms.EDProducer("TagProbeProducer",
     MassMaxCut = cms.untracked.double(120.0),
     TagCollection = cms.InputTag("theHLT"),
     MassMinCut = cms.untracked.double(60.0),
-    ProbeCollection = cms.InputTag("theIsolation")
+    ProbeCollection = cms.InputTag("theIsolation"),
+    RequireOS = cms.untracked.bool(False)
 )
 
 tpMapId = cms.EDProducer("TagProbeProducer",
     MassMaxCut = cms.untracked.double(120.0),
     TagCollection = cms.InputTag("theHLT"),
     MassMinCut = cms.untracked.double(60.0),
-    ProbeCollection = cms.InputTag("theId")
+    ProbeCollection = cms.InputTag("theId"),
+    RequireOS = cms.untracked.bool(False)
 )
 
 tpMapHFSuperClusters = cms.EDProducer("TagProbeProducer",
     MassMaxCut = cms.untracked.double(120.0),
     TagCollection = cms.InputTag("theHLT"),          #theID??
     MassMinCut = cms.untracked.double(60.0),
-    ProbeCollection = cms.InputTag("theHFSuperClusters")
+    ProbeCollection = cms.InputTag("theHFSuperClusters"),
+    RequireOS = cms.untracked.bool(False)
 )
 
 tpMapGsfAndHF = cms.EDProducer("TagProbeProducer",
     MassMaxCut = cms.untracked.double(120.0),
-    TagCollection = cms.InputTag("theGsfElectrons"),          #theID??
+    #TagCollection = cms.InputTag("theGsfElectrons"),          #theID??
+    TagCollection = cms.InputTag("theHLT"),
     MassMinCut = cms.untracked.double(60.0),
-    ProbeCollection = cms.InputTag("theGsfHf")
+    ProbeCollection = cms.InputTag("theGsfHf"),
+    RequireOS = cms.untracked.bool(False)
 )
 
 tpMap_sequence = cms.Sequence(tpMappreSuperClusters + tpMapSuperClusters + tpMapGsfElectrons + tpMapIsolation + tpMapId + tpMapHFSuperClusters + tpMapGsfAndHF)

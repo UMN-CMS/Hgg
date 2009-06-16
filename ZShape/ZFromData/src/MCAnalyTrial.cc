@@ -89,6 +89,7 @@ void MCAnalyTrial::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
       unsigned int index = f - mctags->begin();
       CandidateBaseRef mctagRef = mctags->refAt(index);
       if( mctagRef.isNull() ) continue;
+      std::cout << " The probe pt is " << mctagRef->pt() << " et: " << mctagRef->et() << " eta: " << mctagRef->eta() << std::endl;
       bool good = false;
       good = (bool) ProbePassProbeOverlap(mctagRef,sctags,false);
       int myindex = effBinsFromTxt_->GetBandIndex(mctagRef->pt(), mctagRef->eta());
