@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.14 2009/04/17 13:42:08 haupt Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.15 2009/05/20 22:39:05 mansj Exp $
 //
 //
 
@@ -107,6 +107,13 @@ private:
 
   // before any z-def selection
   EffHistos allCase_;
+
+  struct RegionalPlots {
+    TH1F* ecal_ecal, *ecal_ntrk, *ecal_hf, *ecal_noacc;
+    TH1F* ntrk_ntrk, *ntrk_hf, *ntrk_noacc;
+    TH1F* hf_hf, *hf_noacc, *noacc_noacc;
+  } accHistos_;
+    
 
   // at each step of selection for any z-definition
   struct ZPlots {
