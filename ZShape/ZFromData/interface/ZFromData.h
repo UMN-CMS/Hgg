@@ -23,7 +23,7 @@ Implementation:
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "DataFormats/Common/interface/Handle.h"
 
 #include <CLHEP/Vector/LorentzVector.h>
@@ -134,6 +134,13 @@ private:
   EffHistos allCaseFirst_;
   EffExtraHistos allCaseExtra_;
   EffExtraHistos allCaseExtraFirst_;
+
+
+  struct RegionalPlots {
+    TH1F* ecal_ecal, *ecal_ntrk, *ecal_hf, *ecal_noacc;
+    TH1F* ntrk_ntrk, *ntrk_hf, *ntrk_noacc;
+    TH1F* hf_hf, *hf_noacc, *noacc_noacc;
+  } accHistos_;
 
   // at each step of selection for any z-definition
   struct ZPlots {

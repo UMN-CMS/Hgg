@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Mon Feb 18 21:18:39 CET 2008
-// $Id: ZEventProducer.cc,v 1.6 2008/06/29 14:42:41 franzoni Exp $
+// $Id: ZEventProducer.cc,v 1.7 2008/10/21 15:59:16 mansj Exp $
 //
 //
 
@@ -37,7 +37,7 @@ Implementation:
 
 #include "DataFormats/Math/interface/LorentzVector.h"
 
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 

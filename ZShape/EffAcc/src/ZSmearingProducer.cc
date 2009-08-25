@@ -32,7 +32,7 @@ Implementation:
 
 #include "DataFormats/Math/interface/LorentzVector.h"
 
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 

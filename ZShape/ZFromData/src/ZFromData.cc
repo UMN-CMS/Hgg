@@ -287,6 +287,29 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   stdCuts_.ptCuts(evt_.elec(1));
   stdCuts_.dummyCuts(evt_.elec(0));
   stdCuts_.dummyCuts(evt_.elec(1));
+
+  {
+    math::XYZTLorentzVector p1(evt_.elec(0).p4_);
+    math::XYZTLorentzVector p2(evt_.elec(1).p4_);
+    math::XYZTLorentzVector pZ = p1 + p2 ;
+
+
+    int necal=(evt_.elec(0).passed("ACC(ECAL+TRK)")?(1):(0))+(evt_.elec(1).passed("ACC(ECAL+TRK)")?(1):(0));
+    int ntrk=(evt_.elec(0).passed("ACC(ECAL-TRK)")?(1):(0))+(evt_.elec(1).passed("ACC(ECAL-TRK)")?(1):(0));
+    int nhf=(evt_.elec(0).passed("ACC(HF)")?(1):(0))+(evt_.elec(1).passed("ACC(HF)")?(1):(0));
+
+    if (necal==2) accHistos_.ecal_ecal->Fill(pZ.Rapidity());
+    else if (necal==1 && ntrk==1) accHistos_.ecal_ntrk->Fill(pZ.Rapidity());
+    else if (necal==1 && nhf==1) accHistos_.ecal_hf->Fill(pZ.Rapidity());
+    else if (necal==1) accHistos_.ecal_noacc->Fill(pZ.Rapidity());
+    else if (ntrk==2)  accHistos_.ntrk_ntrk->Fill(pZ.Rapidity());
+    else if (ntrk==1 && nhf==1)  accHistos_.ntrk_hf->Fill(pZ.Rapidity());
+    else if (ntrk==1)  accHistos_.ntrk_noacc->Fill(pZ.Rapidity());
+    else if (nhf==2)  accHistos_.hf_hf->Fill(pZ.Rapidity());
+    else if (nhf==1)  accHistos_.hf_noacc->Fill(pZ.Rapidity());
+    else accHistos_.noacc_noacc->Fill(pZ.Rapidity());
+  }
+
   //std::cout << "MYevt Start 3" << std::endl;
   //EfficiencyCut* keep=0;
   //std::cout << "Got the 4-vectors " << std::endl;
@@ -455,6 +478,21 @@ ZFromData::beginJob(const edm::EventSetup&)
   TFileDirectory subDirF=fs->mkdir("AllFirst");
   allCaseFirst_.Book(subDirF);
   if (extraHistos_) allCaseExtraFirst_.Book(subDirF);
+
+  const float maxY=5.5;
+  const int yBinsPerUnit=4;
+
+  accHistos_.ecal_ecal=subDir.make<TH1F>("ECAL-ECAL","ECAL-ECAL", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
+  accHistos_.ecal_ntrk=subDir.make<TH1F>("ECAL-NTRK","ECAL-NTRK", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
+  accHistos_.ecal_hf=subDir.make<TH1F>("ECAL-HF","ECAL-HF", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
+  accHistos_.ecal_noacc=subDir.make<TH1F>("ECAL-NOACC","ECAL-NOACC", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
+  accHistos_.ntrk_ntrk=subDir.make<TH1F>("NTRK-NTRK","NTRK-NTRK", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
+  accHistos_.ntrk_hf=subDir.make<TH1F>("NTRK-HF","NTRK-HF", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
+  accHistos_.ntrk_noacc=subDir.make<TH1F>("NTRK-NOACC","NTRK-NOACC", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
+  accHistos_.hf_hf=subDir.make<TH1F>("HF-HF","HF-HF", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
+  accHistos_.hf_noacc=subDir.make<TH1F>("HF-NOACC","HF-NOACC", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
+  accHistos_.noacc_noacc=subDir.make<TH1F>("NOACC-NOACC","NOACC-NOACC", int((maxY*2)*yBinsPerUnit), -maxY, maxY);  
+
   
   //
   // one directory for each Z definition
