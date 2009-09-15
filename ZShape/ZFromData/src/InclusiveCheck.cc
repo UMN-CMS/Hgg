@@ -109,7 +109,7 @@ void InclusiveCheck::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-InclusiveCheck::beginJob(const edm::EventSetup&)
+InclusiveCheck::beginJob()
 {
   // smearing the target efficiency according to statistics 
   ///if (statsBox_.trials>0) createAlternateEfficiencies();

@@ -85,7 +85,7 @@ bool BackgroundSkimmer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-BackgroundSkimmer::beginJob(const edm::EventSetup&)
+BackgroundSkimmer::beginJob()
 {
 
 

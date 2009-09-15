@@ -105,7 +105,7 @@ void MCAnalyTrial::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-MCAnalyTrial::beginJob(const edm::EventSetup&)
+MCAnalyTrial::beginJob()
 {
   // smearing the target efficiency according to statistics 
   ///if (statsBox_.trials>0) createAlternateEfficiencies();

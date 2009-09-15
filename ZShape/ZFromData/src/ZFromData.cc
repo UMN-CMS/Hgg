@@ -459,7 +459,7 @@ void ZFromData::fillMCEvent(const HepMC::GenEvent* Evt) {
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-ZFromData::beginJob(const edm::EventSetup&)
+ZFromData::beginJob()
 {
   // smearing the target efficiency according to statistics 
   ///if (statsBox_.trials>0) createAlternateEfficiencies();
