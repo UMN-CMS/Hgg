@@ -64,7 +64,7 @@ public:
   ~ZSmearingProducer();
 
 private:
-  virtual void beginJob(const edm::EventSetup&) ;
+  virtual void beginJob() ;
   virtual void produce(edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
   void smearElectron(math::PtEtaPhiELorentzVector &electron) ;
@@ -533,7 +533,7 @@ double ZSmearingProducer::smearECAL(double eta, double et, MyDetType det)
 
 
 // ------------ Method called once each job just before starting event loop  ------------
-void ZSmearingProducer::beginJob(const edm::EventSetup&)
+void ZSmearingProducer::beginJob()
 {
 }
 

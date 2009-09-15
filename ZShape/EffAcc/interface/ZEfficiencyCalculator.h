@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.16 2009/08/07 18:29:29 mansj Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.17 2009/08/25 14:46:30 haupt Exp $
 //
 //
 
@@ -59,7 +59,7 @@ public:
 
 
 private:
-  virtual void beginJob(const edm::EventSetup&) ;
+  virtual void beginJob() ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
 

@@ -384,7 +384,7 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-ZEfficiencyCalculator::beginJob(const edm::EventSetup&)
+ZEfficiencyCalculator::beginJob()
 {
   // file to write out the histograms produced by the ZEfficiencyCalculator
   edm::Service<TFileService> fs;
