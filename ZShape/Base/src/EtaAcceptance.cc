@@ -25,7 +25,7 @@ bool EtaAcceptance::isInAcceptance(double p, Zone z) const {
   case (zone_EE_notracker) :
     return (eta>=2.48) && (eta<2.850);
   case (zone_HF) :
-    return (eta>3.1) && (eta<4.60);
+    return (eta>3.05) && (eta<4.60);
   case (zone_ECAL) :
     return isInAcceptance(p,zone_EB) || isInAcceptance(p,zone_EE);
   case (zone_ANY) :
