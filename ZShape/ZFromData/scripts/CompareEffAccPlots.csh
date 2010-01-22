@@ -23,9 +23,10 @@ zdef zdefvec;
 std::cout << " I'm Trying here " << std::endl;
 std::map<std::string, zdef> zdefvecvec;
 //zdefvec.push_back("Tight-EB-Loose-ECAL");
-zdefvec.push_back("Tight-ECAL-Loose-ECAL"); 
-zdefvec.push_back("Tight-ECAL-HF");
-//zdefvec.push_back("Golden-EB-EB");
+//zdefvec.push_back("Tight-ECAL-Loose-EE");
+//zdefvec.push_back("Tight-ECAL-Loose-ECAL"); 
+//zdefvec.push_back("Tight-ECAL-HF");
+zdefvec.push_back("Golden-EB-EB");
 
 
 gStyle->SetTitleAlign(22);
@@ -36,7 +37,12 @@ gStyle->SetTitleAlign(22);
 //16.118733
 //6.88835 for M20.... (cross fingers)...
 //13.7767
-EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE/ZeeFromDataJeremyTEMPLATE/histoJeremy09_only1hlt_TRIAL_Z20.root","/data/whybee0c/user/haupt/Electrons/TNPTREE/testProdZEfficiencySmeared_10MTEMPLATE/histo_10M_part.root",zdefvec, 6.88835);
+//4.6675 For original Summer09
+//4.88 or 5.0057
+//2.4153439 for the combined
+//3.9 For the full full but some must not have gone, so 4.031
+
+EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREES09/ZeeFromDataJeremyTEMPLATE/histoJeremy09_only1hlt_TRIAL_Z20FULL.root","/data/whybee0c/user/haupt/Electrons/TNPTREES09/testProdZEfficiencySmeared_10MTEMPLATE/histo_10M_part.root",zdefvec, 4.031);
 myEffAccHistos->getFiles();
 myEffAccHistos->getHistos();
 myEffAccHistos->printSumHistos("${filetype}");

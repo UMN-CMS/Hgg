@@ -271,7 +271,9 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::cout << "Returning " << numDataZ << " fellas " << std::endl;
   */
  
-  allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
+  //allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
+  evtMC_.afterLoad();
+  if (evtMC_.m() > 70 && evtMC_.m() < 110) allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
   if (evt_.n_elec!=2) return; // need 2 and only 2
   evt_.afterLoad(); //added to be consistent 
   std::cout << " There was 1 good pair " << std::endl;

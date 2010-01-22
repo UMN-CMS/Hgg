@@ -12,15 +12,21 @@ from Geometry.CaloEventSetup.CaloGeometry_cff import *
 
 from Configuration.EventContent.EventContent_cff import *
 
+#  electron isolation  ################
+#
+from RecoEgamma.EgammaIsolationAlgos.eleIsoFromDepsModules_cff import *
+from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositTk_cff import *
+from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositEcalFromHits_cff import *
+from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositHcalFromTowers_cff import *
+
 hfRecoEcalCandidate.Correct = True
 ##hfRecoEcalCandidate.e9e25Cut = 0
-##hfRecoEcalCandidate.intercept2DCut = -99
+hfRecoEcalCandidate.intercept2DCut = 0.32
 
 hfSuperClusterCandidate = hfRecoEcalCandidate.clone()
 hfSuperClusterCandidate.e9e25Cut = 0
 hfSuperClusterCandidate.intercept2DCut = -99
 
-from RecoEgamma.EgammaIsolationAlgos.eleIsoFromDepsModules_cff import *
 
 #  Calculate efficiency for *SuperClusters passing as GsfElectron* 
 #
@@ -111,7 +117,7 @@ sc_sequence = cms.Sequence( (HybridSuperClusters * EBSuperClusters + EndcapSuper
  
 
 electrons = cms.EDFilter("ElectronDuplicateRemover",
-    src = cms.untracked.string('pixelMatchGsfElectrons'),
+    src = cms.untracked.string('gsfElectrons'),
     ptMin = cms.untracked.double(20.0),
     EndcapMinEta = cms.untracked.double(1.56),
     ptMax = cms.untracked.double(1000.0),
@@ -139,41 +145,73 @@ theGsfHf = cms.EDFilter("CandViewMerger",
     src = cms.VInputTag(cms.InputTag("theGsfElectrons"), cms.InputTag("theHFSuperClusters"))
 )
 
-from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositTk_cff import *
-from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositEcalFromHits_cff import *
-from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositHcalFromTowers_cff import *
+#$from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositTk_cff import *
+#$from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositEcalFromHits_cff import *
+#$from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositHcalFromTowers_cff import *
 eleIsoDepositTk.src = cms.InputTag('theGsfElectrons')
-eleIsoDepositEcalFromHits.src = cms.InputTag('theTrackerIsolation')
-eleIsoDepositHcalFromTowers.src = cms.InputTag('theEcalIsolation')
+eleIsoDepositEcalFromHits.src = cms.InputTag('theGsfElectrons')
+eleIsoDepositHcalFromTowers.src = cms.InputTag('theGsfElectrons')
+#$eleIsoDepositEcalFromHits.src = cms.InputTag('theTrackerIsolation')
+#$eleIsoDepositHcalFromTowers.src = cms.InputTag('theEcalIsolation')
 
 
-theTrackerIsolation = cms.EDProducer("IsolatedElectronCandProducer",
-	electronProducer = cms.InputTag('theGsfElectrons'),
-        #electronProducer = cms.InputTag('pixelMatchGsfElectrons'),
-	IsolationProducer = cms.InputTag('eleIsoFromDepsTk'),
-	isoCutEB = cms.double(7.2),
-	isoCutEE = cms.double(5.1),
-	EBEEBound = cms.double(1.5)
+## #  isolation  ################
+eleIsoFromDepsHcalFromTowers.vetos =  cms.vstring('0.0')
+eleIsoFromDepsTk.vetos = cms.vstring('0.015','Threshold(1.0)')
+eleIsoFromDepsEcalFromHits.vetos =  cms.vstring('EcalBarrel:0.045',
+    'EcalBarrel:RectangularEtaPhiVeto(-0.02,0.02,-0.5,0.5)',
+    #'EcalBarrel:AbsThresholdFromTransverse(0.08)',
+    'EcalBarrel:Threshold(FromTransverse0.08)',
+    #'EcalEndcaps:AbsThreshold(0.100)',
+    'EcalEndcaps:ThresholdFromTransverse(0.30)',                                                 
+    'EcalEndcaps:0.070',
+    'EcalEndcaps:RectangularEtaPhiVeto(-0.02,0.02,-0.5,0.5)')
+	    
+theIsolation = cms.EDFilter("GenericElectronSelection",
+    src = cms.untracked.string('theGsfElectrons'),
+    etMin = cms.untracked.double(20.0),
+    requireTkIso = cms.untracked.bool(True),
+    eleIsoTk = cms.InputTag("eleIsoFromDepsTk"),                        
+    tkIsoCutBarrel = cms.untracked.double(7.2),
+    tkIsoCutEndcaps = cms.untracked.double(5.1),    
+    #histogramFile = cms.string('hist-trackIso.root'),
+    requireEcalIso = cms.untracked.bool(True),
+    eleIsoEcal = cms.InputTag("eleIsoFromDepsEcalFromHits"),               
+    ecalIsoCutBarrel = cms.untracked.double(5.7),
+    ecalIsoCutEndcaps = cms.untracked.double(5.0),
+    requireHcalIso = cms.untracked.bool(True),
+    eleIsoHcal = cms.InputTag("eleIsoFromDepsHcalFromTowers"),           
+    hcalIsoCutBarrel = cms.untracked.double(8.1),
+    hcalIsoCutEndcaps = cms.untracked.double(3.4)
 )
 
-theEcalIsolation = cms.EDProducer("IsolatedElectronCandProducer",
-	electronProducer = cms.InputTag('theTrackerIsolation'),
-        #electronProducer = cms.InputTag('electrons'),
-        #electronProducer = cms.InputTag('pixelMatchGsfElectrons'),
-	IsolationProducer = cms.InputTag('eleIsoFromDepsEcalFromHits'),
-	isoCutEB = cms.double(5.7),
-	isoCutEE = cms.double(5.0),
-	EBEEBound = cms.double(1.5)
-)
-
-theIsolation = cms.EDProducer("IsolatedElectronCandProducer",
-	electronProducer = cms.InputTag('theEcalIsolation'),
-        #electronProducer = cms.InputTag('pixelMatchGsfElectrons'),
-	IsolationProducer = cms.InputTag('eleIsoFromDepsHcalFromTowers'),
-	isoCutEB = cms.double(8.1),
-	isoCutEE = cms.double(3.4),
-	EBEEBound = cms.double(1.5)
-)
+#$theTrackerIsolation = cms.EDProducer("IsolatedElectronCandProducer",
+#$	electronProducer = cms.InputTag('theGsfElectrons'),
+#$        #electronProducer = cms.InputTag('pixelMatchGsfElectrons'),
+#$	IsolationProducer = cms.InputTag('eleIsoFromDepsTk'),
+#$	isoCutEB = cms.double(7.2),
+#$	isoCutEE = cms.double(5.1),
+#$	EBEEBound = cms.double(1.5)
+#$)
+#$
+#$theEcalIsolation = cms.EDProducer("IsolatedElectronCandProducer",
+#$	electronProducer = cms.InputTag('theTrackerIsolation'),
+#$        #electronProducer = cms.InputTag('electrons'),
+#$        #electronProducer = cms.InputTag('pixelMatchGsfElectrons'),
+#$	IsolationProducer = cms.InputTag('eleIsoFromDepsEcalFromHits'),
+#$	isoCutEB = cms.double(5.7),
+#$	isoCutEE = cms.double(5.0),
+#$	EBEEBound = cms.double(1.5)
+#$)
+#$
+#$theIsolation = cms.EDProducer("IsolatedElectronCandProducer",
+#$	electronProducer = cms.InputTag('theEcalIsolation'),
+#$        #electronProducer = cms.InputTag('pixelMatchGsfElectrons'),
+#$	IsolationProducer = cms.InputTag('eleIsoFromDepsHcalFromTowers'),
+#$	isoCutEB = cms.double(8.1),
+#$	isoCutEE = cms.double(3.4),
+#$	EBEEBound = cms.double(1.5)
+#$)
 
 
 #  isolation  ################
@@ -193,10 +231,10 @@ from RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi import *
 import RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi
 eidRobust = RecoEgamma.ElectronIdentification.electronIdCutBasedExt_cfi.eidCutBasedExt.clone()
 eidRobust.src = cms.InputTag('theIsolation')
-eidRobust.robustEleIDCuts = cms.PSet(
-            barrel = cms.vdouble(999.9, 0.010, 999.9, 0.0071),
-            endcap = cms.vdouble(999.9, 0.028, 999.9, 0.0066)
-                )
+eidRobust.robustlooseEleIDCuts = cms.PSet(
+                  barrel = cms.vdouble(999.99, 0.01 , 999.99, 0.0071,-1,-1),
+                  endcap = cms.vdouble(999.99, 0.028, 999.99, 0.0066,-1,-1)
+               )
 
 
 theId = cms.EDProducer("eidCandProducer",
@@ -208,12 +246,13 @@ theId = cms.EDProducer("eidCandProducer",
 theHLT = cms.EDProducer("eTriggerCandProducer",
     InputProducer = cms.InputTag('theId'),              
     #hltTag = cms.untracked.InputTag("hltL1NonIsoHLTNonIsoSingleElectronEt10TrackIsolFilter","","HLT")
-    hltTag = cms.untracked.InputTag("hltL1NonIsoHLTLooseIsoSingleElectronLWEt15TrackIsolFilter","","HLT") 
+    hltTag = cms.untracked.InputTag("hltL1NonIsoHLTNonIsoSingleElectronEt15LTITrackIsolFilter","","HLT")
+	    #hltTag = cms.untracked.InputTag("hltL1NonIsoHLTLooseIsoSingleElectronLWEt15TrackIsolFilter","","HLT") 
 )
 
 #electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * theIsolation * eidRobust * theId * theHLT * HFElectronID )
-electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * thePt20GsfElectrons * eleIsoDepositTk * eleIsoFromDepsTk * theTrackerIsolation * eleIsoDepositEcalFromHits * eleIsoFromDepsEcalFromHits * theEcalIsolation * eleIsoDepositHcalFromTowers * eleIsoFromDepsHcalFromTowers * theIsolation  * eidRobust * theId * theHLT * HFElectronID )
-
+#electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * thePt20GsfElectrons * eleIsoDepositTk * eleIsoFromDepsTk * theTrackerIsolation * eleIsoDepositEcalFromHits * eleIsoFromDepsEcalFromHits * theEcalIsolation * eleIsoDepositHcalFromTowers * eleIsoFromDepsHcalFromTowers * theIsolation  * eidRobust * theId * theHLT * HFElectronID )
+electron_sequence = cms.Sequence(electrons * theGsfElectrons * theGsfHf * thePt20GsfElectrons * eleIsoDepositTk * eleIsoFromDepsTk * eleIsoDepositEcalFromHits * eleIsoFromDepsEcalFromHits * eleIsoDepositHcalFromTowers * eleIsoFromDepsHcalFromTowers * theIsolation  * eidRobust * theId * theHLT * HFElectronID )
 
 
 
