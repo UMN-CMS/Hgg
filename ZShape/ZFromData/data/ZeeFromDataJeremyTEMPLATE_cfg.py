@@ -1,8 +1,18 @@
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("ZFROMDATA")
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load("CondCore.DBCommon.CondDBSetup_cfi")
+process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Geometry.CaloEventSetup.CaloGeometry_cfi")
+process.load("Geometry.CaloEventSetup.CaloTopology_cfi")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#process.GlobalTag.globaltag = cms.string('IDEAL_V9::All')
+process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
+
 
 
 process.source = cms.Source("PoolSource",
@@ -30,6 +40,7 @@ process.load("ZShape.ZFromData.ZFromDataElectrons_cfi")
 
 process.ZFromData = cms.EDAnalyzer("ZFromData",
     quiet = cms.untracked.bool(False),
+    src = cms.untracked.InputTag('generator'),
     outHistogramsFile = cms.untracked.string('base_Jan23rd_1.root'),
     ExtraFromDataHistos = cms.untracked.bool(True),
 
@@ -86,7 +97,7 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
 	         name = cms.untracked.string('Tight-EB-Loose-ECAL'),
 	         e1 = cms.untracked.vstring("ACC(EB)","PT10","Supercluster-Eta","PT20",
 										"GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet","HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20",
+			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
 										"GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet"),						 
 			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
 		    ptorder = cms.untracked.bool (True)
@@ -101,32 +112,32 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-Loose-ECAL'),
-	         e1 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20",
+			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet"),		 
 			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
 		    ptorder = cms.untracked.bool (True)
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-VeryLoose-ECAL'),
-	         e1 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta"),		 
+			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta"),		 
 			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
 		    ptorder = cms.untracked.bool (True)
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-AlmostVeryLoose-ECAL'),
-	         e1 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20"),			 
+			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20"),			 
 			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
 		    ptorder = cms.untracked.bool (True)
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-HF'),
-	         e1 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
 			 e2 = cms.untracked.vstring("ACC(HF)","PT10","HFSuperCluster-Et","PT20","HFElectronId-EtaDet"),		
 			 Z = cms.untracked.vstring('m(70,110)','G(1,1)'),
@@ -134,17 +145,23 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-Loose-EEHighEta'),
-	         e1 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20","EEEdge-Eta"),			 
+			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20","EEEdge-Eta"),			 
 			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
 		    ptorder = cms.untracked.bool (False)
 	  ),
 	  cms.PSet(
+            name = cms.untracked.string('AllInRange'),
+            Z = cms.untracked.vstring('m(70,110)'),
+            e1 = cms.untracked.vstring('PT0'),
+            e2 = cms.untracked.vstring('PT0')
+        ),
+	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-Loose-EE'),
-	         e1 = cms.untracked.vstring("ACC(ECAL)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(EE)","PT10","Supercluster-Eta","PT20",
+			 e2 = cms.untracked.vstring("ACC(EE+TRK)","PT10","Supercluster-Eta","PT20",
 				         "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet"),			 
 			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
 		    ptorder = cms.untracked.bool (True)
