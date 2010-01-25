@@ -16,7 +16,7 @@ process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
 
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring( "")
+    fileNames = cms.untracked.vstring("dummy.root")
 )
 
 
@@ -25,7 +25,7 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.TFileService = cms.Service("TFileService",
-     fileName = cms.string('histoJeremy09_only1hlt_TRIAL.root')
+     fileName = cms.string('z1_00.root')
 )
 
 process.options = cms.untracked.PSet(
@@ -169,13 +169,13 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
 	)
 )
 
-process.outpath = cms.OutputModule("PoolOutputModule",
-    outputCommands = cms.untracked.vstring(   #'drop *', 
-        'keep *_*_*_Zefficiency'),
-    fileName = cms.untracked.string('OutJeremy09_1.root')
-)
+## process.outpath = cms.OutputModule("PoolOutputModule",
+##     outputCommands = cms.untracked.vstring(   #'drop *', 
+##         'keep *_*_*_Zefficiency'),
+##     fileNeame = cms.untracked.string('OutJeremy09_1.root')
+## )
 
 #process.p1 = cms.Path(process.hfEMClusteringSequence * process.lepton_cands+process.TPEdm)
 process.p1 = cms.Path(process.lepton_cands+process.ZFromData)
-process.the_end = cms.EndPath(process.outpath)
+#process.the_end = cms.EndPath(process.outpath)
 
