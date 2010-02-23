@@ -2,7 +2,7 @@
 #define ZSHAPE_BASE_ZSHAPEZDEF_H 1
 
 #include <vector>
-#include <string>
+#include <string.h>
 class ZShapeEvent;
 
 /** \class ZShapeZDef
@@ -11,8 +11,8 @@ class ZShapeEvent;
   * These cuts apply to the first electron, the second electron, and then
   * the di-electron. 
   * 
-  * $Date: 2009/05/20 22:39:05 $
-  * $Revision: 1.3 $
+  * $Date: 2009/06/08 19:50:56 $
+  * $Revision: 1.4 $
   * \author J. Mans - Minnesota
   */
 class ZShapeZDef {
