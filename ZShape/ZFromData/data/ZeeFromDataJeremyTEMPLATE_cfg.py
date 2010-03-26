@@ -25,7 +25,7 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 process.TFileService = cms.Service("TFileService",
-     fileName = cms.string('z1_00.root')
+     fileName = cms.string('z1_03.root')
 )
 
 process.options = cms.untracked.PSet(
@@ -43,7 +43,8 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
     src = cms.untracked.InputTag('generator'),
     outHistogramsFile = cms.untracked.string('base_Jan23rd_1.root'),
     ExtraFromDataHistos = cms.untracked.bool(True),
-
+ 
+    WeightsFile = cms.string('none'),                        
 	dRMatchCut = cms.untracked.double(0.3),
 	dPtMatchCut = cms.untracked.double(0.6),
 
