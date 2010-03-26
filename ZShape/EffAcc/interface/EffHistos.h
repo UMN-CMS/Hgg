@@ -16,7 +16,7 @@ class EffHistos {
  public:
   void Book(TFileDirectory& tfd);
   void Fill(const ZShapeElectron& e1, const  ZShapeElectron& e2, 
-            const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2); 
+            const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2, double wgt=1.0); 
   void WrapUp(void);
 
   EffHistos() { booked_=false; }

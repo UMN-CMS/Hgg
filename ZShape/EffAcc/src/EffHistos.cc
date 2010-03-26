@@ -62,7 +62,7 @@ void EffHistos::Book(TFileDirectory& tdf) {
 }
 
 void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2, 
-		     const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2) { 
+		     const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2, double wgt) { 
 
   if (!booked_) {
     std::cerr << "Attempt to fill without booking!\n";
@@ -105,36 +105,36 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
   float zTLPt   = pTLZ.Pt();
   
 
-  mZ_  -> Fill(zMass);
-  YZ_  -> Fill(zY);
-  ptZ_ -> Fill(zPt);
+  mZ_  -> Fill(zMass,wgt);
+  YZ_  -> Fill(zY,wgt);
+  ptZ_ -> Fill(zPt,wgt);
 
-  mZTL_  -> Fill(zTLMass);
-  YZTL_  -> Fill(zTLY);
-  ptZTL_ -> Fill(zTLPt);
+  mZTL_  -> Fill(zTLMass,wgt);
+  YZTL_  -> Fill(zTLY,wgt);
+  ptZTL_ -> Fill(zTLPt,wgt);
 
-  e1eta_ -> Fill(e1eta);
-  e1pt_  -> Fill(e1Pt);
-  e1phi_ -> Fill(e1phi);
+  e1eta_ -> Fill(e1eta,wgt);
+  e1pt_  -> Fill(e1Pt,wgt);
+  e1phi_ -> Fill(e1phi,wgt);
 
-  e2eta_ -> Fill(e2eta);
-  e2pt_  -> Fill(e2Pt);
-  e2phi_ -> Fill(e2phi);
+  e2eta_ -> Fill(e2eta,wgt);
+  e2pt_  -> Fill(e2Pt,wgt);
+  e2phi_ -> Fill(e2phi,wgt);
   
   //Now Fill the 2-D Histograms
-  mZ_Y_->Fill(zY,zMass);
-  mZ_pt_->Fill(zPt,zMass);
-  pt_Y_->Fill(zY,zPt);
+  mZ_Y_->Fill(zY,zMass,wgt);
+  mZ_pt_->Fill(zPt,zMass,wgt);
+  pt_Y_->Fill(zY,zPt,wgt);
   
-  e1eta_YZ_  -> Fill(e1eta,zY);
-  e2eta_YZ_  -> Fill(e2eta,zY);
-  e1eta_ptZ_ -> Fill(e1eta,zPt);
-  e2eta_ptZ_ -> Fill(e2eta,zPt);
+  e1eta_YZ_  -> Fill(e1eta,zY,wgt);
+  e2eta_YZ_  -> Fill(e2eta,zY,wgt);
+  e1eta_ptZ_ -> Fill(e1eta,zPt,wgt);
+  e2eta_ptZ_ -> Fill(e2eta,zPt,wgt);
   
-  e1eta_e2eta_ -> Fill(e1eta,e2eta);
+  e1eta_e2eta_ -> Fill(e1eta,e2eta,wgt);
 
   // tree level rapidity VS fast reco-ed rapidity 
-  YZTL_YZ_ -> Fill(zY,zTLY); 
+  YZTL_YZ_ -> Fill(zY,zTLY,wgt); 
 }
 
 
