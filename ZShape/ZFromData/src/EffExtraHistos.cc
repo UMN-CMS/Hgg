@@ -6,7 +6,7 @@ typedef math::XYZTLorentzVector XYZTLorentzVector;
 // $ROOTSYS/include/Math/GenVector/LorentzVector.h
 
 void EffExtraHistos::Book(TFileDirectory& tdf) {
-
+ 
   // add here all extremes, tidily
   float pi       = 3.141593;
   float maxPt    = 400;
@@ -35,10 +35,15 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
   De2phi_ = tdf.make<TH1F>("e2_phi_Delta","e2_phi_Delta;#phi_{e2}", 100,  -pi, pi);  
   De1pt_  = tdf.make<TH1F>("e1_P_t_Delta","e1_P_t_Delta;p_{T,e1}", 200, -50., 50.);  
   De2pt_  = tdf.make<TH1F>("e2_P_t_Delta","e2_P_t_Delta;p_{T,e2}", 200, -50., 50.);
-  atZ_ = tdf.make<TH1F>("Z0_at","Z0_at;a_{T,Z0}", 200, 0, 150.);
-  alZ_ = tdf.make<TH1F>("Z0_al","Z0_al;a_{T,Z0}", 200, 0, 150.);
+
+  atZ_ = tdf.make<TH1F>("wZ0_at","Z0_at;a_{T,Z0}", 200, 0, 150.);
+  alZ_ = tdf.make<TH1F>("wZ0_al","Z0_al;a_{T,Z0}", 200, 0, 150.);
+  ptZ_ = tdf.make<TH1F>("wZ0_pt","Z0_Pt;p_{T,Z0}", 200, 0, maxPt);
+
+  
   MCatZ_ = tdf.make<TH1F>("Z0_at_MC","Z0_at_MC;a_{T,Z0}", 200, 0, 150.);
   MCalZ_ = tdf.make<TH1F>("Z0_al_MC","Z0_al_MC;a_{T,Z0}", 200, 0, 150.);
+
 
   MCmZ_  = tdf.make<TH1F>("Z0_mass_MC","Z0_mass_MC;m_{Z0} (GeV/c^{2})", 60, 35., 150.);  
   MCYZ_  = tdf.make<TH1F>("Z0_Y_MC","Z0_Y_MC;Y_{Z0}", int((maxY*2)*4), -maxY, maxY);  
@@ -51,7 +56,7 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
   MCe2pt_  = tdf.make<TH1F>("e2_P_t_MC","e2_P_t_MC;p_{T,e2}", 200, 0., maxPt);
 }
 
-void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, const ZShapeElectron& em1, const ZShapeElectron& em2) {
+void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, const ZShapeElectron& em1, const ZShapeElectron& em2,double wgt) {
 
   XYZTLorentzVector p1(e1.p4_);
   XYZTLorentzVector p2(e2.p4_);
@@ -73,7 +78,12 @@ void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, co
   float zY    = pZ.Rapidity();
   float zPt   = pZ.Pt();
   
+  //double mzY    = pmZ.Rapidity();
+  //double mzPt   = pmZ.Pt();
+
+ 
   //calculate at, al, t
+
   XYZTLorentzVector t=(p1-p2);
   t*=1.0/(t.r());
   math::XYZVector pt1(p1.Vect().X(),p1.Vect().Y(),0);
@@ -113,32 +123,37 @@ void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, co
   float em2phi = pm2.Phi();
   float em2Pt  = pm2.Pt();
 
-  DmZ_  -> Fill(zMass-zmMass);
-  DYZ_  -> Fill(zY-zmY);
-  DptZ_ -> Fill(zPt-zmPt);
+  DmZ_  -> Fill(zMass-zmMass,wgt);
+  DYZ_  -> Fill(zY-zmY,wgt);
+  DptZ_ -> Fill(zPt-zmPt,wgt);
   
-  De1eta_ -> Fill(e1eta-em1eta);
-  De1pt_  -> Fill(e1Pt-em1Pt);
-  De1phi_ -> Fill(e1phi-em1phi);
+<<<<<<< EffExtraHistos.cc
+  De1eta_ -> Fill(e1eta-em1eta,wgt);
+  De1pt_  -> Fill(e1Pt-em1Pt,wgt);
+  De1phi_ -> Fill(e1phi-em1phi,wgt);
 
-  De2eta_ -> Fill(e2eta-em2eta);
-  De2pt_  -> Fill(e2Pt-em2Pt);
-  De2phi_ -> Fill(e2phi-em2phi);
-  atZ_->Fill(at); 
-  alZ_->Fill(al); 
-  MCatZ_->Fill(atm); 
-  MCalZ_->Fill(alm); 
-  MCmZ_  -> Fill(zmMass);
-  MCYZ_  -> Fill(zmY);
-  MCptZ_ -> Fill(zmPt);
+  De2eta_ -> Fill(e2eta-em2eta,wgt);
+  De2pt_  -> Fill(e2Pt-em2Pt,wgt);
+  De2phi_ -> Fill(e2phi-em2phi,wgt);
+  atZ_->Fill(at,wgt); 
+  alZ_->Fill(al,wgt);
+  ptZ_->Fill(zPt,wgt);
+  MCmZ_  -> Fill(zmMass,wgt);
+  MCYZ_  -> Fill(zmY,wgt);
+  MCptZ_ -> Fill(zmPt,wgt);
 
-  MCe1eta_ -> Fill(em1eta);
-  MCe1pt_  -> Fill(em1Pt);
-  MCe1phi_ -> Fill(em1phi);
+  MCe1eta_ -> Fill(em1eta,wgt);
+  MCe1pt_  -> Fill(em1Pt,wgt);
+  MCe1phi_ -> Fill(em1phi,wgt);
 
-  MCe2eta_ -> Fill(em2eta);
-  MCe2pt_  -> Fill(em2Pt);
-  MCe2phi_ -> Fill(em2phi);
+  MCe2eta_ -> Fill(em2eta,wgt);
+  MCe2pt_  -> Fill(em2Pt,wgt);
+  MCe2phi_ -> Fill(em2phi,wgt);
+
+ 
+  MCatZ_->Fill(atm,wgt); 
+  MCalZ_->Fill(alm,wgt); 
+ 
 
 
 }

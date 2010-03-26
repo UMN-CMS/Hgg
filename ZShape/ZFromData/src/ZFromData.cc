@@ -32,7 +32,7 @@ ZFromData::ZFromData(const edm::ParameterSet& iConfig) :
   writeHistoConservatively_ = iConfig.getUntrackedParameter<bool>("writeHistoBeforeEndJob", false);
   delRMatchingCut_          = iConfig.getUntrackedParameter<double>("dRMatchCut",0.2);
   delPtRelMatchingCut_      = iConfig.getUntrackedParameter<double>("dPtMatchCut",15.0);
-
+  wfile_=iConfig.getParameter<std::string>("WeightsFile");
   //
   //Extra histos generated from the "From Data trials"
   extraHistos_ = iConfig.getUntrackedParameter<bool>("ExtraFromDataHistos", false);
@@ -273,14 +273,16 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
  
   //allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
   evtMC_.afterLoad();
-  if (evtMC_.m() > 70 && evtMC_.m() < 110) allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
+  double wgt=wclass.wgt((evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Pt(),(evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Rapidity());
+  if (evtMC_.m() > 70 && evtMC_.m() < 110) allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,wgt);
   if (evt_.n_elec!=2) return; // need 2 and only 2
   evt_.afterLoad(); //added to be consistent 
   std::cout << " There was 1 good pair " << std::endl;
   //
   // fill histograms for before any selection
-  allCase_.Fill(evt_.elec(0), evt_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_);
-  if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0), evt_.elec(1), evtMC_.elec(0), evtMC_.elec(1));
+
+  allCase_.Fill(evt_.elec(0), evt_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,wgt);
+  if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0), evt_.elec(1), evtMC_.elec(0), evtMC_.elec(1),wgt);
 
   // these stages merely _fill_ bits.  They do not apply cuts!
   stdCuts_.acceptanceCuts(evt_.elec(0));
@@ -349,8 +351,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         int e1n = e1;
         int e2n = e2;
 	// fill standard histograms after acceptance
-	plots->acceptance_.Fill(evt_.elec(e1), evt_.elec(e2),evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_);
-	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1), evt_.elec(e2), evtMC_.elec(e1), evtMC_.elec(e2));
+	plots->acceptance_.Fill(evt_.elec(e1), evt_.elec(e2),evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_,wgt);
+	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1), evt_.elec(e2), evtMC_.elec(e1), evtMC_.elec(e2),wgt);
 	
 	// next n-cuts
 	bool ok=true;
@@ -361,8 +363,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (pairing) {std::swap(e1n,e2n); }
 	  if (ok)
           {
-	    plots->postCut_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
-            if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n));
+	    plots->postCut_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt);
+            if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n),wgt);
 	  }
         }// now the Z cuts
 	for (int j=0; ok && j<q->second->criteriaCount(ZShapeZDef::crit_Z); j++) {
@@ -372,8 +374,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (pairing) {std::swap(e1n,e2n); }
           if (ok) 
           {
-            plots->zCut_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_);
-            if (extraHistos_) plots->zCutExtra_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n), evtMC_.elec(e2n));
+            plots->zCut_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt);
+            if (extraHistos_) plots->zCutExtra_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n), evtMC_.elec(e2n),wgt);
           }	
         }// criteria 
         
@@ -470,7 +472,7 @@ ZFromData::beginJob()
   ///histoFile_   = new TFile(outFileName_.c_str(),"RECREATE");
   
   edm::Service<TFileService> fs;
-
+  wclass.load(wfile_);
   // one directory for histos of event before any selection
   TFileDirectory subDir=fs->mkdir("All");
 
