@@ -127,7 +127,7 @@ void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, co
   DYZ_  -> Fill(zY-zmY,wgt);
   DptZ_ -> Fill(zPt-zmPt,wgt);
   
-<<<<<<< EffExtraHistos.cc
+
   De1eta_ -> Fill(e1eta-em1eta,wgt);
   De1pt_  -> Fill(e1Pt-em1Pt,wgt);
   De1phi_ -> Fill(e1phi-em1phi,wgt);
