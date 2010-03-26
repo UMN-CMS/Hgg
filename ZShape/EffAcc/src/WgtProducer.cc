@@ -22,12 +22,11 @@ void WgtProducer::load(const std::string& fname){
 }
 
 double WgtProducer::wgt(const double& pt, const double& y){
-  int bin=weights_->FindBin(fabs(y),pt);
-  double rv;
-  
-  rv=weights_->GetBinContent(bin);
-  //wgt=1.0;
+
   if (!nowgts_){
+    int bin=weights_->FindBin(fabs(y),pt);
+    double rv;
+    rv=weights_->GetBinContent(bin);
     return rv;
   }else{
     return 1.0;
