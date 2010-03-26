@@ -87,8 +87,8 @@ private:
   // ----------member data ---------------------------
   ZShapeEvent evt_;
   ZShapeEvent evtMC_;
-
- 
+  std::string wfile_;
+  WgtProducer wclass;
 
   std::map<std::string, EffInfo*> effInfo_;
   edm::InputTag tnpProducer_;
