@@ -84,20 +84,23 @@ void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, co
  
   //calculate at, al, t
 
-  XYZTLorentzVector t=(p1-p2);
-  t*=1.0/(t.r());
+  
   math::XYZVector pt1(p1.Vect().X(),p1.Vect().Y(),0);
   math::XYZVector pt2(p2.Vect().X(),p2.Vect().Y(),0);
   math::XYZVector Pt=pt1+pt2;
+  math::XYZVector t=(pt1-pt2);
+  t*=1.0/(t.r());
   double at=(Pt.Cross(t)).r();
   double al=Pt.Dot(t);
 
   //calculate at, al, t for MC, (i.e. atm, alm, tm)
-  XYZTLorentzVector tm=(pm1-pm2);
-  tm*=1.0/(tm.r());
+ 
   math::XYZVector ptm1(pm1.Vect().X(),pm1.Vect().Y(),0);
   math::XYZVector ptm2(pm2.Vect().X(),pm2.Vect().Y(),0);
   math::XYZVector Ptm=ptm1+ptm2;
+  math::XYZVector tm=(ptm1-ptm2);
+  tm*=1.0/(tm.r());
+
   double atm=(Ptm.Cross(tm)).r();
   double alm=Ptm.Dot(tm);
 
