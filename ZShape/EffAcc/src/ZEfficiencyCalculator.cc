@@ -5,7 +5,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "Math/VectorUtil.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 
 //
@@ -210,20 +210,22 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 	bool ok=true;
 	for (int j=1; ok && j<q->second->criteriaCount(ZShapeZDef::crit_E1); j++) {
 	  ok=q->second->pass(evt_,j+1,j+1,0,&pairing);
-          if (ok) 
+          if (ok) { 
             if (!pairing)  
               plots->postCut_[j-1].Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4());
             else 
               plots->postCut_[j-1].Fill(evt_.elec(1), evt_.elec(0), evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());
+	  }
 	} // now the Z cuts
 	for (int j=0; ok && j<q->second->criteriaCount(ZShapeZDef::crit_Z); j++) {
 	  ok=q->second->pass(evt_,1000,1000,j+1,&pairing);
 	  
-          if (ok) 
+          if (ok) {
             if (!pairing)  
               plots->zCut_[j].Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4());
             else 
               plots->zCut_[j].Fill(evt_.elec(1), evt_.elec(0), evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());	
+	  }
         }// criteria  
        
       }// Z definitions 

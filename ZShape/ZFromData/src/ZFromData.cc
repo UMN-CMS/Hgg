@@ -11,7 +11,7 @@
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
 #include "DataFormats/EgammaCandidates/interface/Electron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
@@ -219,7 +219,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    if (tpnum != usetp ) continue;
             std::cout << "In tag probes Iterator " << std::endl;
 	    const reco::CandidateBaseRef &tag = tpItr->key;
-	    vector< pair<reco::CandidateBaseRef,double> > vprobes = (*tagprobes)[tag];
+	    vector< pair<reco::CandidateBaseRef,bool> > vprobes = (*tagprobes)[tag];
 
 	    math::XYZTLorentzVector tpP4 = tag->p4() + (vprobes[0].first)->p4();//Probably not needed for anything.
 	    

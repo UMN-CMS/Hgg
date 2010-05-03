@@ -85,7 +85,7 @@ void EfficiencyStore::setRootFile(TFile * file){
   // looping on objects in the file aiming at the 4 needed histograms 
   
     
-  while(key=(TKey*) next() ){
+  while(key=((TKey*) next()) ){
       
     //    std::cout << "object in file has name: " << key->GetName() << std::endl;
     TH1F * tmp1;    TH2F * tmp2;
@@ -119,25 +119,25 @@ void EfficiencyStore::setRootFile(TFile * file){
 	   //	   std::cout << " This Object is denominator_ " <<  key->GetName() << std::endl;
          }
       
-       if(  strstr(key->GetName(),"eff") && key->GetClassName()=="TH2F")
+    if(  strstr(key->GetName(),"eff") && strcmp(key->GetClassName(),"TH2F")==0)
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   values2DHisto_  = (TH2F *) tmp2->Clone();
 	   values2DHisto_->SetDirectory(0);
          }
-       else if(  strstr(key->GetName(),"systematicPlus_") && key->GetClassName()=="TH2F")
+    else if(  strstr(key->GetName(),"systematicPlus_") && strcmp(key->GetClassName(),"TH2F")==0)
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   systPlus2DHisto_ =  (TH2F *) tmp2->Clone();
 	   systPlus2DHisto_->SetDirectory(0);
          }
-       else if(  strstr(key->GetName(),"systematicMinus_") && key->GetClassName()=="TH2F")
+    else if(  strstr(key->GetName(),"systematicMinus_") && strcmp(key->GetClassName(),"TH2F")==0)
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   systMinus2DHisto_ =  (TH2F *) tmp2->Clone();
 	   systMinus2DHisto_->SetDirectory(0);
          }
-       else if(  strstr(key->GetName(),"den") && key->GetClassName()=="TH2F")
+    else if(  strstr(key->GetName(),"den") && strcmp(key->GetClassName(),"TH2F")==0)
          {
 	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
 	   denominator2DHisto_ =  (TH2F *) tmp2->Clone();

@@ -11,7 +11,7 @@
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "PhysicsTools/UtilAlgos/interface/TFileService.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
 #include "DataFormats/EgammaCandidates/interface/Electron.h"
 
@@ -96,7 +96,7 @@ void InclusiveCheck::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
       if (thecand.isValid())   thesize = thecand->size();
       if (tagprobes.isValid()) thesize = tagprobes->size();
 
-      if ( thesize > numMatch_[i] & goodevent ){ seqHist_->Fill(i); }//Maybe only do this by checking if previous ones existed
+      if ( thesize > numMatch_[i] && goodevent ){ seqHist_->Fill(i); }//Maybe only do this by checking if previous ones existed
       else goodevent = false;
   }
 
