@@ -15,7 +15,7 @@ class EffExtraHistos {
 
  public:
   void Book(TFileDirectory& tfd);
-  void Fill(const ZShapeElectron& e1, const ZShapeElectron& e2,const ZShapeElectron& em1, const ZShapeElectron& em2,double wgt);
+  void Fill(const ZShapeElectron& e1, const ZShapeElectron& e2,const ZShapeElectron& em1, const ZShapeElectron& em2,double wgt, bool doMC);
 
  private:
 

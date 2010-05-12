@@ -56,7 +56,7 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
   MCe2pt_  = tdf.make<TH1F>("e2_P_t_MC","e2_P_t_MC;p_{T,e2}", 200, 0., maxPt);
 }
 
-void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, const ZShapeElectron& em1, const ZShapeElectron& em2,double wgt) {
+void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, const ZShapeElectron& em1, const ZShapeElectron& em2,double wgt, bool doMC) {
 
   XYZTLorentzVector p1(e1.p4_);
   XYZTLorentzVector p2(e2.p4_);
@@ -126,37 +126,40 @@ void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, co
   float em2phi = pm2.Phi();
   float em2Pt  = pm2.Pt();
 
-  DmZ_  -> Fill(zMass-zmMass,wgt);
-  DYZ_  -> Fill(zY-zmY,wgt);
-  DptZ_ -> Fill(zPt-zmPt,wgt);
+  if (doMC) 
+    {
+      DmZ_  -> Fill(zMass-zmMass,wgt);
+      DYZ_  -> Fill(zY-zmY,wgt);
+      DptZ_ -> Fill(zPt-zmPt,wgt);
   
 
-  De1eta_ -> Fill(e1eta-em1eta,wgt);
-  De1pt_  -> Fill(e1Pt-em1Pt,wgt);
-  De1phi_ -> Fill(e1phi-em1phi,wgt);
+      De1eta_ -> Fill(e1eta-em1eta,wgt);
+      De1pt_  -> Fill(e1Pt-em1Pt,wgt);
+      De1phi_ -> Fill(e1phi-em1phi,wgt);
 
-  De2eta_ -> Fill(e2eta-em2eta,wgt);
-  De2pt_  -> Fill(e2Pt-em2Pt,wgt);
-  De2phi_ -> Fill(e2phi-em2phi,wgt);
+      De2eta_ -> Fill(e2eta-em2eta,wgt);
+      De2pt_  -> Fill(e2Pt-em2Pt,wgt);
+      De2phi_ -> Fill(e2phi-em2phi,wgt);
+ 
+      MCmZ_  -> Fill(zmMass,wgt);
+      MCYZ_  -> Fill(zmY,wgt);
+      MCptZ_ -> Fill(zmPt,wgt);
+
+      MCe1eta_ -> Fill(em1eta,wgt);
+      MCe1pt_  -> Fill(em1Pt,wgt);
+      MCe1phi_ -> Fill(em1phi,wgt);
+
+      MCe2eta_ -> Fill(em2eta,wgt);
+      MCe2pt_  -> Fill(em2Pt,wgt);
+      MCe2phi_ -> Fill(em2phi,wgt);
+
+ 
+      MCatZ_->Fill(atm,wgt); 
+      MCalZ_->Fill(alm,wgt);
+    }
   atZ_->Fill(at,wgt); 
   alZ_->Fill(al,wgt);
   ptZ_->Fill(zPt,wgt);
-  MCmZ_  -> Fill(zmMass,wgt);
-  MCYZ_  -> Fill(zmY,wgt);
-  MCptZ_ -> Fill(zmPt,wgt);
-
-  MCe1eta_ -> Fill(em1eta,wgt);
-  MCe1pt_  -> Fill(em1Pt,wgt);
-  MCe1phi_ -> Fill(em1phi,wgt);
-
-  MCe2eta_ -> Fill(em2eta,wgt);
-  MCe2pt_  -> Fill(em2Pt,wgt);
-  MCe2phi_ -> Fill(em2phi,wgt);
-
  
-  MCatZ_->Fill(atm,wgt); 
-  MCalZ_->Fill(alm,wgt); 
- 
-
 
 }

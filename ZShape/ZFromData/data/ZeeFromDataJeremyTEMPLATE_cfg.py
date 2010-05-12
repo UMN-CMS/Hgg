@@ -11,21 +11,22 @@ process.load("Geometry.CaloEventSetup.CaloGeometry_cfi")
 process.load("Geometry.CaloEventSetup.CaloTopology_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 #process.GlobalTag.globaltag = cms.string('IDEAL_V9::All')
-process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
+#process.GlobalTag.globaltag = cms.string('MC_31X_V3::All')
+process.GlobalTag.globaltag = 'GR10_P_V4::All'
 
-
+    
 
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("dummy.root")
+    fileNames = cms.untracked.vstring( )                      
 )
 
 
 process.maxEvents = cms.untracked.PSet(
-   input = cms.untracked.int32(123200)
+   input = cms.untracked.int32(-1)
 )
 
 process.TFileService = cms.Service("TFileService",
-     fileName = cms.string('z1_03.root')
+     fileName = cms.string('histoJeremy09_only1hlt_TRIAL.root')
 )
 
 process.options = cms.untracked.PSet(
@@ -43,8 +44,9 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
     src = cms.untracked.InputTag('generator'),
     outHistogramsFile = cms.untracked.string('base_Jan23rd_1.root'),
     ExtraFromDataHistos = cms.untracked.bool(True),
- 
-    WeightsFile = cms.string('none'),                        
+    doMC = cms.untracked.bool(False),                               
+    WeightsFile = cms.untracked.string('none'),                               
+
 	dRMatchCut = cms.untracked.double(0.3),
 	dPtMatchCut = cms.untracked.double(0.6),
 
@@ -73,12 +75,12 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
 	#TagProbeProducer = cms.untracked.InputTag('tpMapGsfElectrons'),
 	#TagProbeProducer = cms.untracked.InputTag('tpMapSuperClusters'),
 	TagProbeProducer = cms.untracked.InputTag('tpMapGsfAndHF'),
-	GsfProducer = cms.untracked.InputTag('thePt20GsfElectrons'),
+	GsfProducer = cms.untracked.InputTag('theGsfElectrons'),
 	
-	CutNames          = cms.untracked.vstring("Supercluster-Eta", "GsfTrack-EtaDet",   "Iso-Pt",        "ElectronId-EtaDet", "HLT-EtaDet", "HFElectronId-EtaDet", "EEEdge-Eta", "HFSuperCluster-Et"),
-	allProbeCandTags  = cms.untracked.VInputTag(cms.InputTag("theSuperClusters"),cms.InputTag("theSuperClusters"),cms.InputTag("theGsfElectrons"),cms.InputTag("theIsolation"),cms.InputTag("theId"),cms.InputTag("theHFSuperClusters"),cms.InputTag("theSuperClusters"), cms.InputTag("theHFSuperClusters")),
-	passProbeCandTags = cms.untracked.VInputTag(cms.InputTag("theSuperClusters"),cms.InputTag("theGsfElectrons"),cms.InputTag("theIsolation"),cms.InputTag("theId"),cms.InputTag("theHLT"), cms.InputTag("HFElectronID"), cms.InputTag("theEEHFGapSuperClusters"), cms.InputTag("theHFSuperClusters")),
-    ExactMatch        = cms.untracked.vint32(0,0,0,0,0),
+	CutNames          = cms.untracked.vstring("Supercluster-Eta", "GsfTrack-EtaDet",   "Iso-Pt",        "ElectronId-EtaDet", "HLT-EtaDet", "HFElectronId-EtaDet", "HFSuperCluster-Et"),
+	allProbeCandTags  = cms.untracked.VInputTag(cms.InputTag("theSuperClusters"),cms.InputTag("theSuperClusters"),cms.InputTag("theGsfElectrons"),cms.InputTag("theIsolation"),cms.InputTag("theId"),cms.InputTag("theHFSuperClusters"), cms.InputTag("theHFSuperClusters")),
+	passProbeCandTags = cms.untracked.VInputTag(cms.InputTag("theSuperClusters"),cms.InputTag("theGsfElectrons"),cms.InputTag("theIsolation"),cms.InputTag("theId"),cms.InputTag("theHLT"), cms.InputTag("HFElectronID"), cms.InputTag("theHFSuperClusters")),
+        ExactMatch        = cms.untracked.vint32(0,0,0,0,0),
 	
 	writeHistoBeforeEndJob = cms.untracked.bool(False),
 
@@ -86,26 +88,26 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
 	ZDefs = cms.untracked.VPSet(
 	  cms.PSet(
 	         name = cms.untracked.string('Golden-EB-EB'),
-	         e1 = cms.untracked.vstring("ACC(EB)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(EB)","PT10","Supercluster-Eta","PT10",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(EB)","PT10","Supercluster-Eta","PT20",
+			 e2 = cms.untracked.vstring("ACC(EB)","PT10","Supercluster-Eta","PT10",
                                          #"GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),	
 					 "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet"),						 
-			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
+			 Z = cms.untracked.vstring('m(70,110)'),
 		    ptorder = cms.untracked.bool (True)
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-EB-Loose-ECAL'),
-	         e1 = cms.untracked.vstring("ACC(EB)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(EB)","PT10","Supercluster-Eta","PT10",
 										"GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet","HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
+			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT10",
 										"GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet"),						 
-			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
+			 Z = cms.untracked.vstring('m(70,110)'),
 		    ptorder = cms.untracked.bool (True)
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Maximal'),
-	         e1 = cms.untracked.vstring("ACC(EB)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(EB)","PT10","Supercluster-Eta","PT10",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
 			 e2 = cms.untracked.vstring("ACC(ANY)","PT10"),						 
 			 Z = cms.untracked.vstring(),
@@ -113,19 +115,19 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-Loose-ECAL'),
-	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT10",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
+			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT10",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet"),		 
-			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
+			 Z = cms.untracked.vstring('m(70,110)'),
 		    ptorder = cms.untracked.bool (True)
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-VeryLoose-ECAL'),
-	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT10",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
 			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta"),		 
-			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
+			 Z = cms.untracked.vstring('m(70,110)'),
 		    ptorder = cms.untracked.bool (True)
 	  ),
 	  cms.PSet(
@@ -133,23 +135,23 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
 	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
 			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20"),			 
-			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
+			 Z = cms.untracked.vstring('m(70,110)'),
 		    ptorder = cms.untracked.bool (True)
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-HF'),
-	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT10",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(HF)","PT10","HFSuperCluster-Et","PT20","HFElectronId-EtaDet"),		
-			 Z = cms.untracked.vstring('m(70,110)','G(1,1)'),
+			 e2 = cms.untracked.vstring("ACC(HF)","PT10","HFSuperCluster-Et","PT10","HFElectronId-EtaDet"),		
+			 Z = cms.untracked.vstring('m(70,110)'),
 		    ptorder = cms.untracked.bool (False)
 	  ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-Loose-EEHighEta'),
-	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT10",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20","EEEdge-Eta"),			 
-			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
+			 e2 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT10","EEEdge-Eta"),			 
+			 Z = cms.untracked.vstring('m(70,110)'),
 		    ptorder = cms.untracked.bool (False)
 	  ),
 	  cms.PSet(
@@ -160,23 +162,23 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
         ),
 	  cms.PSet(
 	         name = cms.untracked.string('Tight-ECAL-Loose-EE'),
-	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT20",
+	         e1 = cms.untracked.vstring("ACC(ECAL+TRK)","PT10","Supercluster-Eta","PT10",
                                          "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet", "HLT-EtaDet"),
-			 e2 = cms.untracked.vstring("ACC(EE+TRK)","PT10","Supercluster-Eta","PT20",
+			 e2 = cms.untracked.vstring("ACC(EE+TRK)","PT10","Supercluster-Eta","PT10",
 				         "GsfTrack-EtaDet","Iso-Pt","ElectronId-EtaDet"),			 
-			 Z = cms.untracked.vstring('m(70,110)','G(2,2)'),
+			 Z = cms.untracked.vstring('m(70,110)'),
 		    ptorder = cms.untracked.bool (True)
 	  )
 	)
 )
 
-## process.outpath = cms.OutputModule("PoolOutputModule",
-##     outputCommands = cms.untracked.vstring(   #'drop *', 
-##         'keep *_*_*_Zefficiency'),
-##     fileNeame = cms.untracked.string('OutJeremy09_1.root')
-## )
+process.outpath = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring(   #'drop *', 
+        'keep *_*_*_Zefficiency'),
+    fileName = cms.untracked.string('OutJeremy09_1.root')
+)
 
 #process.p1 = cms.Path(process.hfEMClusteringSequence * process.lepton_cands+process.TPEdm)
 process.p1 = cms.Path(process.lepton_cands+process.ZFromData)
-#process.the_end = cms.EndPath(process.outpath)
+process.the_end = cms.EndPath(process.outpath)
 

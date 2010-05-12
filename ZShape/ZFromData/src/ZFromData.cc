@@ -30,9 +30,10 @@ ZFromData::ZFromData(const edm::ParameterSet& iConfig) :
 
   outFileName_              = iConfig.getUntrackedParameter<std::string>("outHistogramsFile", "");
   writeHistoConservatively_ = iConfig.getUntrackedParameter<bool>("writeHistoBeforeEndJob", false);
+  doMC_                     = iConfig.getUntrackedParameter<bool>("doMC", true);
   delRMatchingCut_          = iConfig.getUntrackedParameter<double>("dRMatchCut",0.2);
   delPtRelMatchingCut_      = iConfig.getUntrackedParameter<double>("dPtMatchCut",15.0);
-  wfile_=iConfig.getParameter<std::string>("WeightsFile");
+  wfile_                    = iConfig.getUntrackedParameter<std::string>("WeightsFile", "none");
   //
   //Extra histos generated from the "From Data trials"
   extraHistos_ = iConfig.getUntrackedParameter<bool>("ExtraFromDataHistos", false);
@@ -161,23 +162,22 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   using namespace std;
   using namespace cms;
   
-  //std::cout << " Start 0 " << std::endl;
+  evtMC_.clear();
+
   Handle< HepMCProduct > EvtHandle ;
    
   // find initial (unsmeared, unfiltered,...) HepMCProduct
-  iEvent.getByLabel(m_srcTag, EvtHandle ) ;
-  //std::cout << " Start 1 " << std::endl;
-  const HepMC::GenEvent* Evt = EvtHandle->GetEvent() ;
-   //std::cout << " Start 2 " << std::endl;
-  fillMCEvent(Evt);
+  if (doMC_)
+    { 
+      iEvent.getByLabel(m_srcTag, EvtHandle ) ;
+      const HepMC::GenEvent* Evt = EvtHandle->GetEvent() ;
+      fillMCEvent(Evt);
+    }
   //evt_.findDataZ(iEvent);
-  //int numDataZ = 0;
-  //std::cout << " Clearing an Event " << std::endl;
   evt_.clear();
-  //std::cout << " Checking an Event " << std::endl;
    
   //First set the number of Gsf Electrons above 20 GeV
-  edm::Handle< reco::GsfElectronCollection> electronHandle;
+  edm::Handle< reco::CandidateView> electronHandle;
   try
     {
       iEvent.getByLabel(gsfProducer_,electronHandle);
@@ -197,7 +197,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   ///{
   // Tag-Probes
   //int ptype=0;
-  edm::Handle<reco::CandViewCandViewAssociation> tagprobes;
+  edm::Handle<reco::CandidateView> tagprobes;
   if ( !iEvent.getByLabel(tnpProducer_,tagprobes) ) {
 	 LogWarning("ZFromData") << "Could not extract tag-probe map with input tag "  << tnpProducer_;
          std::cout << "Didn't get the input tag " << std::endl;
@@ -205,58 +205,61 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
      if( tagprobes.isValid() )
       {
-	  std::cout << "In tag probes " << std::endl;
+	//std::cout << "In tag probes " << std::endl;
+	//std::cout << " The Producer is " << tnpProducer_ << std::endl;
 	  //--Here I pick a random T&Probe combination based on the event number
 	  int tpsize = tagprobes->size();
 	  int usetp = (tpsize > 0 ) ? (iEvent.id().event())%tpsize : 0;
 	  int tpnum = 0;
 	  //--End picking a random Tag and Probe combination
 	  std::cout << " tpnum " << tpnum << " usetp " << usetp << " tpsize " << tpsize << std::endl;
-	  reco::CandViewCandViewAssociation::const_iterator tpItr = tagprobes->begin();
+	  reco::CandidateView::const_iterator tpItr = tagprobes->begin();
 	  for( ; tpItr != tagprobes->end(); ++tpItr,++tpnum)
 	  { 
 	    std::cout << " tpnum is " << tpnum <<  " usetp is " << usetp << std::endl;
 	    if (tpnum != usetp ) continue;
             std::cout << "In tag probes Iterator " << std::endl;
-	    const reco::CandidateBaseRef &tag = tpItr->key;
-	    vector< pair<reco::CandidateBaseRef,bool> > vprobes = (*tagprobes)[tag];
+	    const reco::CandidateBaseRef &tag     = tpItr->daughter(0)->masterClone();
+	    const reco::CandidateBaseRef &vprobes = tpItr->daughter(1)->masterClone();
 
-	    math::XYZTLorentzVector tpP4 = tag->p4() + (vprobes[0].first)->p4();//Probably not needed for anything.
+	    math::XYZTLorentzVector tpP4 = tag->p4() + vprobes->p4();//Probably not needed for anything.
 	    
 	    evt_.elec(0).p4_=tag->p4();
-	    evt_.elec(1).p4_=(vprobes[0].first)->p4();
+	    evt_.elec(1).p4_=vprobes->p4();
 		
-		reco::SuperClusterRef SCt = tag->get<reco::SuperClusterRef>();
-		reco::SuperClusterRef SCp = (vprobes[0].first)->get<reco::SuperClusterRef>();
-		evt_.elec(0).detEta_ = SCt->eta();
-		evt_.elec(1).detEta_ = SCp->eta();
+	    reco::SuperClusterRef SCt = tag->get<reco::SuperClusterRef>();
+	    reco::SuperClusterRef SCp = vprobes->get<reco::SuperClusterRef>();
+	    evt_.elec(0).detEta_ = SCt->eta();
+	    evt_.elec(1).detEta_ = SCp->eta();
 		
-	//std::cout << "Got the 4-vectors " << std::endl;
-		 // If there are two probes with the tag continue
-	    if( vprobes.size() > 1 ) { std::cout << " More Than 2 Probes; Z Rapidity "<< tpP4.Rapidity() << " Mass " << sqrt ( tpP4.Dot(tpP4) ) << " PT " << tpP4.Pt()<< std::endl; continue;}
-	//std::cout << "Only 2 probes " << std::endl;	
-		for( int itype=0; itype<(int)passProbeCandTags_.size(); ++itype ){
-	   //std::cout << "Looping over the types" << std::endl;
-           // Passing Probe Candidates
-           edm::Handle<reco::CandidateView> passprobes;
-           if ( !iEvent.getByLabel(passProbeCandTags_[itype],passprobes) ) {
-	           LogWarning("ZFromData") << "Could not extract tag cands with input tag "  << passProbeCandTags_[itype];
-                   std::cout << "DIDn't get the darn tag..... " << std::endl;
-           } 
+	    //std::cout << "Got the 4-vectors " << std::endl;
+	    // If there are two probes with the tag continue
+	    // if( vprobes.size() > 1 ) { std::cout << " More Than 2 Probes; Z Rapidity "<< tpP4.Rapidity() << " Mass " << sqrt ( tpP4.Dot(tpP4) ) << " PT " << tpP4.Pt()<< std::endl; continue;}
+	    //std::cout << " Z Rapidity  "<< tpP4.Rapidity() << " Mass " << sqrt ( tpP4.Dot(tpP4) ) << " PT " << tpP4.Pt()<< std::endl;
+	    //std::cout << " Z RapidityO "<< tpItr->p4().Rapidity() << " Mass " <<  tpItr->p4().M() << " PT " << tpItr->p4().Pt()<< std::endl;
+	    //std::cout << "Only 2 probes " << std::endl;	
+	    for( int itype=0; itype<(int)passProbeCandTags_.size(); ++itype ){
+	      //std::cout << "Looping over the types" << std::endl;
+	      // Passing Probe Candidates
+	      edm::Handle<reco::CandidateView> passprobes;
+	      if ( !iEvent.getByLabel(passProbeCandTags_[itype],passprobes) ) {
+		LogWarning("ZFromData") << "Could not extract tag cands with input tag "  << passProbeCandTags_[itype];
+		std::cout << "DIDn't get the darn tag..... " << std::endl;
+	      } 
 		
-	       ///int ppass = ProbePassProbeOverlap(vprobes[0].first,passprobes);
-		   //std::cout << "doing the cuts themselves " << std::endl;
-		   evt_.elec(0).cutResult(cutName_[itype], ProbePassProbeOverlap(tag,passprobes,exactMatch_[itype]));
-		   evt_.elec(1).cutResult(cutName_[itype], ProbePassProbeOverlap(vprobes[0].first,passprobes,exactMatch_[itype]));
-		   evt_.n_elec=2;
-	       // Did this tag cause a L1 and/or HLT trigger?
-	       //bool l1Trigger = false;
-	       //bool hltTrigger = false;
-           }
-         }
+	      ///int ppass = ProbePassProbeOverlap(vprobes[0].first,passprobes);
+	      //std::cout << "doing the cuts themselves for " << passProbeCandTags_[itype] << std::endl;
+	      evt_.elec(0).cutResult(cutName_[itype], ProbePassProbeOverlap(tag,passprobes,exactMatch_[itype]));
+	      evt_.elec(1).cutResult(cutName_[itype], ProbePassProbeOverlap(vprobes,passprobes,exactMatch_[itype]));
+	      evt_.n_elec=2;
+	      // Did this tag cause a L1 and/or HLT trigger?
+	      //bool l1Trigger = false;
+	      //bool hltTrigger = false;
+	    }
 	  }
-   ///}
-  //std::cout << " Ending this one loop woohoo " << std::endl;
+      }
+     ///}
+     //std::cout << " Ending this one loop woohoo " << std::endl;
   /* 
 
           if (!oneevt){
@@ -273,16 +276,16 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
  
   //allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
   evtMC_.afterLoad();
-  double wgt=wclass.wgt((evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Pt(),(evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Rapidity());
-  if (evtMC_.m() > 70 && evtMC_.m() < 110) allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,wgt);
+  double wgt= 1.0;
+  if (doMC_) wgt = wclass.wgt((evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Pt(),(evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Rapidity());
+  if (doMC_) if (evtMC_.m() > 70 && evtMC_.m() < 110) allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,wgt,doMC_);
   if (evt_.n_elec!=2) return; // need 2 and only 2
   evt_.afterLoad(); //added to be consistent 
-  std::cout << " There was 1 good pair " << std::endl;
   //
   // fill histograms for before any selection
 
-  allCase_.Fill(evt_.elec(0), evt_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,wgt);
-  if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0), evt_.elec(1), evtMC_.elec(0), evtMC_.elec(1),wgt);
+  allCase_.Fill(evt_.elec(0), evt_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,wgt,doMC_);
+  if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0), evt_.elec(1), evtMC_.elec(0), evtMC_.elec(1),wgt,doMC_);
 
   // these stages merely _fill_ bits.  They do not apply cuts!
   stdCuts_.acceptanceCuts(evt_.elec(0));
@@ -351,8 +354,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         int e1n = e1;
         int e2n = e2;
 	// fill standard histograms after acceptance
-	plots->acceptance_.Fill(evt_.elec(e1), evt_.elec(e2),evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_,wgt);
-	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1), evt_.elec(e2), evtMC_.elec(e1), evtMC_.elec(e2),wgt);
+	plots->acceptance_.Fill(evt_.elec(e1), evt_.elec(e2),evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_,wgt,doMC_);
+	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1), evt_.elec(e2), evtMC_.elec(e1), evtMC_.elec(e2),wgt,doMC_);
 	
 	// next n-cuts
 	bool ok=true;
@@ -363,8 +366,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (pairing) {std::swap(e1n,e2n); }
 	  if (ok)
           {
-	    plots->postCut_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt);
-            if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n),wgt);
+	    plots->postCut_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt,doMC_);
+            if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n),wgt,doMC_);
 	  }
         }// now the Z cuts
 	for (int j=0; ok && j<q->second->criteriaCount(ZShapeZDef::crit_Z); j++) {
@@ -374,8 +377,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (pairing) {std::swap(e1n,e2n); }
           if (ok) 
           {
-            plots->zCut_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt);
-            if (extraHistos_) plots->zCutExtra_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n), evtMC_.elec(e2n),wgt);
+            plots->zCut_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt,doMC_);
+            if (extraHistos_) plots->zCutExtra_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n), evtMC_.elec(e2n),wgt,doMC_);
           }	
         }// criteria 
         
@@ -656,6 +659,7 @@ int ZFromData::ProbePassProbeOverlap( const reco::CandidateBaseRef& probe,
    int ppass = 0;
    if( passprobes.isValid() )
    {
+
       for( int ipp=0; ipp<(int)passprobes->size(); ++ipp )
       {
 
@@ -664,16 +668,22 @@ int ZFromData::ProbePassProbeOverlap( const reco::CandidateBaseRef& probe,
 	reco::SuperClusterRef probeSC;
 	reco::SuperClusterRef passprobeSC; 
 
+
 	if( not probe.isNull() ) probeSC  =  probe->get<reco::SuperClusterRef>();
+
 
 	reco::CandidateBaseRef ref = passprobes->refAt(ipp);
 
+
 	if( not ref.isNull() ) passprobeSC = ref->get<reco::SuperClusterRef>();
-	
+
+
 	isOverlap = isOverlap && ( probeSC == passprobeSC );
 
 
 	if( isOverlap ) ppass = 1;
+
+
       } 
    }
 
@@ -700,6 +710,7 @@ bool ZFromData::MatchObjects( const reco::Candidate *hltObj,
 
    // If we are comparing two objects for which the candidates should
    // be exactly the same, cut hard. Otherwise take cuts from user.
+   //std::cout << " tEta " << tEta << " tPhi " << tPhi << " tPt " << tPt << " hEta " <<  hEta << " hPhi " << hPhi << " hPt " << hPt << std::endl;
    if( exact ) return ( dRval < 1e-3 && dPtRel < 1e-3 );
    else        return ( dRval < delRMatchingCut_ && dPtRel < delPtRelMatchingCut_ );
 }

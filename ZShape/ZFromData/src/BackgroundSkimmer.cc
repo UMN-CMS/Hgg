@@ -66,7 +66,7 @@ bool BackgroundSkimmer::filter(edm::Event& iEvent, const edm::EventSetup& iSetup
  
   //if (fromfile_) return;
   
-  edm::Handle<reco::CandViewCandViewAssociation> tagprobes;
+  edm::Handle<reco::CandidateView> tagprobes;
       if ( !iEvent.getByLabel(allProbeCandTags_[0],tagprobes) ) {
          //std::cout << " DIDN't get the darn tag " << allProbeCandTags_[i] << std::endl;
       }

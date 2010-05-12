@@ -43,7 +43,7 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
     src = cms.untracked.InputTag('generator'),
     outHistogramsFile = cms.untracked.string('base_Jan23rd_1.root'),
     ExtraFromDataHistos = cms.untracked.bool(True),
-    WeightsFile = cms.string('none'),
+
 	dRMatchCut = cms.untracked.double(0.3),
 	dPtMatchCut = cms.untracked.double(0.6),
 

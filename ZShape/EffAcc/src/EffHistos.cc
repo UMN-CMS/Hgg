@@ -59,10 +59,10 @@ void EffHistos::Book(TFileDirectory& tdf) {
   YZTL_YZ_       = tdf.make<TH2F>("YZTL_vs_YZ","YZTL_vs_YZ;Y_{Z};Y_{ZtreeLevel}",int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY,int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY); 
   YZTL_YZ_matrix_= tdf.make<TH2F>("YZTL_vs_YZ_matrix","YZTL_vs_YZ_matrix;Y_{Z};Y_{ZtreeLevel}",int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY,int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY); 
 
-}
+} 
 
 void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2, 
-		     const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2, double wgt) { 
+		     const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2, double wgt, bool doMC) { 
 
   if (!booked_) {
     std::cerr << "Attempt to fill without booking!\n";
@@ -109,10 +109,12 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
   YZ_  -> Fill(zY,wgt);
   ptZ_ -> Fill(zPt,wgt);
 
-  mZTL_  -> Fill(zTLMass,wgt);
-  YZTL_  -> Fill(zTLY,wgt);
-  ptZTL_ -> Fill(zTLPt,wgt);
-
+  if (doMC) 
+    {
+      mZTL_  -> Fill(zTLMass,wgt);
+      YZTL_  -> Fill(zTLY,wgt);
+      ptZTL_ -> Fill(zTLPt,wgt);
+    }
   e1eta_ -> Fill(e1eta,wgt);
   e1pt_  -> Fill(e1Pt,wgt);
   e1phi_ -> Fill(e1phi,wgt);
@@ -134,7 +136,7 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
   e1eta_e2eta_ -> Fill(e1eta,e2eta,wgt);
 
   // tree level rapidity VS fast reco-ed rapidity 
-  YZTL_YZ_ -> Fill(zY,zTLY,wgt); 
+  if (doMC) YZTL_YZ_ -> Fill(zY,zTLY,wgt); 
 }
 
 

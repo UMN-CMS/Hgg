@@ -102,6 +102,7 @@ private:
 
   edm::InputTag m_srcTag;
   bool quiet_;
+  bool doMC_;
   std::string outFileName_;
   bool        writeHistoConservatively_;
   TFile*      histoFile_;
