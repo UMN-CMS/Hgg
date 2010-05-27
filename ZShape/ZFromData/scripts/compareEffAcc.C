@@ -175,9 +175,16 @@ EffAccHistos::getHistos(void)
 {
    std::cout << " get mc tree level tree " << std::endl;
    //MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/All/Z0_YTL"); //Changed to Z0_YTL rather than Z0_Y... to be the "truth"
-   MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/AllInRange/Acceptance/Z0_YTLR"); //Changed InRange Z0_YTL
-   MCHistos_.ZRapMC->Sumw2();
+   std::cout << " why am I here " << std::endl;
+   //MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/AllInRange/Acceptance/Z0_YTL"); //Changed InRange Z0_YTL 
+   MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("ZFromData/AllFirst/Z0_Y"); //Changed InRange Z0_YTL
+   std::cout << " oh boy 0 " << std::endl;
+   //MCHistos_.ZRapMC->Sumw2();
+      std::cout << " oh boy 10 " << std::endl;
+      if ( !MCHistos_.ZRapMC) std::cout << " why the ehllo not " << std::endl;
    MCHistos_.ZRapMC->GetXaxis()->CenterTitle(kTRUE);
+      std::cout << " oh boy 20 " << std::endl;
+
    MCHistos_.ZRapMC->GetYaxis()->CenterTitle(kTRUE);
    MCHistos_.ZRapMC->GetYaxis()->SetTitleOffset(1.2);
    MCHistos_.ZRapMC->GetYaxis()->SetTitle(Form("Events/%0.1f Units of Rapidity",MCHistos_.ZRapMC->GetXaxis()->GetBinWidth(1)));
@@ -199,13 +206,13 @@ EffAccHistos::getHistos(void)
       //FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
       FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
       //MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
-      MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
+      MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("ZFromData/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
 
 
       namedvechists ZFDhist;
       namedvechists ZMChist;
       //HERE I DO THE FILLING
-      TDirectory *ZMCdir = ZMCFile_->GetDirectory(Form("mcEff/%s",(*mine).c_str()));
+      TDirectory *ZMCdir = ZMCFile_->GetDirectory(Form("ZFromData/%s",(*mine).c_str()));
       TDirectory *ZFDdir = ZFDFile_->GetDirectory(Form("ZFromData/%s",(*mine).c_str()));
       TIter next(ZMCdir->GetListOfKeys());
       TKey * key;

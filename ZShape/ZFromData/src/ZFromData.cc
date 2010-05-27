@@ -217,8 +217,12 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  for( ; tpItr != tagprobes->end(); ++tpItr,++tpnum)
 	  { 
 	    std::cout << " tpnum is " << tpnum <<  " usetp is " << usetp << std::endl;
-	    if (tpnum != usetp ) continue;
+   	    if (tpnum != usetp ) continue;
             std::cout << "In tag probes Iterator " << std::endl;
+	    std::cout << "RUN: " <<  iEvent.run() << " Event: " << iEvent.id().event() << " LS: " <<  iEvent.luminosityBlock() << " BX: " << iEvent.bunchCrossing() << " ORBIT: " <<  iEvent.orbitNumber() << std::endl;
+
+
+
 	    const reco::CandidateBaseRef &tag     = tpItr->daughter(0)->masterClone();
 	    const reco::CandidateBaseRef &vprobes = tpItr->daughter(1)->masterClone();
 
@@ -235,7 +239,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	    //std::cout << "Got the 4-vectors " << std::endl;
 	    // If there are two probes with the tag continue
 	    // if( vprobes.size() > 1 ) { std::cout << " More Than 2 Probes; Z Rapidity "<< tpP4.Rapidity() << " Mass " << sqrt ( tpP4.Dot(tpP4) ) << " PT " << tpP4.Pt()<< std::endl; continue;}
-	    //std::cout << " Z Rapidity  "<< tpP4.Rapidity() << " Mass " << sqrt ( tpP4.Dot(tpP4) ) << " PT " << tpP4.Pt()<< std::endl;
+	    std::cout << " Z Rapidity:  "<< tpP4.Rapidity() << " Mass: " << sqrt ( tpP4.Dot(tpP4) ) << " PT: " << tpP4.Pt()<< std::endl;
 	    //std::cout << " Z RapidityO "<< tpItr->p4().Rapidity() << " Mass " <<  tpItr->p4().M() << " PT " << tpItr->p4().Pt()<< std::endl;
 	    //std::cout << "Only 2 probes " << std::endl;	
 	    for( int itype=0; itype<(int)passProbeCandTags_.size(); ++itype ){
@@ -343,6 +347,9 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       for (std::map<std::string,ZShapeZDef*>::const_iterator q=zdefs_.begin(); q!=zdefs_.end(); ++q) {
 	ZPlots* plots=zplots_[q->first];
         bool ptorder = zptorder_[q->first];
+	bool spitoutE = false;
+	bool spitoutZ = false; 
+        bool spitright = !(strcmp(q->first.c_str(),"Tight-ECAL-Loose-ECAL")) || !(strcmp(q->first.c_str(),"Tight-ECAL-HF") );
         int e1 = 0;
         int e2 = 1;
         if (ptorder) if ( evt_.elec(0).p4_.Pt() < evt_.elec(1).p4_.Pt() ) {e1 = 1; e2 =0;}
@@ -366,6 +373,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (pairing) {std::swap(e1n,e2n); }
 	  if (ok)
           {
+	    if ( j == q->second->criteriaCount(ZShapeZDef::crit_E1)-1)   spitoutE = true;   
 	    plots->postCut_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt,doMC_);
             if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n),wgt,doMC_);
 	  }
@@ -377,9 +385,19 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (pairing) {std::swap(e1n,e2n); }
           if (ok) 
           {
+	    if ( j == q->second->criteriaCount(ZShapeZDef::crit_Z)-1)  spitoutZ = true;
             plots->zCut_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt,doMC_);
             if (extraHistos_) plots->zCutExtra_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n), evtMC_.elec(e2n),wgt,doMC_);
           }	
+	if ( spitoutE && spitoutZ && spitright)
+	  {
+	    //std::cout << "MYZ " << std::endl;
+	    std::cout << "MYZ RUN: " <<  iEvent.run() << " Event: " << iEvent.id().event() << " LS: " <<  iEvent.luminosityBlock() << "BX: " << iEvent.bunchCrossing() << " ORBIT: " <<  iEvent.orbitNumber() << std::endl;	    
+	    math::PtEtaPhiMLorentzVector tpP4 = evt_.elec(e1n).p4_ + evt_.elec(e2n).p4_;
+	    std::cout << "MYZ Z Rapidity:  "<< tpP4.Rapidity() << " Mass: " << sqrt ( tpP4.Dot(tpP4) ) << " PT: " << tpP4.Pt()<< std::endl;
+
+	    //std::cout << "MYZ " << std::endl;
+	  }
         }// criteria 
         
     }
