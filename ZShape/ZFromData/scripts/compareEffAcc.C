@@ -127,7 +127,22 @@ EffAccHistos::EffAccHistos(std::string fromDataFile, std::string mcFile, vecstri
    Cols_[2] = kMagenta;
    Cols_[3] = kBlue;
    Cols_[4] = kCyan+1;
-
+   Cols_[5] = 3;
+   Cols_[6] = 40;
+   Cols_[7] = 46;
+   Cols_[8] = kMagenta;
+   Cols_[9] = kBlue;
+   Cols_[10] = kCyan+1;
+   Cols_[11] = 3;
+   Cols_[12] = 40;
+   Cols_[13] = 46;
+   Cols_[14] = kMagenta;
+   Cols_[15] = kBlue;
+   Cols_[16] = kCyan+1;
+   Cols_[17] = 3;
+   Cols_[18] = 40;
+   Cols_[19] = 46;
+ 
    //Cout some of the information for the record
    for (itvecstring mine = ZDefVec_.begin(); mine != ZDefVec_.end(); ++mine)
    {
@@ -267,7 +282,8 @@ EffAccHistos::getHistos(void)
 
   for (uint i =0; i < ZDefVec_.size(); ++i)
   {
-     TH1F *tempHist = (TH1F*) (MCHistos_.ZRap[i]->Clone());
+     std::cout << " oh b 15 " << std::endl;
+     TH1F *tempHist = (TH1F*) (MCHistos_.ZRap[i]->Clone(Form("Mytemp%d",i)));
      std::cout << " divide the first " << std::endl;
      MCHistos_.ZRap[i]->Sumw2();
      MCHistos_.ZRap[i]->GetXaxis()->CenterTitle(kTRUE);
@@ -277,15 +293,17 @@ EffAccHistos::getHistos(void)
      tempHist->Divide(MCHistos_.ZRap[i],MCHistos_.ZRapMC,1.0,1.0 );
 std::cout << " divide the first 10 " << std::endl;
      tempHist->SetTitle(";Z0_Y;Efficiency X Acceptance");
-
+     std::cout << " oh b 0 " << std::endl;
      tempHist->SetFillColor(Cols_[i]);
      tempHist->SetLineColor(Cols_[i]);
      tempHist->GetXaxis()->CenterTitle(kTRUE);
      tempHist->GetYaxis()->CenterTitle(kTRUE);
      //tempHist->Sumw2();
      MCHistos_.EffAcc.push_back(tempHist);
+     std::cout << " oh b 10 " << std::endl;
 
   }
+     std::cout << " oh b 20 " << std::endl;
 
    for (uint i =0; i < ZDefVec_.size(); ++i)
    {
@@ -468,7 +486,7 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
               if (strstr((*zfdvhit)->GetName(),"e1")) electron = 1;
               (*zfdvhit)->GetXaxis()->SetTitle(Form("#eta_{d,e%d}",electron));
            }
-           if (placement ==0 )  { plabel -> DrawText(xlab_, ylabp_, "CMS PRELIMINARY");   }//  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));}
+           if (placement ==0 )  { plabel -> DrawText(xlab_, ylabp_, "CMS  PRELIMINARY");   }//  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));}
            else  if (placement == 1 )  { plabel -> DrawText(xlabc_, ylabpc_, "CMS PRELIMINARY");    }// tlabel -> DrawText(xlabc_, ylabtc_, Form("%s",time_));}
            else  if (placement == 2 )   {plabel -> DrawText(xlabb_, ylabpb_, "CMS PRELIMINARY"); }//    tlabel -> DrawText(xlabb_, ylabtb_, Form("%s",time_));}
            else { plabel -> DrawText(xlab_, ylabp_, "CMS PRELIMINARY");   }//  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));}
@@ -477,8 +495,8 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
               std::cout << " Did I get here " << std::endl;
               TLegend *myLeg1 = new TLegend(.78,.80,.98,.95);
 			  if (placement == 1) {myLeg1->SetX1(0.46); myLeg1->SetX2(0.66);myLeg1->SetY1(0.70); myLeg1->SetY2(0.85);}
-               myLeg1->AddEntry((*zmcvhit),"Fast Simulation","l");
-               myLeg1->AddEntry((*zfdvhit),"Full Simulation","lp");
+               myLeg1->AddEntry((*zmcvhit),"Zee MC","l");
+               myLeg1->AddEntry((*zfdvhit),"7 TeV Data ","lp");
                myLeg1->SetFillColor(kWhite);
                myLeg1->Draw();
                tempCan1->Print(Form("Z_CompareFINAL_%s_%s.%s",rtype,(*zmcvhit)->GetName(),ftype));

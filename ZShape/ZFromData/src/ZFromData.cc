@@ -349,7 +349,9 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         bool ptorder = zptorder_[q->first];
 	bool spitoutE = false;
 	bool spitoutZ = false; 
-        bool spitright = !(strcmp(q->first.c_str(),"Tight-ECAL-Loose-ECAL")) || !(strcmp(q->first.c_str(),"Tight-ECAL-HF") );
+        //bool spitright = !(strcmp(q->first.c_str(),"Tight-ECAL-Loose-ECAL")) || !(strcmp(q->first.c_str(),"Tight-ECAL-HF") );
+	//bool spitright = !(strcmp(q->first.c_str(),"Tight-ECAL-Loose-ECAL")) );
+        bool spitright = true;
         int e1 = 0;
         int e2 = 1;
         if (ptorder) if ( evt_.elec(0).p4_.Pt() < evt_.elec(1).p4_.Pt() ) {e1 = 1; e2 =0;}
@@ -392,10 +394,11 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	if ( spitoutE && spitoutZ && spitright)
 	  {
 	    //std::cout << "MYZ " << std::endl;
-	    std::cout << "MYZ RUN: " <<  iEvent.run() << " Event: " << iEvent.id().event() << " LS: " <<  iEvent.luminosityBlock() << "BX: " << iEvent.bunchCrossing() << " ORBIT: " <<  iEvent.orbitNumber() << std::endl;	    
+	    std::cout << "MYZ " << q->first << " RUN: " <<  iEvent.run() << " Event: " << iEvent.id().event() << " LS: " <<  iEvent.luminosityBlock() << "BX: " << iEvent.bunchCrossing() << " ORBIT: " <<  iEvent.orbitNumber() << std::endl;	    
 	    math::PtEtaPhiMLorentzVector tpP4 = evt_.elec(e1n).p4_ + evt_.elec(e2n).p4_;
-	    std::cout << "MYZ Z Rapidity:  "<< tpP4.Rapidity() << " Mass: " << sqrt ( tpP4.Dot(tpP4) ) << " PT: " << tpP4.Pt()<< std::endl;
-
+	    std::cout << "MYZ " << q->first << " Z Rapidity:  "<< tpP4.Rapidity() << " Mass: " << sqrt ( tpP4.Dot(tpP4) ) << " PT: " << tpP4.Pt()<< std::endl;
+	    std::cout << "MYZ " << q->first << "Electron 1 (eta,phi,pt : deteta) " << evt_.elec(e1n).p4_.eta() << ", " << evt_.elec(e1n).p4_.phi() << ", " << evt_.elec(e1n).p4_.Pt() << " : " << evt_.elec(e1n).detEta_ << std::endl;
+	    std::cout << "MYZ " << q->first << "Electron 2 (eta,phi,pt : deteta) " << evt_.elec(e2n).p4_.eta() << ", " << evt_.elec(e2n).p4_.phi() << ", " << evt_.elec(e2n).p4_.Pt() << " : " <<evt_.elec(e2n).detEta_ << std::endl;
 	    //std::cout << "MYZ " << std::endl;
 	  }
         }// criteria 
@@ -682,7 +685,8 @@ int ZFromData::ProbePassProbeOverlap( const reco::CandidateBaseRef& probe,
       {
 
 	bool isOverlap = MatchObjects(&((*passprobes)[ipp]),  probe,checkExactOverlap_);
-
+	//std::cout << " isOver " << isOverlap << std::endl;
+	if ( checkExactOverlap_ && isOverlap ) {ppass = 1; continue;}
 	reco::SuperClusterRef probeSC;
 	reco::SuperClusterRef passprobeSC; 
 
@@ -698,6 +702,7 @@ int ZFromData::ProbePassProbeOverlap( const reco::CandidateBaseRef& probe,
 
 	isOverlap = isOverlap && ( probeSC == passprobeSC );
 
+	//std::cout << " isOverNOW " << isOverlap << std::endl;
 
 	if( isOverlap ) ppass = 1;
 

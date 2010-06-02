@@ -27,6 +27,9 @@ hfSuperClusterCandidate = hfRecoEcalCandidate.clone()
 hfSuperClusterCandidate.e9e25Cut = 0
 hfSuperClusterCandidate.intercept2DCut = -99
 
+hfRecoEcalCandidateTight = hfRecoEcalCandidate.clone()
+hfRecoEcalCandidateTight.intercept2DCut = 0.55
+
 
 #  Calculate efficiency for *SuperClusters passing as GsfElectron* 
 #
@@ -96,11 +99,11 @@ theHFSuperClusters = cms.EDFilter("CandViewSelector",
 theSuperClusters = cms.EDFilter("CandViewSelector",
     #src = cms.InputTag("superClusterCands"),
     src = cms.InputTag("allSuperClusters"),
-    cut = cms.string('et  > 5.0 && abs(eta)<2.5 && !(1.4442< abs(eta) <1.560)'),
+    cut = cms.string('et  > 10.0 && abs(eta)<2.5 && !(1.4442< abs(eta) <1.560)'),
     filter = cms.bool(True) #LOOK UP WHAT THIS DOES
 )
 
-sc_sequence = cms.Sequence( ( hfSuperClusterCandidate * theHFSuperClusters) * HybridSuperClusters * EBSuperClusters + EndcapSuperClusters * EESuperClusters * allSuperClusters * theSuperClusters)
+sc_sequence = cms.Sequence( ( hfSuperClusterCandidate * theHFSuperClusters + hfRecoEcalCandidateTight) * HybridSuperClusters * EBSuperClusters + EndcapSuperClusters * EESuperClusters * allSuperClusters * theSuperClusters)
 
 
 
@@ -116,13 +119,18 @@ sc_sequence = cms.Sequence( ( hfSuperClusterCandidate * theHFSuperClusters) * Hy
  
 theGsfElectrons = cms.EDFilter("GsfElectronRefSelector",
     src = cms.InputTag("gsfElectrons"),
-    cut = cms.string('(abs(superCluster.eta)<2.5) && !(1.4442<abs(superCluster.eta)<1.560) && (( caloEnergy * sin( caloPosition.theta ) )  > 5.0)')
+    cut = cms.string('(abs(superCluster.eta)<2.5) && !(1.4442<abs(superCluster.eta)<1.560) && (( caloEnergy * sin( caloPosition.theta ) )  > 15.0)')
 )
 
 
 HFElectronID = cms.EDFilter("CandViewSelector",
     src = cms.InputTag("hfRecoEcalCandidate"),
-    cut = cms.string('et > 5.0')
+    cut = cms.string('et > 15.0')
+)
+
+HFElectronIDTight = cms.EDFilter("CandViewSelector",
+    src = cms.InputTag("hfRecoEcalCandidateTight"),
+    cut = cms.string('et > 15.0')
 )
 
 theGsfHf = cms.EDFilter("CandViewMerger",
@@ -179,16 +187,133 @@ theId = cms.EDFilter("GsfElectronRefSelector",
 theHLT = cms.EDProducer("trgMatchedGsfElectronProducer",                     
     InputProducer = cms.InputTag("theId"),                          
     #hltTag = cms.untracked.InputTag("HLT_Ele15_SW_LooseTrackIso_L1R","","HLT"),
-    hltTag = cms.untracked.InputTag("HLT_L1SingleEG8","","HLT"),    
+    #hltTag = cms.untracked.InputTag("HLT_L1SingleEG8","","HLT"),    
+    hltTag = cms.untracked.InputTag("HLT_Photon10_L1R","","HLT"),  
     triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
 )
 
+theHLTGsf = cms.EDProducer("trgMatchedGsfElectronProducer",                     
+    InputProducer = cms.InputTag("theGsfElectrons"),                          
+    #hltTag = cms.untracked.InputTag("HLT_Ele15_SW_LooseTrackIso_L1R","","HLT"),
+    #hltTag = cms.untracked.InputTag("HLT_L1SingleEG8","","HLT"),    
+    hltTag = cms.untracked.InputTag("HLT_Photon10_L1R","","HLT"),                      
+    triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
+)
 
-electron_sequence = cms.Sequence(theGsfElectrons * theGsfHf * theIsolation * theId * theHLT * HFElectronID )
+electron_sequence = cms.Sequence(theGsfElectrons * theHLTGsf * theGsfHf * theIsolation * theId * theHLT * (HFElectronID + HFElectronIDTight) )
+
+
+##
+##     ___            ___    _ 
+##    |_ _|___  ___  |_ _|__| | 
+##     | |/ __|/ _ \  | |/ _` |
+##     | |\__ \ (_)   | | (_| | 
+##    |___|___/\___/ |___\__,_|
+##
+
+
+from ElectroWeakAnalysis.ZEE.simpleEleIdSequence_cff import *
+from RecoEgamma.EgammaIsolationAlgos.egammaIsolationSequence_cff import *
+from PhysicsTools.PatAlgos.patSequences_cff import *
+
+patElectronIDs = cms.Sequence(simpleEleIdSequence)
+
+electronEcalRecHitIsolationLcone.ecalBarrelRecHitProducer = cms.InputTag("reducedEcalRecHitsEB")
+electronEcalRecHitIsolationScone.ecalBarrelRecHitProducer = cms.InputTag("reducedEcalRecHitsEB")
+electronEcalRecHitIsolationLcone.ecalEndcapRecHitProducer = cms.InputTag("reducedEcalRecHitsEE")
+electronEcalRecHitIsolationScone.ecalEndcapRecHitProducer = cms.InputTag("reducedEcalRecHitsEE")
+electronEcalRecHitIsolationLcone.ecalBarrelRecHitCollection = cms.InputTag("")
+electronEcalRecHitIsolationScone.ecalBarrelRecHitCollection = cms.InputTag("")
+electronEcalRecHitIsolationLcone.ecalEndcapRecHitCollection = cms.InputTag("")
+electronEcalRecHitIsolationScone.ecalEndcapRecHitCollection = cms.InputTag("")
+patElectronIsolation = cms.Sequence(egammaIsolationSequence)
+
+
+makePatElectrons = cms.Sequence(patElectronIDs*patElectronIsolation*patElectrons)
+
+patElectrons.addElectronID = cms.bool(True)
+patElectrons.electronIDSources = cms.PSet(
+    simpleEleId95relIso= cms.InputTag("simpleEleId95relIso"),
+    simpleEleId90relIso= cms.InputTag("simpleEleId90relIso"),
+    simpleEleId85relIso= cms.InputTag("simpleEleId85relIso"),
+    simpleEleId80relIso= cms.InputTag("simpleEleId80relIso"),
+    simpleEleId70relIso= cms.InputTag("simpleEleId70relIso"),
+    simpleEleId60relIso= cms.InputTag("simpleEleId60relIso"),
+    simpleEleId95cIso= cms.InputTag("simpleEleId95cIso"),
+    simpleEleId90cIso= cms.InputTag("simpleEleId90cIso"),
+    simpleEleId85cIso= cms.InputTag("simpleEleId85cIso"),
+    simpleEleId80cIso= cms.InputTag("simpleEleId80cIso"),
+    simpleEleId70cIso= cms.InputTag("simpleEleId70cIso"),
+    simpleEleId60cIso= cms.InputTag("simpleEleId60cIso"),
+)
+patElectrons.addGenMatch = cms.bool(False)
+patElectrons.embedGenMatch = cms.bool(False)
+
+Iso95 =  cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && ((electronID("simpleEleId95relIso") > 2-.1 && electronID("simpleEleId95relIso") < 3+.1)  || electronID("simpleEleId95relIso") > 6-0.1 && electronID("simpleEleId95relIso") < 7+.1)')                
+)
+
+ElectronID95 = cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && ((electronID("simpleEleId95relIso") > 3-.1 && electronID("simpleEleId95relIso") < 3+.1)  || electronID("simpleEleId95relIso") > 7-0.1 && electronID("simpleEleId95relIso") < 7+.1)')                
+)
+
+Iso90 =  cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && ((electronID("simpleEleId90relIso") > 2-.1 && electronID("simpleEleId90relIso") < 3+.1)  || electronID("simpleEleId90relIso") > 6-0.1 && electronID("simpleEleId90relIso") < 7+.1)')                
+
+)
+
+ElectronID90 = cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && (electronID("simpleEleId90relIso") == 3 || electronID("simpleEleId90relIso") == 7 )')
+)
+
+Iso85 =  cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && (electronID("simpleEleId85relIso") == 2 || electronID("simpleEleId85relIso") == 6 || electronID("simpleEleId85relIso") == 3 || electronID("simpleEleId85relIso") == 7 )')                
+)
+
+ElectronID85 = cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && (electronID("simpleEleId85relIso") == 3 || electronID("simpleEleId85relIso") == 7 )')
+)
+
+Iso80 =  cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && (electronID("simpleEleId80relIso") == 2 || electronID("simpleEleId80relIso") == 6 || electronID("simpleEleId80relIso") == 3 || electronID("simpleEleId80relIso") == 7 )')                
+)
+
+ElectronID80 = cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && (electronID("simpleEleId80relIso") == 3 || electronID("simpleEleId80relIso") == 7 )')
+)
+
+Iso70 =  cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && (electronID("simpleEleId70relIso") == 2 || electronID("simpleEleId70relIso") == 6 || electronID("simpleEleId70relIso") == 3 || electronID("simpleEleId70relIso") == 7 )')                
+)
+
+ElectronID70 = cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && (electronID("simpleEleId70relIso") == 3 || electronID("simpleEleId70relIso") == 7 )')
+)
+
+
+Iso60 =  cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && (electronID("simpleEleId60relIso") == 2 || electronID("simpleEleId60relIso") == 6 || electronID("simpleEleId60relIso") == 3 || electronID("simpleEleId60relIso") == 7 )')                
+)
+
+ElectronID60 = cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string('et > 15.0 && (electronID("simpleEleId60relIso") == 3 || electronID("simpleEleId60relIso") == 7 )')
+)
 
 
 
- 
+neweleseq=cms.Sequence(makePatElectrons* (Iso95 * ElectronID95 + Iso90 * ElectronID90 * Iso85 * ElectronID85 + Iso80 * ElectronID80+ Iso70 * ElectronID70 + Iso60 * ElectronID60 )  )
 
 
 ##    _____ ___   ____    ____       _          
@@ -249,8 +374,9 @@ tpMapHFSuperClusters = cms.EDProducer("CandViewShallowCloneCombiner",
 
 
 tpMapGsfAndHF =  cms.EDProducer("CandViewShallowCloneCombiner",
-    decay = cms.string("theHLT theGsfHf"), # charge coniugate states are implied
-    cut   = cms.string("30 < mass < 120"),
+    #decay = cms.string("theHLTGsf theGsfHf"), # charge coniugate states are implied
+    decay = cms.string("theGsfElectrons theGsfHf"),
+    cut   = cms.string("50 < mass < 130"),
     checkCharge = cms.bool(False),
 )
 
@@ -327,7 +453,7 @@ truthMatch_sequence = cms.Sequence( SuperClustersMatch + GsfElectronsMatch + Iso
 #truthMatch_sequence = cms.Sequence( GsfElectronsMatch + IsolationMatch + IdMatch + HLTMatch + HFSCMatch + HFIDMatch)
 #lepton_cands = cms.Sequence(genParticles * hfEMClusteringSequence * sc_sequence * electron_sequence * tpMap_sequence * truthMatch_sequence)
 
-lepton_cands = cms.Sequence(hfEMClusteringSequence * sc_sequence * electron_sequence * tpMap_sequence )
+lepton_cands = cms.Sequence(hfEMClusteringSequence * sc_sequence * electron_sequence * neweleseq  * tpMap_sequence )
 
 
    

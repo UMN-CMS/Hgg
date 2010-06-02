@@ -46,7 +46,7 @@ EESuperClusters = cms.EDFilter("CandViewSelector",
 
 theHFSuperClusters = cms.EDFilter("CandViewSelector",
     src = cms.InputTag("hfSuperClusterCandidate"),
-    cut = cms.string('et > 5.0')
+    cut = cms.string('et > 10.0')
 )
 
 
@@ -58,7 +58,7 @@ allSuperClusters = cms.EDFilter("CandViewMerger",
 theSuperClusters = cms.EDFilter("CandViewSelector",
     #src = cms.InputTag("superClusterCands"),
     src = cms.InputTag("allSuperClusters"),
-    cut = cms.string('et  > 5.0 && abs(eta)<2.8 && !(1.4442< abs(eta) <1.560)'),
+    cut = cms.string('et  > 10.0 && abs(eta)<2.8 && !(1.4442< abs(eta) <1.560)'),
     filter = cms.bool(True) #LOOK UP WHAT THIS DOES
 )
 
@@ -77,12 +77,12 @@ sc_sequence = cms.Sequence( ( hfSuperClusterCandidate * theHFSuperClusters) * Hy
 
 theGsfElectrons = cms.EDFilter("GsfElectronRefSelector",
     src = cms.InputTag("gsfElectrons"),
-    cut = cms.string('(abs(superCluster.eta)<2.8) && !(1.4442<abs(superCluster.eta)<1.560) && (( caloEnergy * sin( caloPosition.theta ) )  > 5.0)')
+    cut = cms.string('(abs(superCluster.eta)<2.8) && !(1.4442<abs(superCluster.eta)<1.560) && (( caloEnergy * sin( caloPosition.theta ) )  > 10.0)')
 )
 
 HFElectronID = cms.EDFilter("CandViewSelector",
                                 src = cms.InputTag("hfRecoEcalCandidate"),
-                                cut = cms.string('et > 15.0')
+                                cut = cms.string('et > 10.0')
                             )
 
 

@@ -7,10 +7,9 @@
 #include "ZShape/ZFromData/interface/BackgroundSkimmer.h"
 
 
-DEFINE_SEAL_MODULE();
 
-DEFINE_ANOTHER_FWK_MODULE(ZFromData);
-DEFINE_ANOTHER_FWK_MODULE(MCAnalyTrial);
-DEFINE_ANOTHER_FWK_MODULE(InclusiveCheck);
-DEFINE_ANOTHER_FWK_MODULE(BackgroundSkimmer);
+DEFINE_FWK_MODULE(ZFromData);
+DEFINE_FWK_MODULE(MCAnalyTrial);
+DEFINE_FWK_MODULE(InclusiveCheck);
+DEFINE_FWK_MODULE(BackgroundSkimmer);
 
