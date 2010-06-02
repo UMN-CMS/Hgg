@@ -12,9 +12,9 @@
 int main( int argc, char **argv ) {
 
   std::cout << "\nThis program converts efficiencies txt files to plots." << std::endl;
-  char *eff ="";
-  char *bins="";
-  char *binsfile="";
+  char *eff;
+  char *bins;
+  char *binsfile;
   int domeff=0;
 
   if(argc<7 ){

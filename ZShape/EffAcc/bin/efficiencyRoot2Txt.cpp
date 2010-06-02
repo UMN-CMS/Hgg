@@ -12,8 +12,8 @@
 int main( int argc, char **argv ) {
 
   std::cout << "\nThis program converts efficiencies from Root to txt format." << std::endl;
-  char *eff ="";
-  char *bins="";
+  char* eff ;
+  char* bins;
 
   if(argc<5 ){
     std::cout << "\nlacking arguments. Usage:    efficiencyRoot2Txt <path/efficiencyFileName.root> <path/effFileName.txt> <eff name> <effbins>\n" << std::endl;
