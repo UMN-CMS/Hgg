@@ -20,7 +20,7 @@ from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositEcalFromHits_cff import *
 from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositHcalFromTowers_cff import *
 
 hfRecoEcalCandidate.Correct = True
-##hfRecoEcalCandidate.e9e25Cut = 0
+hfRecoEcalCandidate.e9e25Cut = 0
 hfRecoEcalCandidate.intercept2DCut = 0.32
 
 hfSuperClusterCandidate = hfRecoEcalCandidate.clone()
@@ -28,7 +28,8 @@ hfSuperClusterCandidate.e9e25Cut = 0
 hfSuperClusterCandidate.intercept2DCut = -99
 
 hfRecoEcalCandidateTight = hfRecoEcalCandidate.clone()
-hfRecoEcalCandidateTight.intercept2DCut = 0.55
+hfRecoEcalCandidateTight.intercept2DCut = 0.45
+hfRecoEcalCandidateTight.e9e25Cut = 0
 
 
 #  Calculate efficiency for *SuperClusters passing as GsfElectron* 
@@ -188,7 +189,7 @@ theHLT = cms.EDProducer("trgMatchedGsfElectronProducer",
     InputProducer = cms.InputTag("theId"),                          
     #hltTag = cms.untracked.InputTag("HLT_Ele15_SW_LooseTrackIso_L1R","","HLT"),
     #hltTag = cms.untracked.InputTag("HLT_L1SingleEG8","","HLT"),    
-    hltTag = cms.untracked.InputTag("HLT_Photon10_L1R","","HLT"),  
+    hltTag = cms.untracked.InputTag("HLT_Photon15_L1R","","HLT"),  
     triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
 )
 
@@ -196,7 +197,7 @@ theHLTGsf = cms.EDProducer("trgMatchedGsfElectronProducer",
     InputProducer = cms.InputTag("theGsfElectrons"),                          
     #hltTag = cms.untracked.InputTag("HLT_Ele15_SW_LooseTrackIso_L1R","","HLT"),
     #hltTag = cms.untracked.InputTag("HLT_L1SingleEG8","","HLT"),    
-    hltTag = cms.untracked.InputTag("HLT_Photon10_L1R","","HLT"),                      
+    hltTag = cms.untracked.InputTag("HLT_Photon15_L1R","","HLT"),                      
     triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
 )
 
@@ -218,14 +219,14 @@ from PhysicsTools.PatAlgos.patSequences_cff import *
 
 patElectronIDs = cms.Sequence(simpleEleIdSequence)
 
-electronEcalRecHitIsolationLcone.ecalBarrelRecHitProducer = cms.InputTag("reducedEcalRecHitsEB")
-electronEcalRecHitIsolationScone.ecalBarrelRecHitProducer = cms.InputTag("reducedEcalRecHitsEB")
-electronEcalRecHitIsolationLcone.ecalEndcapRecHitProducer = cms.InputTag("reducedEcalRecHitsEE")
-electronEcalRecHitIsolationScone.ecalEndcapRecHitProducer = cms.InputTag("reducedEcalRecHitsEE")
-electronEcalRecHitIsolationLcone.ecalBarrelRecHitCollection = cms.InputTag("")
-electronEcalRecHitIsolationScone.ecalBarrelRecHitCollection = cms.InputTag("")
-electronEcalRecHitIsolationLcone.ecalEndcapRecHitCollection = cms.InputTag("")
-electronEcalRecHitIsolationScone.ecalEndcapRecHitCollection = cms.InputTag("")
+#electronEcalRecHitIsolationLcone.ecalBarrelRecHitProducer = cms.InputTag("reducedEcalRecHitsEB")
+#electronEcalRecHitIsolationScone.ecalBarrelRecHitProducer = cms.InputTag("reducedEcalRecHitsEB")
+#electronEcalRecHitIsolationLcone.ecalEndcapRecHitProducer = cms.InputTag("reducedEcalRecHitsEE")
+#electronEcalRecHitIsolationScone.ecalEndcapRecHitProducer = cms.InputTag("reducedEcalRecHitsEE")
+#electronEcalRecHitIsolationLcone.ecalBarrelRecHitCollection = cms.InputTag("")
+#electronEcalRecHitIsolationScone.ecalBarrelRecHitCollection = cms.InputTag("")
+#electronEcalRecHitIsolationLcone.ecalEndcapRecHitCollection = cms.InputTag("")
+#electronEcalRecHitIsolationScone.ecalEndcapRecHitCollection = cms.InputTag("")
 patElectronIsolation = cms.Sequence(egammaIsolationSequence)
 
 
@@ -248,67 +249,69 @@ patElectrons.electronIDSources = cms.PSet(
 )
 patElectrons.addGenMatch = cms.bool(False)
 patElectrons.embedGenMatch = cms.bool(False)
+patElectrons.isoDeposits = cms.PSet()
+patElectrons.userIsolation = cms.PSet()
 
 Iso95 =  cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && ((electronID("simpleEleId95relIso") > 2-.1 && electronID("simpleEleId95relIso") < 3+.1)  || electronID("simpleEleId95relIso") > 6-0.1 && electronID("simpleEleId95relIso") < 7+.1)')                
+    cut = cms.string('pt > 15.0 && ((electronID("simpleEleId95relIso") > 2-.1 && electronID("simpleEleId95relIso") < 3+.1)  || electronID("simpleEleId95relIso") > 6-0.1 && electronID("simpleEleId95relIso") < 7+.1)')                
 )
 
 ElectronID95 = cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && ((electronID("simpleEleId95relIso") > 3-.1 && electronID("simpleEleId95relIso") < 3+.1)  || electronID("simpleEleId95relIso") > 7-0.1 && electronID("simpleEleId95relIso") < 7+.1)')                
+    cut = cms.string('pt > 15.0 && ((electronID("simpleEleId95relIso") > 3-.1 && electronID("simpleEleId95relIso") < 3+.1)  || electronID("simpleEleId95relIso") > 7-0.1 && electronID("simpleEleId95relIso") < 7+.1)')                
 )
 
 Iso90 =  cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && ((electronID("simpleEleId90relIso") > 2-.1 && electronID("simpleEleId90relIso") < 3+.1)  || electronID("simpleEleId90relIso") > 6-0.1 && electronID("simpleEleId90relIso") < 7+.1)')                
+    cut = cms.string('pt > 15.0 && ((electronID("simpleEleId90relIso") > 2-.1 && electronID("simpleEleId90relIso") < 3+.1)  || electronID("simpleEleId90relIso") > 6-0.1 && electronID("simpleEleId90relIso") < 7+.1)')                
 
 )
 
 ElectronID90 = cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && (electronID("simpleEleId90relIso") == 3 || electronID("simpleEleId90relIso") == 7 )')
+    cut = cms.string('pt > 15.0 && (electronID("simpleEleId90relIso") == 3 || electronID("simpleEleId90relIso") == 7 )')
 )
 
 Iso85 =  cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && (electronID("simpleEleId85relIso") == 2 || electronID("simpleEleId85relIso") == 6 || electronID("simpleEleId85relIso") == 3 || electronID("simpleEleId85relIso") == 7 )')                
+    cut = cms.string('pt > 15.0 && (electronID("simpleEleId85relIso") == 2 || electronID("simpleEleId85relIso") == 6 || electronID("simpleEleId85relIso") == 3 || electronID("simpleEleId85relIso") == 7 )')                
 )
 
 ElectronID85 = cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && (electronID("simpleEleId85relIso") == 3 || electronID("simpleEleId85relIso") == 7 )')
+    cut = cms.string('pt > 15.0 && (electronID("simpleEleId85relIso") == 3 || electronID("simpleEleId85relIso") == 7 )')
 )
 
 Iso80 =  cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && (electronID("simpleEleId80relIso") == 2 || electronID("simpleEleId80relIso") == 6 || electronID("simpleEleId80relIso") == 3 || electronID("simpleEleId80relIso") == 7 )')                
+    cut = cms.string('pt > 15.0 && (electronID("simpleEleId80relIso") == 2 || electronID("simpleEleId80relIso") == 6 || electronID("simpleEleId80relIso") == 3 || electronID("simpleEleId80relIso") == 7 )')                
 )
 
 ElectronID80 = cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && (electronID("simpleEleId80relIso") == 3 || electronID("simpleEleId80relIso") == 7 )')
+    cut = cms.string('pt > 15.0 && (electronID("simpleEleId80relIso") == 3 || electronID("simpleEleId80relIso") == 7 )')
 )
 
 Iso70 =  cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && (electronID("simpleEleId70relIso") == 2 || electronID("simpleEleId70relIso") == 6 || electronID("simpleEleId70relIso") == 3 || electronID("simpleEleId70relIso") == 7 )')                
+    cut = cms.string('pt > 15.0 && (electronID("simpleEleId70relIso") == 2 || electronID("simpleEleId70relIso") == 6 || electronID("simpleEleId70relIso") == 3 || electronID("simpleEleId70relIso") == 7 )')                
 )
 
 ElectronID70 = cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && (electronID("simpleEleId70relIso") == 3 || electronID("simpleEleId70relIso") == 7 )')
+    cut = cms.string('pt > 15.0 && (electronID("simpleEleId70relIso") == 3 || electronID("simpleEleId70relIso") == 7 )')
 )
 
 
 Iso60 =  cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && (electronID("simpleEleId60relIso") == 2 || electronID("simpleEleId60relIso") == 6 || electronID("simpleEleId60relIso") == 3 || electronID("simpleEleId60relIso") == 7 )')                
+    cut = cms.string('pt > 15.0 && (electronID("simpleEleId60relIso") == 2 || electronID("simpleEleId60relIso") == 6 || electronID("simpleEleId60relIso") == 3 || electronID("simpleEleId60relIso") == 7 )')                
 )
 
 ElectronID60 = cms.EDFilter("PATElectronRefSelector",
     src = cms.InputTag("patElectrons"),
-    cut = cms.string('et > 15.0 && (electronID("simpleEleId60relIso") == 3 || electronID("simpleEleId60relIso") == 7 )')
+    cut = cms.string('pt > 15.0 && (electronID("simpleEleId60relIso") == 3 || electronID("simpleEleId60relIso") == 7 )')
 )
 
 

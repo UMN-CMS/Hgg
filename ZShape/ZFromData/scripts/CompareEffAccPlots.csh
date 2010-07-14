@@ -59,8 +59,11 @@ gStyle->SetTitleAlign(22);
 //4.88 or 5.0057
 //2.4153439 for the combined
 //3.9 For the full full but some must not have gone, so 4.031
-
-EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeFromDataJeremyTEMPLATE/histoJason10_only1hlt_TRIAL_ZFULL.root","/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeMCFromDataJeremyTEMPLATE/MCZFD.root",zdefvec, 2932.5);
+//////
+//2932.5 for 17
+//2077.2 for 24
+//
+EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeFromDataJeremyTEMPLATE/histoJason10_only1hlt_TRIAL_ZFULL.root","/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeMCFromDataJeremyTEMPLATE/MCZFD.root",zdefvec, 2077.2);
 myEffAccHistos->getFiles();
 myEffAccHistos->getHistos();
 myEffAccHistos->printSumHistos("${filetype}");

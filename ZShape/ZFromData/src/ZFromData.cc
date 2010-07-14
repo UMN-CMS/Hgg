@@ -734,8 +734,9 @@ bool ZFromData::MatchObjects( const reco::Candidate *hltObj,
    // If we are comparing two objects for which the candidates should
    // be exactly the same, cut hard. Otherwise take cuts from user.
    //std::cout << " tEta " << tEta << " tPhi " << tPhi << " tPt " << tPt << " hEta " <<  hEta << " hPhi " << hPhi << " hPt " << hPt << std::endl;
-   if( exact ) return ( dRval < 1e-3 && dPtRel < 1e-3 );
-   else        return ( dRval < delRMatchingCut_ && dPtRel < delPtRelMatchingCut_ );
+   //if( exact ) return ( dRval < 1e-3 && dPtRel < 1e-3 );
+   //else        return ( dRval < delRMatchingCut_ && dPtRel < delPtRelMatchingCut_ );
+   return ( dRval < delRMatchingCut_ && dPtRel < delPtRelMatchingCut_ );
 }
 // ************************************************************** //
 

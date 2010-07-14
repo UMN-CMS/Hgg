@@ -151,7 +151,7 @@ theId = cms.EDFilter("GsfElectronRefSelector",
 theHLT = cms.EDProducer("trgMatchedGsfElectronProducer",
                             InputProducer = cms.InputTag("theId"),
                             #hltTag = cms.untracked.InputTag("HLT_Ele15_SW_LooseTrackIso_L1R","","HLT"),
-                            hltTag = cms.untracked.InputTag("HLT_L1SingleEG8","","HLT"),
+                            hltTag = cms.untracked.InputTag("HLT_Photon10_L1R","","HLT"),
                             triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
                         )
 
