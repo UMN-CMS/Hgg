@@ -44,7 +44,7 @@ Implementation:
 
 #include "ZShape/Base/interface/ZShapeElectron.h"
 
-#include "PhysicsTools/TagAndProbe/interface/EffTableLoader.h"
+#include "ZShape/Base/interface/EffTableLoader.h"
 
 
 #include <TF1.h>

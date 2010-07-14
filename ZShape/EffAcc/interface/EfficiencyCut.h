@@ -6,7 +6,7 @@
 #include "DataFormats/Math/interface/Vector3D.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "ZShape/Base/interface/ZShapeElectron.h"
-#include "PhysicsTools/TagAndProbe/interface/EffTableLoader.h"
+#include "ZShape/Base/interface/EffTableLoader.h"
 //
 // holds efficiency info and performs the cut. Recognizes well-knonw variables
 

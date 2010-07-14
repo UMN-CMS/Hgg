@@ -2,7 +2,7 @@
 #define EFFSTORENEW_INC
 
 #include <string.h>
-#include "PhysicsTools/TagAndProbe/interface/EffTableLoader.h"
+#include "ZShape/Base/interface/EffTableLoader.h"
 
 #include <TH1.h>
 #include <TH2.h>

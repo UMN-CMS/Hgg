@@ -36,7 +36,7 @@ Implementation:
 #include "ZShape/EffAcc/interface/EfficiencyCut.h"
 #include "ZShape/ZFromData/interface/EffExtraHistos.h"
 
-#include "PhysicsTools/TagAndProbe/interface/EffTableLoader.h"
+#include "ZShape/Base/interface/EffTableLoader.h"
 
 ///#include "AnalysisDataFormats/ElectronEfficiency/interface/EmObjectFwd.h"
 ///#include "AnalysisDataFormats/ElectronEfficiency/interface/TagProbeAssociation.h"

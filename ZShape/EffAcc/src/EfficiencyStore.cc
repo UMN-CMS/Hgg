@@ -11,7 +11,7 @@
 #include <TKey.h>
 
 #include "ZShape/EffAcc/interface/EfficiencyStore.h"
-#include "PhysicsTools/TagAndProbe/interface/EffTableLoader.h"
+#include "ZShape/Base/interface/EffTableLoader.h"
 
 EfficiencyStore::EfficiencyStore()
 {

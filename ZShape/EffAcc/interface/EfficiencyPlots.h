@@ -10,7 +10,7 @@
 #include <TGraphAsymmErrors.h>
 #include <TStyle.h>
 // Used for 2D efficiency reading/writing 
-#include "PhysicsTools/TagAndProbe/interface/EffTableLoader.h"
+#include "ZShape/Base/interface/EffTableLoader.h"
 // This is my personal class I have used to write the efficiency histograms
 // This is essentionally a class that acts like a ROOT Macro
 
