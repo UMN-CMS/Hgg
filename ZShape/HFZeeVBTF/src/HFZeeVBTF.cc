@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id$
+// $Id: HFZeeVBTF.cc,v 1.1 2010/07/20 17:15:35 franzoni Exp $
 //
 //
 
@@ -130,7 +130,7 @@ private:
     void book(TFileDirectory td,const std::string&);
     // fill all histos of the set with the two electron candidates
     void fill(pat::ElectronCollection::const_iterator ecalE,  const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, const edm::ParameterSet& myPs);
-    TH1* mee, *Yee, *Ptee;
+    TH1* mee, *meeHFP, *meeHFM, *Yee, *Ptee;
     TH1* ec_eta, *ec_phi, *ec_pt;
     TH1* hf_eta, *hf_phi, *hf_pt;
     // gf: add hisos for variables N-1 selected
@@ -172,6 +172,10 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
 
   title=std::string("M_{ee} ")+post;
   mee=td.make<TH1D>("mee",title.c_str(),90,40,130);  
+  title=std::string("M_{ee,HF+} ")+post;
+  meeHFP=td.make<TH1D>("mee-HFP",title.c_str(),90,40,130);  
+  title=std::string("M_{ee,HF-} ")+post;
+  meeHFM=td.make<TH1D>("mee-HFM",title.c_str(),90,40,130);  
   title=std::string("Y_{ee} ")+post;
   Yee=td.make<TH1D>("yee",title.c_str(),50,-4,4);  
   title=std::string("pT_{ee} ")+post;
@@ -244,6 +248,10 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
   Z+=hfE.p4();
 
   mee   ->Fill(Z.M());
+
+  if(hfE.p4().eta()>0)   meeHFP   ->Fill(Z.M());
+  else                   meeHFM   ->Fill(Z.M());
+
   Yee   ->Fill(Z.Rapidity());
   Ptee  ->Fill(Z.pt());
 
