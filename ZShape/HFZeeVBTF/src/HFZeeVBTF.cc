@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.1 2010/07/20 17:15:35 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.2 2010/07/20 17:32:11 franzoni Exp $
 //
 //
 
@@ -129,10 +129,12 @@ private:
     //book histogram set w/ common suffix inside the provided TFileDirectory
     void book(TFileDirectory td,const std::string&);
     // fill all histos of the set with the two electron candidates
-    void fill(pat::ElectronCollection::const_iterator ecalE,  const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, const edm::ParameterSet& myPs);
+    void fill(pat::ElectronCollection::const_iterator ecalE,  const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, const edm::ParameterSet& myPs, const float hf_2d_cut);
     TH1* mee, *meeHFP, *meeHFM, *Yee, *Ptee;
     TH1* ec_eta, *ec_phi, *ec_pt;
     TH1* hf_eta, *hf_phi, *hf_pt;
+    TH1* el_1_eta, *el_2_eta;
+    TH2* el_1_eta_VS_el_2_eta, *el_1_phi_VS_el_2_phi;
     // gf: add hisos for variables N-1 selected
     TH1* combIsoEB_nmo,  *relTkIsoEB_nmo, *relEcIsoEB_nmo, *relHcIsoEB_nmo, *sigiEtaiEtaEB_nmo, *dphiEB_nmo, *detaEB_nmo, *hOeEB_nmo;
     TH1* combIsoEE_nmo,  *relTkIsoEE_nmo, *relEcIsoEE_nmo, *relHcIsoEE_nmo, *sigiEtaiEtaEE_nmo, *dphiEE_nmo, *detaEE_nmo, *hOeEE_nmo;
@@ -144,7 +146,7 @@ bool init_;
   // gf set of histo for all Z definitios in a stack
   struct HistStruct {
     TH1 *nelec,*nhf;
-    HistPerDef base, minimal, zMass;
+    HistPerDef /*base,*/ mee90none, zMass;
     HistPerDef mee90loose, mee80loose, mee70loose, mee60loose;
     HistPerDef mee90tight, mee80tight, mee70tight, mee60tight;
   } hists;
@@ -191,11 +193,21 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   title=std::string("eta_{hf} ")+post;
   hf_eta=td.make<TH1D>("etahf",title.c_str(),50,-5,5);  
   title=std::string("phi_{hf} ")+post;
-  hf_phi=td.make<TH1D>("phihf",title.c_str(),30,-3.14159,3.14159);  
+  hf_phi=td.make<TH1D>("phihf",title.c_str(),30,-3.14159,3.14159);
   title=std::string("pt_{hf} ")+post;
   hf_pt=td.make<TH1D>("pthf",title.c_str(),90,0,90);  
-  
-  
+
+
+  title=std::string("eta_{el_1} ")+post;
+  el_1_eta=td.make<TH1D>("etael1",title.c_str(),50,-5,5);  
+  title=std::string("eta_{el_2} ")+post;
+  el_2_eta=td.make<TH1D>("etael2",title.c_str(),50,-5,5);  
+
+  title=std::string("eta_{el_1}_VS_eta_{el_2} ")+post;
+  el_1_eta_VS_el_2_eta=td.make<TH2D>("etael1-vs-etael2",title.c_str(),50,-5,5,50,-5,5);
+  title=std::string("phi_{el_1}_VS_phi_{el_2} ")+post;
+  el_1_phi_VS_el_2_phi=td.make<TH2D>("phiel1-vs-phiel2",title.c_str(),30,-3.14159,3.14159,30,-3.14159,3.14159);
+
   title=std::string("N-1 combIsoEB ")+post;
   combIsoEB_nmo=td.make<TH1D>("N-1 combIsoEB",title.c_str(),100,0,2);
   title=std::string("N-1 relTkIsoEB ")+post;
@@ -242,7 +254,7 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
 
 void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,  
 				 const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, 
-				 const edm::ParameterSet& myPs) {
+				 const edm::ParameterSet& myPs, const float hf_2d_cut) {
 
   reco::Particle::LorentzVector Z(ecalE->p4());
   Z+=hfE.p4();
@@ -267,6 +279,19 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
   hf_eta->Fill(hfE.eta());
   hf_phi->Fill(hfE.phi());
   hf_pt ->Fill(hfE.pt());
+  
+  if(ecalE->pt() > hfE.pt()){
+    el_1_eta->Fill(ecalE->eta());
+    el_2_eta->Fill(hfE.eta());
+    el_1_eta_VS_el_2_eta->Fill(ecalE->eta(),hfE.eta());
+    el_1_phi_VS_el_2_phi->Fill(ecalE->phi(),hfE.phi());
+  }
+  else{
+    el_1_eta->Fill(hfE.eta());
+    el_2_eta->Fill(ecalE->eta());
+    el_1_eta_VS_el_2_eta->Fill(hfE.eta(),ecalE->eta());
+    el_1_phi_VS_el_2_phi->Fill(hfE.phi(),ecalE->phi());
+  }
 
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/SimpleCutBasedEleID
   // here follows filling of histograms for selection variables when the other N-1 have passed
@@ -280,9 +305,9 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
   // establish cuts 
   // gf: bring HF variables to PSet as well
   float e9e25_cut    = 0.90;
-  float eSeL_cut     = 0.50;
-  float eCOREe9_cut  = 0.70;
-  float hf_2d_cut    = 0.32; // loose 
+  // float eSeL_cut     = 0.50;
+  // float eCOREe9_cut  = 0.70;
+  // float hf_2d_cut    = 0.32; // loose 
   
   // stay super loos for now
   //float e9e25_cut    = 0.40;
@@ -449,8 +474,8 @@ HFZeeVBTF::HFZeeVBTF(const edm::ParameterSet& iConfig)
   edm::Service<TFileService> fs;
   hists.nelec=fs->make<TH1D>("nelec","N_Elec",10,-0.5,9.5);
   hists.nhf=fs  ->make<TH1D>("nhf","N_HF",10,-0.5,9.5);
-  hists.base.book(fs->mkdir("base"),"(base)");
-  hists.minimal.book(fs->mkdir("minimal"),"(minimal)");
+  //hists.base.book(fs->mkdir("base"),"(base)");
+  hists.mee90none.book(fs->mkdir("mee90none"),"(mee90none)");
   hists.zMass.book(fs->mkdir("zMass"),"(zMass)");
   hists.mee90loose.book(fs->mkdir("mee90loose"),"(90,loose)");
   hists.mee80loose.book(fs->mkdir("mee80loose"),"(80,loose)");
@@ -516,12 +541,6 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     return ; // RETURN if no elecs in the event
   }
 
-
-//   const reco::RecoEcalCandidate& hfE=(*HFElectrons)[0]; // choose first HF candidate
-//   reco::SuperClusterRef hfclusRef=hfE.superCluster();
-//   const reco::HFEMClusterShapeRef hfclusShapeRef=(*ClusterAssociation).find(hfclusRef)->val;
-//   const reco::HFEMClusterShape& hfshape=*hfclusShapeRef;
-
   const pat::ElectronCollection& pElecs = *(patElectron.product());
   pat::ElectronCollection::const_iterator i, ecalE=pElecs.end();
   
@@ -541,14 +560,14 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       const reco::RecoEcalCandidate& hfE=(*HFElectrons)[0];
       reco::SuperClusterRef hfclusRef=hfE.superCluster();
       const reco::HFEMClusterShapeRef hfclusShapeRef=(*ClusterAssociation).find(hfclusRef)->val;
-      const reco::HFEMClusterShape& hfshape=*hfclusShapeRef;
-      hists.base.fill(i,hfE,hfshape,robust95relIsoEleIDCutsV04_ps_);//gf: for each Z definition, N-1 control plots could be filled here too
+      // const reco::HFEMClusterShape& hfshape=*hfclusShapeRef;
+      // hists.base.fill(i,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_);//gf: for each Z definition, N-1 control plots could be filled here too
       ;
     }
     
     // ECAL acceptance cut
-    if (ecalE==pElecs.end() && w.doesElePass( i->electronID(ecalID_) )  // 3: passes electron ID and Isolation only
-    	&& (fabs(eta_det)<1.4442 || fabs(eta_det)>1.560)) {           // ECAL acceptance cut
+    if (ecalE==pElecs.end() && w.doesElePass( i->electronID(ecalID_) )  // 3: passes electron iso/Id/convRej depending on configuration; ecalID_ defines working point
+    	&& (fabs(eta_det)<1.4442 || fabs(eta_det)>1.560)) {             // ECAL acceptance cut
       ecalE=i;
     }// if
     
@@ -560,25 +579,14 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   if ( (pElecs.size()>0) &&  (HFElectrons->size()>0) && (ecalE!=pElecs.end())){
     if(dolog_) std::cout << "size ele coll:" << pElecs.size() << "  size HF coll: " << HFElectrons->size() << std::endl;
     // add here histograms w/o request of Z mass or eleId
-    // minimal is at the very beginning: one HF supercluste and one GSF w/ ID and iso
+    // mee90none is at the very beginning: one HF supercluste and one GSF w/ ID and iso
     const reco::RecoEcalCandidate& hfE=(*HFElectrons)[0];
     reco::SuperClusterRef hfclusRef=hfE.superCluster();
     const reco::HFEMClusterShapeRef hfclusShapeRef=(*ClusterAssociation).find(hfclusRef)->val;
     const reco::HFEMClusterShape& hfshape=*hfclusShapeRef;
-    hists.minimal.fill(ecalE,hfE,hfshape,robust95relIsoEleIDCutsV04_ps_);//gf: for each Z definition, N-1 control plots could be filled here too
+    hists.mee90none.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,0);//gf: for each Z definition, N-1 control plots could be filled here too
   }
 
-  /*  
-      for(unsigned int i=0;i<HFElectrons->size();i++){
-      const reco::RecoEcalCandidate& sclus=(*HFElectrons)[i];
-      reco::SuperClusterRef clusRef=(*HFElectrons)[i].superCluster();
-      const reco::HFEMClusterShapeRef clusShapeRef=(*ClusterAssociation).find(clusRef)->val;
-      const reco::HFEMClusterShape& shape=*clusShapeRef;
-      std::cout << "HF " << sclus.pt() << std::endl;
-    
-      }
-  */
-  
   // gf: up to this point requirements are:
   // 1) at least one ECAL electron; ecalE is ==first== ECAL electron with SC within acceptance
   //    && electron ID and Isolation only
@@ -662,20 +670,20 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	std::cout << "======================================================" << std::endl;
       }// 4) here require electronId to have passed, for different working points
       //  5) and require HF eleID loose or tight
-      hists.zMass.fill(ecalE,hfE,hfshape,robust95relIsoEleIDCutsV04_ps_);//gf: for each Z definition, N-1 control plots could be filled here too
+      hists.zMass.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,0);//gf: for each Z definition, N-1 control plots could be filled here too
       if (var2d>=hf_2d_loose) {
-	if (w.doesElePass( ecalE->electronID("simpleEleId90relIso") )) hists.mee90loose.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_);
-	if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.mee80loose.fill(ecalE,hfE,hfshape,robust80relIsoEleIDCutsV04_ps_);
-	if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.mee70loose.fill(ecalE,hfE,hfshape,robust70relIsoEleIDCutsV04_ps_);
-	if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.mee60loose.fill(ecalE,hfE,hfshape,robust60relIsoEleIDCutsV04_ps_);
+	if (w.doesElePass( ecalE->electronID("simpleEleId90relIso") )) hists.mee90loose.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,hf_2d_loose);
+	if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.mee80loose.fill(ecalE,hfE,hfshape,robust80relIsoEleIDCutsV04_ps_,hf_2d_loose);
+	if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.mee70loose.fill(ecalE,hfE,hfshape,robust70relIsoEleIDCutsV04_ps_,hf_2d_loose);
+	if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.mee60loose.fill(ecalE,hfE,hfshape,robust60relIsoEleIDCutsV04_ps_,hf_2d_loose);
       }
       if (var2d>=hf_2d_tight) {
-	if (w.doesElePass( ecalE->electronID("simpleEleId90relIso") ) ) hists.mee90tight.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_);
+	if (w.doesElePass( ecalE->electronID("simpleEleId90relIso") ) ) hists.mee90tight.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,hf_2d_tight);
 	if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") ) )
-	  { hists.mee80tight.fill(ecalE,hfE,hfshape,robust80relIsoEleIDCutsV04_ps_); std::cout << "passed simpleEleId80relIso - HFtight" << std::endl;}
+	  { hists.mee80tight.fill(ecalE,hfE,hfshape,robust80relIsoEleIDCutsV04_ps_,hf_2d_tight); std::cout << "passed simpleEleId80relIso - HFtight" << std::endl;}
 	if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") ) ) 
-	  {hists.mee70tight.fill(ecalE,hfE,hfshape,robust70relIsoEleIDCutsV04_ps_);std::cout << "passed simpleEleI70relIso - HFtight" << std::endl;}	
-	if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") ) ) hists.mee60tight.fill(ecalE,hfE,hfshape,robust60relIsoEleIDCutsV04_ps_);
+	  {hists.mee70tight.fill(ecalE,hfE,hfshape,robust70relIsoEleIDCutsV04_ps_,hf_2d_tight);std::cout << "passed simpleEleI70relIso - HFtight" << std::endl;}	
+	if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") ) ) hists.mee60tight.fill(ecalE,hfE,hfshape,robust60relIsoEleIDCutsV04_ps_,hf_2d_tight);
       }//gf: why are electronID all treated the same?
       
     }// if mass is in Z window
