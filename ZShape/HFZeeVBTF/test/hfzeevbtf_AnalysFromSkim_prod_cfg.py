@@ -283,6 +283,12 @@ process.hfRecoEcalCandidate.intercept2DCut=0.3
 process.p = cms.Path(
     # process.EG_1e28 *
     process.hfRecoEcalCandidate
-    *process.demo
-    *process.demoLoose
+     *process.Id-Iso
+         *process.Id-Rej
+         *process.Iso-Rej
+         *process.Id
+         *process.Iso
+         *process.Rej
+         *process.Id-Iso-Rej
+
     )
