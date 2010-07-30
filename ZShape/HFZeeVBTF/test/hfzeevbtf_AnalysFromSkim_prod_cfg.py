@@ -17,7 +17,10 @@ process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(    )
 )
+
 process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
+process.hfRecoEcalCandidate.intercept2DCut=0.3
+
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('')
@@ -26,7 +29,7 @@ process.TFileService = cms.Service("TFileService",
 # to access values of EldId cuts
 import ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi
 
-process.Id-Iso-Rej = cms.EDAnalyzer('HFZeeVBTF',
+process.IdIsoRej = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90relIso'),
 #      ECALid = cms.string('simpleEleId90cIso'),
     DoLog = cms.bool(True),
@@ -59,7 +62,7 @@ process.Id-Iso-Rej = cms.EDAnalyzer('HFZeeVBTF',
 
 # EWK analyzer: different Z definitions with one ECAL electron and one HF electron
 # ---> this is the instance to run AFTER the Wenu EWK filter
-process.Id-Iso = cms.EDAnalyzer('HFZeeVBTF',
+process.IdIso = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90cIso'),
     DoLog = cms.bool(True),
 #   this is instance of the analysis code which I carry along to allow the keeping also of electrons that have not passed conversion rejection
@@ -82,7 +85,7 @@ process.Id-Iso = cms.EDAnalyzer('HFZeeVBTF',
 
 )
 
-process.Id-Rej = cms.EDAnalyzer('HFZeeVBTF',
+process.IdRej = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90relIso'),
 #      ECALid = cms.string('simpleEleId90cIso'),
     DoLog = cms.bool(True),
@@ -112,7 +115,7 @@ process.Id-Rej = cms.EDAnalyzer('HFZeeVBTF',
                               
 )
 
-process.Iso-Rej = cms.EDAnalyzer('HFZeeVBTF',
+process.IsoRej = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90relIso'),
 #      ECALid = cms.string('simpleEleId90cIso'),
     DoLog = cms.bool(True),
@@ -241,11 +244,6 @@ process.Rej = cms.EDAnalyzer('HFZeeVBTF',
 
 
 
-
-
-
-process.hfRecoEcalCandidate.intercept2DCut=0.3
-
 # 
 # import HLTrigger.HLTfilters.hltHighLevelDev_cfi
 # process.EG_1e28 = HLTrigger.HLTfilters.hltHighLevelDev_cfi.hltHighLevelDev.clone(andOr = True)
@@ -283,12 +281,11 @@ process.hfRecoEcalCandidate.intercept2DCut=0.3
 process.p = cms.Path(
     # process.EG_1e28 *
     process.hfRecoEcalCandidate
-     *process.Id-Iso
-         *process.Id-Rej
-         *process.Iso-Rej
-         *process.Id
-         *process.Iso
-         *process.Rej
-         *process.Id-Iso-Rej
-
+     *process.IdIso
+     *process.IdRej
+     *process.IsoRej
+     *process.Id
+     *process.Iso
+     *process.Rej
+     *process.IdIsoRej
     )
