@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.2 2010/07/20 17:32:11 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.3 2010/07/29 16:14:12 franzoni Exp $
 //
 //
 
@@ -330,31 +330,31 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
   bool verboseDebug(false);
   
   // EB isolation variables
-  combIsolation_cut[0] = ebParam[17]; if(verboseDebug) std::cout  << "\n\ncombIsolationEB: " << combIsolation_cut[0] << std::endl;
+  combIsolation_cut[0] = ebParam.at(17); if(verboseDebug) std::cout  << "\n\ncombIsolationEB: " << combIsolation_cut[0] << std::endl;
   
-  trackRel03_cut[0]    = ebParam[11]; if(verboseDebug) std::cout  << "trackRel03EB: " << trackRel03_cut[0] << std::endl;
-  ecalRel03_cut[0]     = ebParam[12]; if(verboseDebug) std::cout  << "ecalRel03EB: " << ecalRel03_cut[0] << std::endl;
-  hcalRel03_cut[0]     = ebParam[13]; if(verboseDebug) std::cout  << "hcalRel03EB: " << hcalRel03_cut[0] << std::endl;
+  trackRel03_cut[0]    = ebParam.at(11); if(verboseDebug) std::cout  << "trackRel03EB: " << trackRel03_cut[0] << std::endl;
+  ecalRel03_cut[0]     = ebParam.at(12); if(verboseDebug) std::cout  << "ecalRel03EB: " << ecalRel03_cut[0] << std::endl;
+  hcalRel03_cut[0]     = ebParam.at(13); if(verboseDebug) std::cout  << "hcalRel03EB: " << hcalRel03_cut[0] << std::endl;
   
   // EB eleId variables
-  sigiEtaiEta_cut[0]  = ebParam[1];  if(verboseDebug) std::cout  << "sigiEetaiEtaEB: " << sigiEtaiEta_cut[0] << std::endl;
-  dPhi_cut[0]         = ebParam[2];  if(verboseDebug) std::cout  << "DphiEB: " << dPhi_cut[0] << std::endl;
-  dEta_cut[0]         = ebParam[3];  if(verboseDebug) std::cout  << "DetaEB: " << dEta_cut[0] << std::endl;
-  HoE_cut[0]          = ebParam[0];  if(verboseDebug) std::cout  << "HoEEB: " << HoE_cut[0] << std::endl;
+  sigiEtaiEta_cut[0]  = ebParam.at(1);  if(verboseDebug) std::cout  << "sigiEetaiEtaEB: " << sigiEtaiEta_cut[0] << std::endl;
+  dPhi_cut[0]         = ebParam.at(2);  if(verboseDebug) std::cout  << "DphiEB: " << dPhi_cut[0] << std::endl;
+  dEta_cut[0]         = ebParam.at(3);  if(verboseDebug) std::cout  << "DetaEB: " << dEta_cut[0] << std::endl;
+  HoE_cut[0]          = ebParam.at(0);  if(verboseDebug) std::cout  << "HoEEB: " << HoE_cut[0] << std::endl;
 
   
   // EE isolation variables
-  combIsolation_cut[1] = eeParam[17]; if(verboseDebug) std::cout  << "\n\ncombIsolationEE: " << combIsolation_cut[1] << std::endl;
+  combIsolation_cut[1] = eeParam.at(17); if(verboseDebug) std::cout  << "\n\ncombIsolationEE: " << combIsolation_cut[1] << std::endl;
   
-  trackRel03_cut[1]    = eeParam[11]; if(verboseDebug) std::cout  << "trackRel03EE: " << trackRel03_cut[1] << std::endl;
-  ecalRel03_cut[1]     = eeParam[12]; if(verboseDebug) std::cout  << "ecalRel03EE: " << ecalRel03_cut[1] << std::endl;
-  hcalRel03_cut[1]     = eeParam[13]; if(verboseDebug) std::cout  << "hcalRel03EE: " << hcalRel03_cut[1] << std::endl;
+  trackRel03_cut[1]    = eeParam.at(11); if(verboseDebug) std::cout  << "trackRel03EE: " << trackRel03_cut[1] << std::endl;
+  ecalRel03_cut[1]     = eeParam.at(12); if(verboseDebug) std::cout  << "ecalRel03EE: " << ecalRel03_cut[1] << std::endl;
+  hcalRel03_cut[1]     = eeParam.at(13); if(verboseDebug) std::cout  << "hcalRel03EE: " << hcalRel03_cut[1] << std::endl;
   
   // EE eleId variables
-  sigiEtaiEta_cut[1]  = eeParam[1];  if(verboseDebug) std::cout  << "sigiEetaiEtaEE: " << sigiEtaiEta_cut[1] << std::endl;
-  dPhi_cut[1]          = eeParam[2];  if(verboseDebug) std::cout  << "DphiEE: " << dPhi_cut[1] << std::endl;
-  dEta_cut[1]          = eeParam[3];  if(verboseDebug) std::cout  << "DetaEE: " << dEta_cut[1] << std::endl;
-  HoE_cut[1]           = eeParam[0];  if(verboseDebug) std::cout  << "HoEEE: " << HoE_cut[1] << std::endl;
+  sigiEtaiEta_cut[1]  = eeParam.at(1);  if(verboseDebug) std::cout  << "sigiEetaiEtaEE: " << sigiEtaiEta_cut[1] << std::endl;
+  dPhi_cut[1]          = eeParam.at(2);  if(verboseDebug) std::cout  << "DphiEE: " << dPhi_cut[1] << std::endl;
+  dEta_cut[1]          = eeParam.at(3);  if(verboseDebug) std::cout  << "DetaEE: " << dEta_cut[1] << std::endl;
+  HoE_cut[1]           = eeParam.at(0);  if(verboseDebug) std::cout  << "HoEEE: " << HoE_cut[1] << std::endl;
   
   
   //////////////////////////////////////////////////////////////////////////////////////
@@ -658,7 +658,8 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	}
 	
 	int nf=0;
-	for (unsigned int i=0; i<HLT_Names.size(); i++) {
+	// checking against both size of names and of results: found events when they're diferent (someonelse's bug?)
+	for (unsigned int i=0; i<HLT_Names.size() && i<hltResults->size(); i++) {
 	  if ( hltResults->accept(i) ) {
 	    if ((nf % 5)==0) std::cout << "\n    ";
 	    std::cout << HLT_Names.at(i) << " ";
