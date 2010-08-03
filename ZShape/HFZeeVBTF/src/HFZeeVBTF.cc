@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.3 2010/07/29 16:14:12 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.4 2010/08/03 13:08:18 franzoni Exp $
 //
 //
 
@@ -81,7 +81,7 @@ bool selectElectron::doesElePass(int v)
 //bool doesElePass(int k)
 //{
 //  if (k<0 || k>7) {
-//    std::cout << "value entering doesElePass makes no sense" << std::endl;
+//    std::cout << myName_ << "value entering doesElePass makes no sense" << std::endl;
 //    return false;
 //  }
 //  else if (k < 3)         return false;
@@ -93,7 +93,7 @@ bool selectElectron::doesElePass(int v)
 //bool doesElePass(int k)
 //{
 //  if (k<0 || k>7) {
-//    std::cout << "value entering doesElePass makes no sense" << std::endl;
+//    std::cout << myName_ << "value entering doesElePass makes no sense" << std::endl;
 //    return false;
 //  }
 //  //if (k==3 || k==7)         return true;
@@ -119,6 +119,7 @@ private:
   virtual void endJob() ;
   std::string ecalID_, currentFile_;
   bool dolog_;
+  std::string myName_;
   std::vector<int> acceptedElectronIDs_;
   selectElectron w;
 
@@ -463,6 +464,8 @@ HFZeeVBTF::HFZeeVBTF(const edm::ParameterSet& iConfig)
   ecalID_=iConfig.getParameter<std::string>("ECALid");
   dolog_=iConfig.getParameter<bool>("DoLog");
   acceptedElectronIDs_ = iConfig.getParameter< std::vector<int> >("acceptedElectronIDs");
+  myName_=iConfig.getParameter<std::string>("myName");
+  myName_+=std::string("    ");
   
   std::vector<int>::const_iterator it;
   for(it=acceptedElectronIDs_.begin(); it!=acceptedElectronIDs_.end(); it++)
@@ -522,8 +525,6 @@ void
 HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
-  
-  //std::cout << "ciao! Entering analyze" << std::endl;
 
   edm::Handle<reco::RecoEcalCandidateCollection> HFElectrons;
   edm::Handle<reco::SuperClusterCollection> SuperClusters;
@@ -577,7 +578,7 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   hists.nhf  ->Fill(HFElectrons->size());
 
   if ( (pElecs.size()>0) &&  (HFElectrons->size()>0) && (ecalE!=pElecs.end())){
-    if(dolog_) std::cout << "size ele coll:" << pElecs.size() << "  size HF coll: " << HFElectrons->size() << std::endl;
+    if(dolog_ && 0) std::cout << myName_  << "size ele coll:" << pElecs.size() << "  size HF coll: " << HFElectrons->size() << std::endl;
     // add here histograms w/o request of Z mass or eleId
     // mee90none is at the very beginning: one HF supercluste and one GSF w/ ID and iso
     const reco::RecoEcalCandidate& hfE=(*HFElectrons)[0];
@@ -609,18 +610,18 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       double var2d=hfshape.eCOREe9()-(hfshape.eSeL()*1.125);
       double eta_det=ecalE->superCluster().get()->eta();
       if (dolog_) {
-	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << myName_  << "------------------------------------------------------" << std::endl;
 	
-	std::cout << "Candidate!: event " << iEvent.id().event() << " run " << iEvent.id().run();
+	std::cout << myName_  << "Candidate!: event " << iEvent.id().event() << " run " << iEvent.id().run();
 	
-	std::cout << "  m_ee=" << Z.M() << " Y_ee=" << Z.Rapidity() << " pT_ee=" << Z.pt() <<  std::endl;
-	std::cout << " file: " << currentFile_ << std::endl;
+	std::cout << myName_  << "  m_ee=" << Z.M() << " Y_ee=" << Z.Rapidity() << " pT_ee=" << Z.pt() <<  std::endl;
+	std::cout << myName_  << " file: " << currentFile_ << std::endl;
 	
 	// https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID#Electron_ID_Implementation_in_Re
-	std::cout << "ECAL (pt,eta,phi, eta_det) : " << ecalE->pt() << ", " << ecalE->eta() << ", " << ecalE->phi() << " , (" << eta_det << ")" << std::endl;
-	//DELETE THIS std::cout << "ECAL (pt,tkIso,phi, eta_det) : " << ecalE->pt() << ", " << ecalE->trackIso() << ", " << ecalE->phi() << " , (" << eta_det << ")" << std::endl;
+	std::cout << myName_  << "ECAL (pt,eta,phi, eta_det) : " << ecalE->pt() << ", " << ecalE->eta() << ", " << ecalE->phi() << " , (" << eta_det << ")" << std::endl;
+	//DELETE THIS std::cout << myName_  << "ECAL (pt,tkIso,phi, eta_det) : " << ecalE->pt() << ", " << ecalE->trackIso() << ", " << ecalE->phi() << " , (" << eta_det << ")" << std::endl;
 	// gf: pull up here all the ECALId variables as descrived in twiki here above 
-	std::cout << "\t ECAL ele // REL ISOLATION -  trackRel03: " << ecalE->dr03TkSumPt()/ecalE->p4().Pt() 
+	std::cout << myName_  << "\t ECAL ele // REL ISOLATION -  trackRel03: " << ecalE->dr03TkSumPt()/ecalE->p4().Pt() 
 		  << "\t ecalRel03: "  << ecalE->dr03EcalRecHitSumEt()/ecalE->p4().Pt() 
 		  << "\t hcalRel03: "  <<  ecalE->dr03HcalTowerSumEt()/ecalE->p4().Pt() 
 		  << "\n\t Electron ID - sigIetaIeta: " << ecalE->scSigmaIEtaIEta()
@@ -629,7 +630,7 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		  << "\t H/E: "  << ecalE->hadronicOverEm()
 		  << std::endl;
 
-	std::cout << "  ID (60,70,80,90) : " 
+	std::cout << myName_  << "  ID (60,70,80,90) : " 
 		  << ecalE->electronID("simpleEleId60relIso") << " " 
 		  << ecalE->electronID("simpleEleId70relIso") << " " 
 		  << ecalE->electronID("simpleEleId80relIso") << " " 
@@ -637,8 +638,8 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		  << std::endl;
 	
 	
-	std::cout << "  HF (pt, eta, phi): " << hfE.pt() << ", " << hfE.eta() << ", " << hfE.phi() << std::endl;
-	std::cout << "  Shape (S/L, ec/e9, e1/e9, e9/e25, 2d) : " 
+	std::cout << myName_  << "  HF (pt, eta, phi): " << hfE.pt() << ", " << hfE.eta() << ", " << hfE.phi() << std::endl;
+	std::cout << myName_  << "  Shape (S/L, ec/e9, e1/e9, e9/e25, 2d) : " 
 		  << hfshape.eSeL() << " "
 		  << hfshape.eCOREe9() << " "
 		  << hfshape.e1x1()/hfshape.e3x3() << " "
@@ -646,7 +647,7 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		  << var2d << " "
 		  << std::endl;
 
-	std::cout << "\n Triggers fired: ";
+	std::cout << myName_  << "\n Triggers fired: ";
 	
 	Handle<TriggerResults> hltResults ;
 	iEvent.getByLabel( edm::InputTag("TriggerResults","","HLT"), hltResults ) ;
@@ -661,14 +662,14 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	// checking against both size of names and of results: found events when they're diferent (someonelse's bug?)
 	for (unsigned int i=0; i<HLT_Names.size() && i<hltResults->size(); i++) {
 	  if ( hltResults->accept(i) ) {
-	    if ((nf % 5)==0) std::cout << "\n    ";
-	    std::cout << HLT_Names.at(i) << " ";
+	    if ((nf % 5)==0) std::cout << myName_  << "\n    ";
+	    std::cout << myName_  << HLT_Names.at(i) << " ";
 	    nf++;
 	  }
 	}
-	std::cout << std::endl;
+	std::cout << myName_  << std::endl;
 	
-	std::cout << "======================================================" << std::endl;
+	std::cout << myName_  << "======================================================" << std::endl;
       }// 4) here require electronId to have passed, for different working points
       //  5) and require HF eleID loose or tight
       hists.zMass.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,0);//gf: for each Z definition, N-1 control plots could be filled here too
@@ -681,9 +682,9 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       if (var2d>=hf_2d_tight) {
 	if (w.doesElePass( ecalE->electronID("simpleEleId90relIso") ) ) hists.mee90tight.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,hf_2d_tight);
 	if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") ) )
-	  { hists.mee80tight.fill(ecalE,hfE,hfshape,robust80relIsoEleIDCutsV04_ps_,hf_2d_tight); std::cout << "passed simpleEleId80relIso - HFtight" << std::endl;}
+	  { hists.mee80tight.fill(ecalE,hfE,hfshape,robust80relIsoEleIDCutsV04_ps_,hf_2d_tight); std::cout << myName_  << "passed simpleEleId80relIso - HFtight" << std::endl;}
 	if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") ) ) 
-	  {hists.mee70tight.fill(ecalE,hfE,hfshape,robust70relIsoEleIDCutsV04_ps_,hf_2d_tight);std::cout << "passed simpleEleI70relIso - HFtight" << std::endl;}	
+	  {hists.mee70tight.fill(ecalE,hfE,hfshape,robust70relIsoEleIDCutsV04_ps_,hf_2d_tight);std::cout << myName_  << "passed simpleEleI70relIso - HFtight" << std::endl;}	
 	if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") ) ) hists.mee60tight.fill(ecalE,hfE,hfshape,robust60relIsoEleIDCutsV04_ps_,hf_2d_tight);
       }//gf: why are electronID all treated the same?
       
