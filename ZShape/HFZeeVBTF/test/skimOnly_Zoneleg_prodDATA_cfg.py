@@ -609,6 +609,7 @@ process.z1lPath = cms.Path(process.patDefaultSequence*process.z1legFilter)
 
 process.z1lOutputModule = cms.OutputModule( "PoolOutputModule",
        fileName = cms.untracked.string(""),
+                                             maxSize = cms.untracked.int32(300000),
                                              SelectEvents = cms.untracked.PSet(
                                              SelectEvents = cms.vstring('z1lPath',),
                                                                               )
