@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.4 2010/08/03 13:08:18 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.5 2010/08/03 14:04:08 franzoni Exp $
 //
 //
 
@@ -50,6 +50,8 @@
 #include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+#include "ZShape/HFZeeVBTF/interface/SelectElectron.h"
+
 
 //////////////////////////////////////////////////////////////////
 // generically maximum
@@ -57,49 +59,6 @@ template <class T> const T& max ( const T& a, const T& b ) {
   return (b<a)?a:b;     // or: return comp(b,a)?a:b; for the comp version
 }
 
-//////////////////////////////////////////////////////////////////
-// little helper class to manage selection of electron candidates
-class selectElectron {
-  int x, y;
-  std::vector<int> allowed;
-public:
-  void add(int);
-  bool doesElePass(int);
-} rect;
-
-void selectElectron::add(int v)
-{ allowed.push_back(v);}
-
-bool selectElectron::doesElePass(int v)
-{ 
-  if ( find(allowed.begin(),allowed.end(),v) != allowed.end() ) return true;
-  else return false;
-}
-
-
-//// original implementation; and how Jeremy submitted MC jobs for bck
-//bool doesElePass(int k)
-//{
-//  if (k<0 || k>7) {
-//    std::cout << myName_ << "value entering doesElePass makes no sense" << std::endl;
-//    return false;
-//  }
-//  else if (k < 3)         return false;
-//  else if (k==4)          return false;
-//  else                    return true;
-//}
-
-// tighter version proposed by Jason: require at least "electron ID and Isolation" (3), possibly with conversion rejection as well (7: passes the whole selection)
-//bool doesElePass(int k)
-//{
-//  if (k<0 || k>7) {
-//    std::cout << myName_ << "value entering doesElePass makes no sense" << std::endl;
-//    return false;
-//  }
-//  //if (k==3 || k==7)         return true;
-//  if (k==7)         return true;
-//  else                      return false;
-//}
 
 
 
