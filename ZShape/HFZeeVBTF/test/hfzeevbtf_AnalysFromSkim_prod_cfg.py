@@ -18,6 +18,17 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(    )
 )
 
+
+# in this file I collect the lumi sections intervals I am interested in
+from ZShape.HFZeeVBTF.myGoodlumi_cfi import *
+# this is the equivalent of the JSON file 
+process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(
+                                                                   propmtRecoJsonAug4
+                                                                   # + propmtRecoJsonAug4 
+)
+
+
+
 process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
 process.hfRecoEcalCandidate.intercept2DCut=0.3
 
