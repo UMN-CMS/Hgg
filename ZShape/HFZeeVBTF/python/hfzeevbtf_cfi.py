@@ -1,5 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
+# to access values of EldId cuts
+import ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi
+
+
 demo = cms.EDAnalyzer('HFZeeVBTF',
                       acceptedElectronIDs = cms.vint32( 7 ),
                       ECALid = cms.string('simpleEleId90relIso'),
