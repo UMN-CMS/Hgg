@@ -13,7 +13,7 @@
 //
 // Original Author:  G. Franzoni
 //         Created:  Wed Aug 04 00:21:26 CDT 2010
-// $Id: EleWithMet.cc,v 1.1 2010/08/06 14:14:26 franzoni Exp $
+// $Id: EleWithMet.cc,v 1.2 2010/08/12 16:32:23 franzoni Exp $
 //
 //
 
@@ -86,35 +86,24 @@ private:
 
   // ----------member data ---------------------------
 
-  // gf set of histograms per each == Z definition ==
+  // gf set of histograms per each == W definition ==
+
   struct HistPerDef {
     //book histogram set w/ common suffix inside the provided TFileDirectory
     void book(TFileDirectory td,const std::string&);
     // fill all histos of the set with the two electron candidates
-    void fill(pat::ElectronCollection::const_iterator ecalE,  const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, const edm::ParameterSet& myPs, const float hf_2d_cut);
-    TH1* mee, *meeHFP, *meeHFM, *Yee, *Ptee;
-    TH1* ec_eta, *ec_phi, *ec_pt;
-    TH1* hf_eta, *hf_phi, *hf_pt;
-    TH1* el_1_eta, *el_2_eta;
-    TH2* el_1_eta_VS_el_2_eta, *el_1_phi_VS_el_2_phi;
-
+    void fill(pat::ElectronCollection::const_iterator ecalE);
+    //    void fill(pat::ElectronCollection::const_iterator ecalE,  const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, const edm::ParameterSet& myPs, const float hf_2d_cut);
     
     TH1* eleEta, *elePhi, *eleEt;
     
   };
 
-  std::vector<std::string> HLT_Names;
-
   // gf set of histo for all Z definitios in a stack
   struct HistStruct {
-    TH1 *nelec,*nhf;
-    HistPerDef /*base,*/ mee90none, zMass;
-    HistPerDef mee90loose, mee80loose, mee70loose, mee60loose;
-    HistPerDef mee90tight, mee80tight, mee70tight, mee60tight;
-        
+    TH1 *nelec, *met, *metEta, *metPhi;
     HistPerDef ele90metLoose, ele80metLoose, ele70metLoose, ele60metLoose,
       ele90metTight, ele80metTight, ele70metTight,    ele60metTight;
-
   } hists;
 
 };
@@ -123,47 +112,6 @@ private:
 void EleWithMet::HistPerDef::book(TFileDirectory td, const std::string& post) {
   std::string title;
 
-//  title=std::string("M_{ee} ")+post;
-//  mee=td.make<TH1D>("mee",title.c_str(),90,40,130);  
-//  title=std::string("M_{ee,HF+} ")+post;
-//  meeHFP=td.make<TH1D>("mee-HFP",title.c_str(),90,40,130);  
-//  title=std::string("M_{ee,HF-} ")+post;
-//  meeHFM=td.make<TH1D>("mee-HFM",title.c_str(),90,40,130);  
-//  title=std::string("Y_{ee} ")+post;
-//  Yee=td.make<TH1D>("yee",title.c_str(),50,-4,4);  
-//  title=std::string("pT_{ee} ")+post;
-//  Ptee=td.make<TH1D>("ptee",title.c_str(),90,0,90);  
-//
-//  title=std::string("eta_{ecal} ")+post;
-//  ec_eta=td.make<TH1D>("etaecal",title.c_str(),30,-3,3);  
-//  title=std::string("phi_{ecal} ")+post;
-//  ec_phi=td.make<TH1D>("phiecal",title.c_str(),30,-3.14159,3.14159);  
-//  title=std::string("pt_{ecal} ")+post;
-//  ec_pt=td.make<TH1D>("ptecal",title.c_str(),90,0,90);  
-//
-//  title=std::string("eta_{hf} ")+post;
-//  hf_eta=td.make<TH1D>("etahf",title.c_str(),50,-5,5);  
-//  title=std::string("phi_{hf} ")+post;
-//  hf_phi=td.make<TH1D>("phihf",title.c_str(),30,-3.14159,3.14159);
-//  title=std::string("pt_{hf} ")+post;
-//  hf_pt=td.make<TH1D>("pthf",title.c_str(),90,0,90);  
-//
-//
-//  title=std::string("eta_{el_1} ")+post;
-//  el_1_eta=td.make<TH1D>("etael1",title.c_str(),50,-5,5);  
-//  title=std::string("eta_{el_2} ")+post;
-//  el_2_eta=td.make<TH1D>("etael2",title.c_str(),50,-5,5);  
-//
-//  title=std::string("eta_{el_1}_VS_eta_{el_2} ")+post;
-//  el_1_eta_VS_el_2_eta=td.make<TH2D>("etael1-vs-etael2",title.c_str(),50,-5,5,50,-5,5);
-//  title=std::string("phi_{el_1}_VS_phi_{el_2} ")+post;
-//  el_1_phi_VS_el_2_phi=td.make<TH2D>("phiel1-vs-phiel2",title.c_str(),30,-3.14159,3.14159,30,-3.14159,3.14159);
-//  
-
-
-
-
-
   title=std::string("eta_{el} ")+post;
   eleEta=td.make<TH1D>("eta_{el}",title.c_str(),30,-3,3);
   title=std::string("phi_{el} ")+post;
@@ -171,28 +119,20 @@ void EleWithMet::HistPerDef::book(TFileDirectory td, const std::string& post) {
   title=std::string("et_{el} ")+post;
   eleEt=td.make<TH1D>("et_{el}",title.c_str(),50,0,100);
 
-
-
 }
 
-void EleWithMet::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,  
-				 const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, 
-				 const edm::ParameterSet& myPs, const float hf_2d_cut) {
-
+void EleWithMet::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE//,  
+				  //const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, 
+				  //				  const edm::ParameterSet& myPs, const float hf_2d_cut
+				  ) {
+  
   //pat::ElectronCollection::const_iterator ecalE,  
-  eleEta-> Fill(ecalE->eta());
-  elePhi-> Fill(ecalE->phi());
-  eleEt-> Fill(ecalE->pt());
+  eleEta -> Fill(ecalE->eta());
+  elePhi -> Fill(ecalE->phi());
+  eleEt  -> Fill(ecalE->pt());
 
 }// end of fill()
 
-static const double hf_2d_loose = 0.32;
-// this value for tight is lower than CMS AN-2009/106 to accont for S/L miscalib in data
-// see figure 15 therein: turn-on is sharp
-static const double hf_2d_tight = 0.45;
-
-
-//
 // constants, enums and typedefs
 //
 
@@ -215,10 +155,8 @@ EleWithMet::EleWithMet(const edm::ParameterSet& iConfig)
 
   metCollectionTag_ = iConfig.getParameter<edm::InputTag>("metCollectionTag");
 
-  ETCut_ = iConfig.getParameter<double>("ETCut");
+  ETCut_  = iConfig.getParameter<double>("ETCut");
   METCut_ = iConfig.getParameter<double>("METCut");
-
-
 
   std::vector<int>::const_iterator it;
   for(it=acceptedElectronIDs_.begin(); it!=acceptedElectronIDs_.end(); it++)
@@ -226,20 +164,18 @@ EleWithMet::EleWithMet(const edm::ParameterSet& iConfig)
     }
 
   edm::Service<TFileService> fs;
-  hists.nelec=fs->make<TH1D>("met","met:mE_{T} [GeV]",100,0,100);
-  hists.nelec=fs->make<TH1D>("met eta","metEta:#eta_{mE_{T}}",100,0,100);
-  hists.nelec=fs->make<TH1D>("met phi","metPhi:#phi_{mE_{T}}",100,-1*TMath::Pi(),TMath::Pi());
 
+  // these are general histograms filled regardless of the eleId/Met selection
+  hists.nelec=fs ->make<TH1D>("nelec","N_Elec",10,-0.5,9.5);
+  hists.met=fs   ->make<TH1D>("met","met:mE_{T} [GeV]",100,0,100);
+  hists.metEta=fs->make<TH1D>("met eta","metEta:#eta_{mE_{T}}",100,-5,5);
+  hists.metPhi=fs->make<TH1D>("met phi","metPhi:#phi_{mE_{T}}",100,-1*TMath::Pi(),TMath::Pi());
 
-  hists.nelec=fs->make<TH1D>("nelec","N_Elec",10,-0.5,9.5);
-  hists.nhf=fs  ->make<TH1D>("nhf","N_HF",10,-0.5,9.5);
-  //hists.base.book(fs->mkdir("base"),"(base)");
-  //  hists.mee90none.book(fs->mkdir("mee90none"),"(mee90none)");
-  //  hists.zMass.book(fs->mkdir("zMass"),"(zMass)");
   hists.ele90metLoose.book(fs->mkdir("ele90metLoose"),"(ele90,metLoose)");
   hists.ele80metLoose.book(fs->mkdir("ele80metLoose"),"(ele80,metLoose)");
   hists.ele70metLoose.book(fs->mkdir("ele70metLoose"),"(ele70,metLoose)");  
   hists.ele60metLoose.book(fs->mkdir("ele60metLoose"),"(ele60,metLoose)");  
+
   hists.ele90metTight.book(fs->mkdir("ele90metTight"),"(ele90,metTight)");  
   hists.ele80metTight.book(fs->mkdir("ele80metTight"),"(ele80,metTight)");  
   hists.ele70metTight.book(fs->mkdir("ele70metTight"),"(ele70,metTight)");  
@@ -314,20 +250,32 @@ EleWithMet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
   }// end loop over electrons
   
-  hists.nelec->Fill(pElecs.size());
-  hists.nhf  ->Fill(HFElectrons->size());
+  if (ecalE==pElecs.end() ) return;
 
+  hists.nelec->Fill(pElecs.size());
+  
   edm::Handle<pat::METCollection> patMET;
   iEvent.getByLabel(metCollectionTag_,  patMET);
   const pat::METCollection *pMet = patMET.product();
   const pat::METCollection::const_iterator met = pMet->begin();
   const pat::MET theMET = *met;
 
+  hists.met   ->Fill( met->et() );
+  hists.metEta->Fill( met->eta() );
+  hists.metPhi->Fill( met->phi() );
 
-//      hists.zMass.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,0);//gf: for each Z definition, N-1 control plots could be filled here too
-//      if (var2d>=hf_2d_loose) {
-//	if (w.doesElePass( ecalE->electronID("simpleEleId90relIso") )) hists.mee90loose.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,hf_2d_loose);
-
+  if( met->et()  > ETCut_){
+    if(w.doesElePass( ecalE->electronID("simpleEleId90relIso") ))  hists.ele90metLoose.fill(ecalE);
+//    if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.ele80metLoose.fill(ecalE);
+//    if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.ele70metLoose.fill(ecalE);
+//    if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.ele60metLoose.fill(ecalE);
+//  }
+//  if( met->et()  > (ETCut_+15) ){
+//    if(w.doesElePass( ecalE->electronID("simpleEleId90relIso") ))  hists.ele90metTight.fill(ecalE);
+//    if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.ele80metTight.fill(ecalE);
+//    if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.ele70metTight.fill(ecalE);
+//    if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.ele60metTight.fill(ecalE);
+  }
 
 }
 
