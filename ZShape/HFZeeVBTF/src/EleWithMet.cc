@@ -13,7 +13,7 @@
 //
 // Original Author:  G. Franzoni
 //         Created:  Wed Aug 04 00:21:26 CDT 2010
-// $Id: EleWithMet.cc,v 1.3 2010/08/13 13:56:04 franzoni Exp $
+// $Id: EleWithMet.cc,v 1.4 2010/08/13 14:37:29 franzoni Exp $
 //
 //
 
@@ -223,54 +223,52 @@ EleWithMet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   for (i=pElecs.begin(); i!=pElecs.end(); i++) {
     reco::SuperClusterRef scr=i->superCluster();
+    
     if (scr.isNull()) {
       std::cout << "I'm NULL!!!\n";
       continue;
     }
-
+    
     // gf: ECAL eta acceptance cut on supercluster. What about phi acceptance and central crack?
     // explanation of electronID value: https://twiki.cern.ch/twiki/bin/view/CMS/SimpleCutBasedEleID
     double eta_det=scr.get()->eta();
-    if (ecalE==pElecs.end() && i->electronID(ecalID_)>=(.0-0.1)   // very loose to let events pass; cuts done later
-	&& (fabs(eta_det)<1.4442 || fabs(eta_det)>1.560)
-	&& HFElectrons->size()>0) {
-      const reco::RecoEcalCandidate& hfE=(*HFElectrons)[0];
-      reco::SuperClusterRef hfclusRef=hfE.superCluster();
-      const reco::HFEMClusterShapeRef hfclusShapeRef=(*ClusterAssociation).find(hfclusRef)->val;
-      // const reco::HFEMClusterShape& hfshape=*hfclusShapeRef;
-      // hists.base.fill(i,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_);//gf: for each Z definition, N-1 control plots could be filled here too
-      ;
-    }
     
-    // ECAL acceptance cut
-    if (ecalE==pElecs.end() && w.doesElePass( i->electronID(ecalID_) )  // 3: passes electron iso/Id/convRej depending on configuration; ecalID_ defines working point
-    	&& (fabs(eta_det)<1.4442 || fabs(eta_det)>1.560)) {             // ECAL acceptance cut
+    // ECAL acceptance and minEnergy cut
+    if (
+	ecalE==pElecs.end()   // 3: ECAL acceptance cut
+	&& (fabs(eta_det)<1.4442 || fabs(eta_det)>1.560)
+	&&  i->pt() > ETCut_
+	) {
       ecalE=i;
-    }// if
+    }// end if
     
   }// end loop over electrons
   
+
+  // reqiure presence of at least one GSF electron within acceptance and min energy
   if (ecalE==pElecs.end() ) return;
 
+  
   hists.nelec->Fill(pElecs.size());
   
+  // Met used to select electrons from W decay
   edm::Handle<pat::METCollection> patMET;
   iEvent.getByLabel(metCollectionTag_,  patMET);
   const pat::METCollection *pMet = patMET.product();
   const pat::METCollection::const_iterator met = pMet->begin();
   const pat::MET theMET = *met;
 
+  hists.metEta->Fill( met->eta() ); //(eta is pointless for met - jsut a consistency check that it's always 0)
   hists.met   ->Fill( met->et() );
-  hists.metEta->Fill( met->eta() );
   hists.metPhi->Fill( met->phi() );
   
-  if( met->et()  > ETCut_){
+  if( met->et()  > METCut_){
     if(w.doesElePass( ecalE->electronID("simpleEleId90relIso") ))  hists.ele90metLoose.fill(ecalE);
     if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.ele80metLoose.fill(ecalE);
     if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.ele70metLoose.fill(ecalE);
     if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.ele60metLoose.fill(ecalE);
   }
-  if( met->et()  > (ETCut_+15) ){
+  if( met->et()  > (METCut_+10) ){
     if(w.doesElePass( ecalE->electronID("simpleEleId90relIso") ))  hists.ele90metTight.fill(ecalE);
     if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.ele80metTight.fill(ecalE);
     if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.ele70metTight.fill(ecalE);
