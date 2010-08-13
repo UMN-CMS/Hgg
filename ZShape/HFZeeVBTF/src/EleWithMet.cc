@@ -13,7 +13,7 @@
 //
 // Original Author:  G. Franzoni
 //         Created:  Wed Aug 04 00:21:26 CDT 2010
-// $Id: EleWithMet.cc,v 1.2 2010/08/12 16:32:23 franzoni Exp $
+// $Id: EleWithMet.cc,v 1.3 2010/08/13 13:56:04 franzoni Exp $
 //
 //
 
@@ -112,11 +112,11 @@ private:
 void EleWithMet::HistPerDef::book(TFileDirectory td, const std::string& post) {
   std::string title;
 
-  title=std::string("eta_{el} ")+post;
+  title=std::string("eta_{el} ")+post+std::string(";#eta_{el}");
   eleEta=td.make<TH1D>("eta_{el}",title.c_str(),30,-3,3);
-  title=std::string("phi_{el} ")+post;
+  title=std::string("phi_{el} ")+post+std::string(";#phi_{el}");
   elePhi=td.make<TH1D>("phi_{el}",title.c_str(),30,-1*TMath::Pi(),TMath::Pi());
-  title=std::string("et_{el} ")+post;
+  title=std::string("et_{el} ")+post+std::string(";Et_{el}");
   eleEt=td.make<TH1D>("et_{el}",title.c_str(),50,0,100);
 
 }
@@ -166,10 +166,10 @@ EleWithMet::EleWithMet(const edm::ParameterSet& iConfig)
   edm::Service<TFileService> fs;
 
   // these are general histograms filled regardless of the eleId/Met selection
-  hists.nelec=fs ->make<TH1D>("nelec","N_Elec",10,-0.5,9.5);
-  hists.met=fs   ->make<TH1D>("met","met:mE_{T} [GeV]",100,0,100);
-  hists.metEta=fs->make<TH1D>("met eta","metEta:#eta_{mE_{T}}",100,-5,5);
-  hists.metPhi=fs->make<TH1D>("met phi","metPhi:#phi_{mE_{T}}",100,-1*TMath::Pi(),TMath::Pi());
+  hists.nelec=fs ->make<TH1D>("nelec","N_Elec; num electron",10,-0.5,9.5);
+  hists.met=fs   ->make<TH1D>("met","met;mE_{T} [GeV]",100,0,100);
+  hists.metEta=fs->make<TH1D>("met eta","metEta;#eta_{mE_{T}}",3,-5,5);
+  hists.metPhi=fs->make<TH1D>("met phi","metPhi;#phi_{mE_{T}}",36,-1*TMath::Pi(),TMath::Pi());
 
   hists.ele90metLoose.book(fs->mkdir("ele90metLoose"),"(ele90,metLoose)");
   hists.ele80metLoose.book(fs->mkdir("ele80metLoose"),"(ele80,metLoose)");
@@ -263,18 +263,18 @@ EleWithMet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   hists.met   ->Fill( met->et() );
   hists.metEta->Fill( met->eta() );
   hists.metPhi->Fill( met->phi() );
-
+  
   if( met->et()  > ETCut_){
     if(w.doesElePass( ecalE->electronID("simpleEleId90relIso") ))  hists.ele90metLoose.fill(ecalE);
-//    if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.ele80metLoose.fill(ecalE);
-//    if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.ele70metLoose.fill(ecalE);
-//    if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.ele60metLoose.fill(ecalE);
-//  }
-//  if( met->et()  > (ETCut_+15) ){
-//    if(w.doesElePass( ecalE->electronID("simpleEleId90relIso") ))  hists.ele90metTight.fill(ecalE);
-//    if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.ele80metTight.fill(ecalE);
-//    if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.ele70metTight.fill(ecalE);
-//    if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.ele60metTight.fill(ecalE);
+    if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.ele80metLoose.fill(ecalE);
+    if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.ele70metLoose.fill(ecalE);
+    if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.ele60metLoose.fill(ecalE);
+  }
+  if( met->et()  > (ETCut_+15) ){
+    if(w.doesElePass( ecalE->electronID("simpleEleId90relIso") ))  hists.ele90metTight.fill(ecalE);
+    if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.ele80metTight.fill(ecalE);
+    if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.ele70metTight.fill(ecalE);
+    if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.ele60metTight.fill(ecalE);
   }
 
 }
