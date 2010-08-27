@@ -13,7 +13,7 @@
 //
 // Original Author:  G. Franzoni
 //         Created:  Wed Aug 04 00:21:26 CDT 2010
-// $Id: EleWithMet.cc,v 1.4 2010/08/13 14:37:29 franzoni Exp $
+// $Id: EleWithMet.cc,v 1.5 2010/08/13 15:09:14 franzoni Exp $
 //
 //
 
@@ -259,7 +259,7 @@ EleWithMet::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   const pat::MET theMET = *met;
 
   hists.metEta->Fill( met->eta() ); //(eta is pointless for met - jsut a consistency check that it's always 0)
-  hists.met   ->Fill( met->et() );
+  hists.met   ->Fill( met->et() );  // add a plot which has Met phi above a threshold!
   hists.metPhi->Fill( met->phi() );
   
   if( met->et()  > METCut_){
