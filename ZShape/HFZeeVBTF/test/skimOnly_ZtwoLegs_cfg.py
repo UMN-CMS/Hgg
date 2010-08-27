@@ -4,7 +4,7 @@ process = cms.Process("PAT")
 
 
 process.load('FWCore/MessageService/MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 process.options = cms.untracked.PSet(
     Rethrow = cms.untracked.vstring('ProductNotFound'),
@@ -21,6 +21,10 @@ process.source = cms.Source("PoolSource",
                   
 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+
+process.options = cms.untracked.PSet(
+                            fileMode = cms.untracked.string('NOMERGE')
+)
 
 
 
