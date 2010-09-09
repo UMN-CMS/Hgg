@@ -373,7 +373,7 @@ process.z1EcalLegTightPath = cms.Path(process.patDefaultSequence
 
 process.z1lOutputModule = cms.OutputModule( "PoolOutputModule",
                                             fileName = cms.untracked.string(""),
-                                            maxSize = cms.untracked.int32(300000),
+                                            maxSize = cms.untracked.int32(500000),
                                             SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('z2EcalLegsPath','z1EcalLegTightPath','z1Ecal1HfLegPath'),
                                                                               )
                                             )
