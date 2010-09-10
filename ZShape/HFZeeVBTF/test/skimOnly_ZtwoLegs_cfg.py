@@ -381,3 +381,4 @@ process.z1lOutputModule = cms.OutputModule( "PoolOutputModule",
 
 process.outpath = cms.EndPath(process.z1lOutputModule)
 
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
