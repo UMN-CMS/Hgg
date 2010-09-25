@@ -207,16 +207,16 @@ process.z1LegFilter =cms.EDFilter('WenuCandidateFilter',
                                   useSpikeRejection = cms.untracked.bool(True),
                                   spikeCleaningSwissCrossCut = cms.untracked.double(0.95),
                                   # demand geometrically matched to an HLT object with ET>15GeV
-                                  useTriggerInfo = cms.untracked.bool(True), # GF >>>>>>>>>>>> changed here on Tue Aug  3 19:16:55 CEST 2010
-                                  electronMatched2HLT = cms.untracked.bool(True), # GF changed Sun Aug  8 20:52:24 CEST 2010
+                                  useTriggerInfo = cms.untracked.bool(False), # GF >>>>>>>>>>>> changed here on Tue Aug  3 19:16:55 CEST 2010
+                                  electronMatched2HLT = cms.untracked.bool(False), # GF changed Sun Aug  8 20:52:24 CEST 2010
                                   electronMatched2HLT_DR = cms.untracked.double(0.2), # GF 
                                   useHLTObjectETCut = cms.untracked.bool(False), # GF 
                                   hltObjectETCut = cms.untracked.double(15.),
-                                  useExtraTrigger = cms.untracked.bool(True), # GF  >>>>>>>>>> Wed Aug  4 11:52:45 CDT 2010
+                                  useExtraTrigger = cms.untracked.bool(False), # GF  >>>>>>>>>> Wed Aug  4 11:52:45 CDT 2010
                                   vHltpathExtra = cms.untracked.vstring(HLT_path_name_extra0,HLT_path_name_extra1),
                                   vHltpathFilterExtra = cms.untracked.VInputTag(HLT_filter_name_extra0, HLT_filter_name_extra1),
                                   # ET Cut in the SC
-                                  ETCut = cms.untracked.double(15.), # GF : changed here Wed Aug  4 11:52:45 CDT 2010
+                                  ETCut = cms.untracked.double(18.), # GF : changed here Wed Aug  4 11:52:45 CDT 2010
                                   METCut = cms.untracked.double(0.),
                                   # reject events with a 2nd electron with ET > 20 that passes the WP95%
                                   vetoSecondElectronEvents = cms.untracked.bool(False),
@@ -274,8 +274,8 @@ process.z1TightLegFilter =cms.EDFilter('WenuCandidateFilter',
                                        useSpikeRejection = cms.untracked.bool(True),
                                        spikeCleaningSwissCrossCut = cms.untracked.double(0.95),
                                        # demand geometrically matched to an HLT object with ET>15GeV
-                                       useTriggerInfo = cms.untracked.bool(True), # GF >>>>>>>>>>>> changed here on Tue Aug  3 19:16:55 CEST 2010
-                                       electronMatched2HLT = cms.untracked.bool(True), # GF changed Sun Aug  8 20:52:24 CEST 2010
+                                       useTriggerInfo = cms.untracked.bool(False), # GF >>>>>>>>>>>> changed here on Tue Aug  3 19:16:55 CEST 2010
+                                       electronMatched2HLT = cms.untracked.bool(False), # GF changed Sun Aug  8 20:52:24 CEST 2010
                                        electronMatched2HLT_DR = cms.untracked.double(0.2), # GF 
                                        useHLTObjectETCut = cms.untracked.bool(False), # GF 
                                        hltObjectETCut = cms.untracked.double(15.),
