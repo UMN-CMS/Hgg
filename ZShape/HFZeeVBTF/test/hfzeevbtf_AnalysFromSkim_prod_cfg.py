@@ -3,10 +3,10 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("Demo")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 10000
+process.MessageLogger.cerr.FwkReport.reportEvery = 2000
 
 process.maxEvents = cms.untracked.PSet( 
-input = cms.untracked.int32(-1)
+	 input = cms.untracked.int32(100000)
 )
 
 process.options = cms.untracked.PSet(
@@ -15,17 +15,27 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
-    fileNames = cms.untracked.vstring(    )
+    fileNames=cms.untracked.vstring(     )
 )
 
 
-# in this file I collect the lumi sections intervals I am interested in
-from ZShape.HFZeeVBTF.myGoodlumi_cfi import *
-# this is the equivalent of the JSON file 
-process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(
-                                                                   propmtRecoJsonAug4
-                                                                   # + propmtRecoJsonAug4 
-)
+# # in this file I collect the lumi sections intervals I am interested in
+# from ZShape.HFZeeVBTF.myGoodlumi_cfi import *
+# # this is the equivalent of the JSON file 
+# process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(
+#     #                                                                  propmtRecoJsonAug4
+#     # + propmtRecoJsonAug4
+#     fullPromptRecoUpTo144114
+#     )
+
+
+# see explanations in : https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideGoodLumiSectionsJSONFile#cmsRun
+# in 36x need tags: V01-00-02 FWCore/PythonUtilities     and      V00-04-00 PhysicsTools/PythonAnalysis
+import PhysicsTools.PythonAnalysis.LumiList as LumiList
+import FWCore.ParameterSet.Types as CfgTypes
+myLumis = LumiList.LumiList(filename = '/home/hep/franzoni/cmssw/CMSSW_3_6_1_patch3_Z_HF_update7/src/ZShape/HFZeeVBTF/fileLists/Cert_132440-144114_7TeV_StreamExpress_Collisions10_JSON_v3.txt').getCMSSWString().split(',')
+process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange())
+process.source.lumisToProcess.extend(myLumis)
 
 
 
@@ -34,7 +44,7 @@ process.hfRecoEcalCandidate.intercept2DCut=0.3
 
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('')
+       fileName = cms.string(''),
 )
 
 # to access values of EldId cuts
@@ -255,49 +265,114 @@ process.Rej = cms.EDAnalyzer('HFZeeVBTF',
 )
 
 
+from ZShape.HFZeeVBTF.elewithmet_cfi import *
+#myDesiredMetCollection = "caloMET"
+myDesiredMetCollection = "pfMET"
+#myDesiredMetCollection = "tcMET"
 
-# 
-# import HLTrigger.HLTfilters.hltHighLevelDev_cfi
-# process.EG_1e28 = HLTrigger.HLTfilters.hltHighLevelDev_cfi.hltHighLevelDev.clone(andOr = True)
-# process.EG_1e28.HLTPaths = (
-# #     "HLT_Mu9",
-# #     "HLT_Mu5_Track0_Jpsi"
-#     "HLT_Photon10_L1R",
-#     "HLT_Photon15_L1R",
-#     "HLT_Photon15_LooseEcalIso_L1R",
-#     "HLT_Photon20_L1R",
-#     "HLT_Photon30_L1R_8E29",
-#     "HLT_DoublePhoton4_Jpsi_L1R",
-#     "HLT_DoublePhoton4_Upsilon_L1R",
-#     "HLT_DoublePhoton4_eeRes_L1R",
-#     "HLT_DoublePhoton5_eeRes_L1R", #added to match the /cdaq/physics/firstCollisions10/v2.0/HLT_7TeV/V5 table
-#     "HLT_DoublePhoton5_Jpsi_L1R",
-#     "HLT_DoublePhoton5_Upsilon_L1R",
-#     "HLT_DoublePhoton5_L1R",
-#     "HLT_DoublePhoton10_L1R",
-#     "HLT_DoubleEle5_SW_L1R",
-#     "HLT_Ele20_LW_L1R",
-#     "HLT_Ele15_SiStrip_L1R",
-#     "HLT_Ele15_SC10_LW_L1R",
-#     "HLT_Ele15_LW_L1R",
-#     "HLT_Ele10_LW_EleId_L1R",
-#     "HLT_Ele10_LW_L1R",
-#     "HLT_Photon15_TrackIso_L1R"
-#     )
-# process.EG_1e28.HLTPathsPrescales  = cms.vuint32(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1)
-# process.EG_1e28.HLTOverallPrescale = cms.uint32(1)
-# process.EG_1e28.throw = False
-# process.EG_1e28.andOr = True
+process.metEleIdIsoRej = cms.EDAnalyzer('EleWithMet',
+                                 # source
+                                 acceptedElectronIDs = cms.vint32( 7 ),
+                                 ECALid = cms.string('simpleEleId90relIso'),
+                                 myName = cms.string('metEleIdIsoRej'),
+                                 DoLog = cms.bool(True),
+                                 ETCut = cms.double(20.),
+                                 METCut = cms.double(25.),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 )
 
+
+process.metEleIdIso = cms.EDAnalyzer('EleWithMet',
+                                 # source
+                                 acceptedElectronIDs = cms.vint32( 3, 7 ),
+                                 ECALid = cms.string('simpleEleId90relIso'),
+                                 myName = cms.string('metEleIdIso'),
+                                 DoLog = cms.bool(True),
+                                 ETCut = cms.double(20.),
+                                 METCut = cms.double(25.),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 )
+
+
+process.metEleIdRej = cms.EDAnalyzer('EleWithMet',
+                                 # source
+                                 acceptedElectronIDs = cms.vint32( 5, 7 ),
+                                 ECALid = cms.string('simpleEleId90relIso'),
+                                 myName = cms.string('metEleIdRej'),
+                                 DoLog = cms.bool(True),
+                                 ETCut = cms.double(20.),
+                                 METCut = cms.double(25.),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 )
+
+
+process.metEleIsoRej = cms.EDAnalyzer('EleWithMet',
+                                 # source
+                                 acceptedElectronIDs = cms.vint32( 6, 7 ),
+                                 ECALid = cms.string('simpleEleId90relIso'),
+                                 myName = cms.string('metEleIsoRej'),
+                                 DoLog = cms.bool(True),
+                                 ETCut = cms.double(20.),
+                                 METCut = cms.double(25.),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 )
+
+
+process.metEleId = cms.EDAnalyzer('EleWithMet',
+                                 # source
+                                 acceptedElectronIDs = cms.vint32( 1, 3, 5 ,7 ),
+                                 ECALid = cms.string('simpleEleId90relIso'),
+                                 myName = cms.string('metEleId'),
+                                 DoLog = cms.bool(True),
+                                 ETCut = cms.double(20.),
+                                 METCut = cms.double(25.),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 )
+
+
+process.metEleIso = cms.EDAnalyzer('EleWithMet',
+                                 # source
+                                 acceptedElectronIDs = cms.vint32( 2, 3, 6, 7 ),
+                                 ECALid = cms.string('simpleEleId90relIso'),
+                                 myName = cms.string('metEleIso'),
+                                 DoLog = cms.bool(True),
+                                 ETCut = cms.double(20.),
+                                 METCut = cms.double(25.),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 )
+
+
+process.metEleRej = cms.EDAnalyzer('EleWithMet',
+                                 # source
+                                 acceptedElectronIDs = cms.vint32( 4, 5, 6, 7 ),
+                                 ECALid = cms.string('simpleEleId90relIso'),
+                                 myName = cms.string('metEleRej'),
+                                 DoLog = cms.bool(True),
+                                 ETCut = cms.double(20.),
+                                 METCut = cms.double(25.),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 )
+
+
+import FWCore.Modules.printContent_cfi
+process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 process.p = cms.Path(
     # process.EG_1e28 *
     process.hfRecoEcalCandidate
-     *process.IdIso
-     *process.IdRej
-     *process.IsoRej
-     *process.Id
-     *process.Iso
-     *process.Rej
-     *process.IdIsoRej
+    *process.IdIso
+    *process.IdRej
+    *process.IsoRej
+    *process.Id
+    *process.Iso
+    *process.Rej
+    *process.IdIsoRej
+    * process.metEleIdIsoRej
+    * process.metEleIdIso
+    * process.metEleIdRej
+    * process.metEleIsoRej
+    * process.metEleId
+    * process.metEleIso
+    * process.metEleRej
+    # *process.dumpEv
     )
