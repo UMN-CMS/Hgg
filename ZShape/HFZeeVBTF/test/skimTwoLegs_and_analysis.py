@@ -18,12 +18,9 @@ process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 # source
 process.source = cms.Source("PoolSource",      
-    fileNames=cms.untracked.vstring(
-         'file:/data/whybee1b/phedex/store//data/Run2010A/EG/RECO/v4/000/142/558/FC9C72D0-8AA3-DF11-8F5B-003048F1BF68.root'  #  this is a data test
+    fileNames=cms.untracked.vstring(     )
        # 'file:/data/whybee0a/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0009/F074213B-4446-DF11-923D-00E081791875.root'  #  this is a MC test
-    )
-                  
-)
+                 )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5000) )
 
 process.options = cms.untracked.PSet(
@@ -126,32 +123,32 @@ process.load("ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff")
 #  difference between data and MC
 # JM ==> set to TRUE to tell the ID that it is data
 # JM ==> or set to talse if it's MC
-process.simpleEleId95relIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId90relIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId85relIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId80relIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId70relIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId60relIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId95cIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId90cIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId85cIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId80cIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId70cIso.dataMagneticFieldSetUp = cms.bool(True)
-process.simpleEleId60cIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId95relIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId90relIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId85relIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId80relIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId70relIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId60relIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId95cIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId90cIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId85cIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId80cIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId70cIso.dataMagneticFieldSetUp = cms.bool(True)
+#  process.simpleEleId60cIso.dataMagneticFieldSetUp = cms.bool(True)
 #
-#   process.simpleEleId95relIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId90relIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId85relIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId80relIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId70relIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId60relIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId95cIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId90cIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId85cIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId80cIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId70cIso.dataMagneticFieldSetUp = cms.bool(False)
-#   process.simpleEleId60cIso.dataMagneticFieldSetUp = cms.bool(False)
-#   #
+process.simpleEleId95relIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId90relIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId85relIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId80relIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId70relIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId60relIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId95cIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId90cIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId85cIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId80cIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId70cIso.dataMagneticFieldSetUp = cms.bool(False)
+process.simpleEleId60cIso.dataMagneticFieldSetUp = cms.bool(False)
+#
 
 process.patElectronIDs = cms.Sequence(process.simpleEleIdSequence)
 process.makePatElectrons = cms.Sequence(process.patElectronIDs*process.patElectrons)
@@ -237,9 +234,9 @@ process.z1LegFilter =cms.EDFilter('WenuCandidateFilter',
                                   calculateValidFirstPXBHit = cms.untracked.bool(True),
                                   calculateConversionRejection = cms.untracked.bool(True),
                                   calculateExpectedMissingHits = cms.untracked.bool(True),
-                                  #  difference between data and MC
-                                  dataMagneticFieldSetUp = cms.untracked.bool(True), # we are dealing with DATA
-                                  # dataMagneticFieldSetUp = cms.untracked.bool(False), # we are dealing with MC
+                                  #  difference between data and MC JM
+                                  # dataMagneticFieldSetUp = cms.untracked.bool(True), # we are dealing with DATA
+                                  dataMagneticFieldSetUp = cms.untracked.bool(False), # we are dealing with MC
                                   dcsTag = cms.untracked.InputTag("scalersRawToDigi"),
                                   )
 
@@ -304,9 +301,9 @@ process.z1TightLegFilter =cms.EDFilter('WenuCandidateFilter',
                                        calculateValidFirstPXBHit = cms.untracked.bool(True),
                                        calculateConversionRejection = cms.untracked.bool(True),
                                        calculateExpectedMissingHits = cms.untracked.bool(True),
-                                       #  difference between data and MC
-                                       dataMagneticFieldSetUp = cms.untracked.bool(True), # we are dealing with DATA
-                                       # dataMagneticFieldSetUp = cms.untracked.bool(False), # we are dealing with MC
+                                       # difference between data and MC JM
+                                       # dataMagneticFieldSetUp = cms.untracked.bool(True), # we are dealing with DATA
+                                       dataMagneticFieldSetUp = cms.untracked.bool(False), # we are dealing with MC
                                        dcsTag = cms.untracked.InputTag("scalersRawToDigi"),
                                        )
 
@@ -388,7 +385,7 @@ process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
 process.hfRecoEcalCandidate.intercept2DCut=0.3
 
 process.TFileService = cms.Service("TFileService",
-       fileName = cms.string('theAnalysisOutput.root'),
+       fileName = cms.string("/data/whybee1a/user/franzoni/ele2010/sep24/skimTwoLegs_and_analysis.py/TFskimTwoLegs_and_analysis-test-for-MC_001.root"),
 )
 
 
