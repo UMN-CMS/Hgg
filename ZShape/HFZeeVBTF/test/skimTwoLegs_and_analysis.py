@@ -385,7 +385,7 @@ process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
 process.hfRecoEcalCandidate.intercept2DCut=0.3
 
 process.TFileService = cms.Service("TFileService",
-       fileName = cms.string("/data/whybee1a/user/franzoni/ele2010/sep24/skimTwoLegs_and_analysis.py/TFskimTwoLegs_and_analysis-test-for-MC_001.root"),
+       fileName = cms.string("TFskimAndAnalysisFromRECO_MC_Zoneleg.root"),
 )
 
 
