@@ -298,7 +298,7 @@ process.eeSC = cms.EDFilter("CandViewSelector",
                             cut = cms.string('abs( eta ) > 1.560 & abs( eta ) < 3')
                             )
 # join them in ECAL calidates (no-duplication guaranteed)
-process.ecalSC = cms.EDFilter("CandViewMerger",
+process.ecalSC = cms.EDProducer("CandViewMerger",
                               src = cms.VInputTag(cms.InputTag("ebSC"), cms.InputTag("eeSC"))
                               )                                                  
 # select ECAL sucperclusters above a certain Et
