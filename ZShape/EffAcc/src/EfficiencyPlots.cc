@@ -20,8 +20,8 @@ EfficiencyPlots::EfficiencyPlots(char *txtFile, char *cutType, int binStart, cha
 {
    trueeff = "Supercluster Creation";
    if (strstr(cutType_,"Gsf") ) trueeff = "GSF Track Matching";
-   else if (strstr(cutType_,"Iso") ) trueeff = "Isolation";
-   else if (strstr(cutType_,"ElectronId") ) trueeff = "Electron Identification";
+   else if (strstr(cutType_,"Iso") ) {trueeff = "Isolation WP95"; if ( strstr(cutType_,"80")) trueeff = "Isolation WP80"; }
+   else if (strstr(cutType_,"ElectronId") ) {trueeff = "Electron Identification WP95";if (strstr(cutType_,"80")) trueeff = "Electron Identification WP80";}
    else if (strstr(cutType_,"HLT") ) trueeff = "Trigger Efficiency";
    else if (strstr(cutType_,"HF") ) trueeff = "HF Electron Identification";
 

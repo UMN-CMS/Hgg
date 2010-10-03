@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 // Adapted From Following Description:
 // Original Author:  Fedor Ratnikov Nov 9, 2007
-// $Id: EffTableReader.cc,v 1.1 2009/01/07 19:02:23 kalanand Exp $
+// $Id: EffTableReader.cc,v 1.1 2010/07/14 04:04:56 haupt Exp $
 // Generic parameters for Jet corrections
 //----------------------------------------------------------------------------
 #include "ZShape/Base/interface/EffTableReader.h"
@@ -94,7 +94,7 @@ EffTableReader::EffTableReader (const std::string& fFile) {
 
 
 int EffTableReader::bandIndex (float fEt, float fEta) const{
-  int bandInd =0;
+  int bandInd = -1; //new default value says it isn't in a band (bin)
        for (unsigned i = 0; i < mRecords.size(); ++i) {
          if(fEt>=mRecords[i].EtMin() && fEt<mRecords[i].EtMax()){
 	   if(fEta>=mRecords[i].etaMin() && fEta<mRecords[i].etaMax()){

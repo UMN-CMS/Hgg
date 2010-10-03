@@ -22,18 +22,29 @@ process.options = cms.untracked.PSet(
 process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
      moduleSeeds = cms.PSet(
          VtxSmeared = cms.untracked.uint32(123456786),
+	 generator = cms.untracked.uint32(123456786)		 
      ),
      # This is to initialize the random engine of the source
      sourceSeed = cms.untracked.uint32(123456786)
  )
 
+#process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+#    theSource = cms.PSet(
+#        initialSeed = cms.untracked.uiHAHAnt32(123456789),
+#        engineName = cms.untracked.string('HepJamesRandom')
+#    ),
+#    generator = cms.PSet(
+#        initialSeed = cms.untracked.uiHAHAnt32(123456789),
+#        engineName = cms.untracked.string('HepJamesRandom')
+#    )
+#    ,saveFileName = cms.untracked.string('')
+# )
 
-
-process.load("ZShape.EffAcc.PythiaZee10TeV_noUE_cfi")
+process.load("ZShape.EffAcc.PythiaZee7TeV_cfi")
 #process.load("ZShape.EffAcc.PythiaZee10TeV_cfi")
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000000))
-process.PythiaSource.pythiaPylistVerbosity = 1
-process.PythiaSource.maxEventsToPrint = 1
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(300000))
+process.generator.pythiaPylistVerbosity = 1
+process.generator.maxEventsToPrint = 1
 
 
 process.load("Configuration.StandardSequences.VtxSmearedGauss_cff")
@@ -43,7 +54,8 @@ process.load("ZShape.EffAcc.ZEventProducer_cfi")
 process.dumpEv = cms.EDAnalyzer("EventContentAnalyzer")
 
 process.p1 = cms.Path(
-          process.VtxSmeared
+	  process.generator
+        * process.VtxSmeared
         * process.ZIntoElectronsEventProducer
      #  * process.dumpEv
 )

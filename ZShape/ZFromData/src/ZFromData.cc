@@ -279,6 +279,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   */
  
   //allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_); //This actually just is the RAW MC information
+  if ( evt_.elec(0).p4_.Pt() < evt_.elec(1).p4_.Pt() ) {std::swap( evt_.elec(0), evt_.elec(1));}    
   evtMC_.afterLoad();
   double wgt= 1.0;
   if (doMC_) wgt = wclass.wgt((evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Pt(),(evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Rapidity());
@@ -352,16 +353,16 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //bool spitright = !(strcmp(q->first.c_str(),"Tight-ECAL-Loose-ECAL")) || !(strcmp(q->first.c_str(),"Tight-ECAL-HF") );
 	//bool spitright = !(strcmp(q->first.c_str(),"Tight-ECAL-Loose-ECAL")) );
         bool spitright = true;
-        int e1 = 0;
-        int e2 = 1;
-        if (ptorder) if ( evt_.elec(0).p4_.Pt() < evt_.elec(1).p4_.Pt() ) {e1 = 1; e2 =0;}
-        
+        int e1 = 0; 
+        int e2 = 1; 
+        //if (ptorder) if ( evt_.elec(0).p4_.Pt() < evt_.elec(1).p4_.Pt() ) {e1 = 1; e2 =0;}  
+	       
 	// acceptance is always the first cut
 	if (!q->second->pass(evt_,1,1,0,&pairing)) continue;
 	
         if (pairing) {std::swap(e1,e2); }
-        int e1n = e1;
-        int e2n = e2;
+        int e1n = e1; 
+        int e2n = e2; 
 	// fill standard histograms after acceptance
 	plots->acceptance_.Fill(evt_.elec(e1), evt_.elec(e2),evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_,wgt,doMC_);
 	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1), evt_.elec(e2), evtMC_.elec(e1), evtMC_.elec(e2),wgt,doMC_);

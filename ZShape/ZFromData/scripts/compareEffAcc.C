@@ -65,6 +65,7 @@ typedef struct{
   vechists EffAcc;
   vechists ZRapAfter;
   TH1F *ZRapTotal;
+  TH1F *ZMCRapTotal;
   TH1F *ZEffAccTotal;
   THStack *ZRapTotSk;
   THStack *ZEffAccTotSk;
@@ -123,9 +124,9 @@ EffAccHistos::EffAccHistos(std::string fromDataFile, std::string mcFile, vecstri
 
   //Next we initialize the colors
    Cols_[0] = kBlack;
-   Cols_[1] = kRed;
+   Cols_[1] = kBlue;
    Cols_[2] = kMagenta;
-   Cols_[3] = kBlue;
+   Cols_[3] = kRed;
    Cols_[4] = kCyan+1;
    Cols_[5] = 3;
    Cols_[6] = 40;
@@ -191,8 +192,9 @@ EffAccHistos::getHistos(void)
    std::cout << " get mc tree level tree " << std::endl;
    //MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/All/Z0_YTL"); //Changed to Z0_YTL rather than Z0_Y... to be the "truth"
    std::cout << " why am I here " << std::endl;
-   //MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/AllInRange/Acceptance/Z0_YTL"); //Changed InRange Z0_YTL 
-   MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("ZFromData/AllFirst/Z0_Y"); //Changed InRange Z0_YTL
+   //MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/AllInRange/Acceptance/Z0_YTL"); //Changed For ALL mass range  
+   MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/AllInRange/C01-m(70,110)/Z0_YTL"); //Changed InRange Z0_YTL
+   ////MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("ZFromData/AllFirst/Z0_Y"); //Changed InRange Z0_YTL
    std::cout << " oh boy 0 " << std::endl;
    //MCHistos_.ZRapMC->Sumw2();
       std::cout << " oh boy 10 " << std::endl;
@@ -221,13 +223,15 @@ EffAccHistos::getHistos(void)
       //FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
       FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
       //MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
-      MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("ZFromData/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
+      ///MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("ZFromData/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
+      MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
 
 
       namedvechists ZFDhist;
       namedvechists ZMChist;
       //HERE I DO THE FILLING
-      TDirectory *ZMCdir = ZMCFile_->GetDirectory(Form("ZFromData/%s",(*mine).c_str()));
+      ///TDirectory *ZMCdir = ZMCFile_->GetDirectory(Form("ZFromData/%s",(*mine).c_str()));
+      TDirectory *ZMCdir = ZMCFile_->GetDirectory(Form("mcEff/%s",(*mine).c_str()));
       TDirectory *ZFDdir = ZFDFile_->GetDirectory(Form("ZFromData/%s",(*mine).c_str()));
       TIter next(ZMCdir->GetListOfKeys());
       TKey * key;
@@ -341,12 +345,15 @@ std::cout << " divide the first 50 " << std::endl;
      FinalHistos_.ZRapAfter.push_back(tempHist);
   }
 std::cout << " divide the first 60 " << std::endl;
-  FinalHistos_.ZRapTotal    = new TH1F("ZRapTotal","Z Rapidity;Z0_Y;Number of Events",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
+  FinalHistos_.ZRapTotal    = new TH1F("ZRapTotal","Z Rapidity;Z0_Y;Number of Events/0.25 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
+  FinalHistos_.ZMCRapTotal  = new TH1F("ZMCRapTotal","Z Rapidity;Z0_Y;Number of Events/0.25 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
   FinalHistos_.ZEffAccTotal = new TH1F("EffAccTotal","EffxAcc Total;Z0_Y;EffxAcc",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
   FinalHistos_.ZRapTotSk = new THStack();
   FinalHistos_.ZEffAccTotSk= new THStack();
   FinalHistos_.ZRapTotal->GetXaxis()->CenterTitle(kTRUE);
   FinalHistos_.ZRapTotal->GetYaxis()->CenterTitle(kTRUE);
+  FinalHistos_.ZMCRapTotal->GetXaxis()->CenterTitle(kTRUE);
+  FinalHistos_.ZMCRapTotal->GetYaxis()->CenterTitle(kTRUE);
   FinalHistos_.ZEffAccTotal->GetXaxis()->CenterTitle(kTRUE);
   FinalHistos_.ZEffAccTotal->GetYaxis()->CenterTitle(kTRUE);
 
@@ -355,6 +362,7 @@ std::cout << " divide the first 60 " << std::endl;
      FinalHistos_.ZRapTotSk->Add(FromDataHists_[i]);
      FinalHistos_.ZEffAccTotSk->Add(MCHistos_.EffAcc[i]);
      FinalHistos_.ZRapTotal->Add(FromDataHists_[i],1.0);
+     FinalHistos_.ZMCRapTotal->Add(MCHistos_.ZRap[i],scale_); //do I need the scale factor here??
      FinalHistos_.ZEffAccTotal->Add(MCHistos_.EffAcc[i]);
   }
 
@@ -413,6 +421,31 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
   FinalHistos_.ZRapTotal->Draw();
        plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
   tempCan1->Print(Form("ZEffRapTotal_Z0_Y.%s",ftype));
+
+  
+  FinalHistos_.ZRapTotal->SetMarkerStyle(kOpenCircle);
+  FinalHistos_.ZRapTotal->SetMarkerSize(0.9);
+  FinalHistos_.ZRapTotal->SetLineWidth(2);
+  if (FinalHistos_.ZRapTotal->GetMaximum() > FinalHistos_.ZMCRapTotal->GetMaximum())
+    {
+     FinalHistos_.ZRapTotal->Draw("pe");
+     FinalHistos_.ZMCRapTotal->Draw("histsame");
+    }
+  else 
+    {
+     FinalHistos_.ZMCRapTotal->Draw("hist");
+     FinalHistos_.ZRapTotal->Draw("samepe");
+    }
+  FinalHistos_.ZMCRapTotal->SetLineColor(kRed);
+  
+       plabel -> DrawText(xlabb_, ylabpb_, "CMS PRELIMINARY");   
+       TLegend *myLegj = new TLegend(.78,.80,.98,.95);
+       myLegj->AddEntry(FinalHistos_.ZMCRapTotal,"Zee MC","l");
+       myLegj->AddEntry(FinalHistos_.ZRapTotal,"7 TeV Data ","lp");
+       myLegj->SetFillColor(kWhite);
+       myLegj->Draw();
+  tempCan1->Print(Form("ZEffMCRapTotal_Z0_Y.%s",ftype));
+       myLegj->Delete();
 
   MCHistos_.ZRapMC->Draw("hist");
        plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
@@ -495,7 +528,8 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
               std::cout << " Did I get here " << std::endl;
               TLegend *myLeg1 = new TLegend(.78,.80,.98,.95);
 			  if (placement == 1) {myLeg1->SetX1(0.46); myLeg1->SetX2(0.66);myLeg1->SetY1(0.70); myLeg1->SetY2(0.85);}
-               myLeg1->AddEntry((*zmcvhit),"Zee MC","l");
+	       ///myLeg1->AddEntry((*zmcvhit),"Zee MC","l");
+	       myLeg1->AddEntry((*zmcvhit),"Fast Sim","l");		  
                myLeg1->AddEntry((*zfdvhit),"7 TeV Data ","lp");
                myLeg1->SetFillColor(kWhite);
                myLeg1->Draw();
@@ -538,8 +572,8 @@ tlabel -> SetTextAlign(22);
 tlabel -> SetTextAngle(0);
 
 TCanvas *tempCan = new TCanvas("tempcan","tempcan",800,600);
-TLegend *myLegl = new TLegend(.75,.25,.97,.55);
-TLegend *myLegf = new TLegend(.75,.25,.97,.55);
+TLegend *myLegl = new TLegend(.80,.45,.97,.75);
+TLegend *myLegf = new TLegend(.80,.45,.97,.75);
 myLegl->SetFillColor(kWhite);
 myLegf->SetFillColor(kWhite);
 for (uint i =0; i < ZDefVec_.size(); ++i)
@@ -562,6 +596,23 @@ myLegf->Draw();
      plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZRapTotalStacked_Z0_Y.%s",ftype));
 
+if (FinalHistos_.ZRapTotSk->GetMaximum() > FinalHistos_.ZMCRapTotal->GetMaximum()) {
+FinalHistos_.ZRapTotSk->Draw();
+FinalHistos_.ZRapTotSk->GetXaxis()->SetTitle("Z0_Y");
+FinalHistos_.ZMCRapTotal->Draw("samehist");
+FinalHistos_.ZMCRapTotal->SetLineColor(kRed);
+}
+else 
+{
+FinalHistos_.ZMCRapTotal->Draw("hist");
+FinalHistos_.ZMCRapTotal->SetLineColor(kRed);
+FinalHistos_.ZRapTotSk->Draw("same");
+FinalHistos_.ZRapTotSk->GetXaxis()->SetTitle("Z0_Y");
+}
+myLegf->SetTextSize(0.02);
+myLegf->AddEntry(FinalHistos_.ZMCRapTotal,"Zee MC","l");
+myLegf->Draw();
+tempCan->Print(Form("ZRapMCTotalStacked_Z0_Y.%s",ftype));
 
 for (uint i =0; i < ZDefVec_.size(); ++i)
   {
@@ -579,6 +630,8 @@ FinalHistos_.ZRapTotSk->Draw("nostack");
 myLegl->Draw();
      plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");   //  tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZRapTotalEach_Z0_Y.%s",ftype));
+
+
 
  /*  
    for (int itype = 0; itype < PHYSVARS; ++itype)

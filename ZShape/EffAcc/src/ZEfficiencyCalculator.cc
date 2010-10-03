@@ -38,7 +38,7 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
       zdef->addCriterion(ZShapeZDef::crit_E2,*k);
     for (std::vector<std::string>::iterator k=reqZ.begin(); k!=reqZ.end(); k++) 
       zdef->addCriterion(ZShapeZDef::crit_Z,*k);
-    zdefs_[name]=zdef;
+    zdefs_[name]=zdef;  
   }
 
   //

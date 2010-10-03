@@ -12,17 +12,24 @@
 class EfficiencyStore {
 
  public:
-
+ 
 
   EfficiencyStore();
   //EfficiencyStore(TFile * file);
-  EfficiencyStore(TFile *file, std::string EffName ="", std::string EffBinsFile ="" );
+  EfficiencyStore(TFile *file, std::string EffName ="", std::string EffType = "");
+  //EfficiencyStore(TFile *file, std::string EffName ="");
   EfficiencyStore(const std::string & textFileName);
 
   EffTableLoader* indexer() const { return efftable_; }
 
   //-----------------------------------------------------------------------------------//
   void setRootFile(TFile * file);  
+
+  //-----------------------------------------------------------------------------------//
+  void vecToHist(void);
+
+  //-----------------------------------------------------------------------------------//
+  void histToVec(void);
 
   //-----------------------------------------------------------------------------------//
   void produceTxtFile(std::string &textFileName);
@@ -33,6 +40,8 @@ class EfficiencyStore {
   //-----------------------------------------------------------------------------------//
   void produceHistograms(TFile * rootFile);
 
+  //-----------------------------------------------------------------------------------//
+  void setVarMinMax(double vmin, double vmax);
 
   
   TH1F* getValuesHisto1D()     {
@@ -64,11 +73,23 @@ class EfficiencyStore {
   TH2F * values2DHisto_;     TH2F * systPlus2DHisto_;
   TH2F * systMinus2DHisto_;  TH2F * denominator2DHisto_;
 
+  std::vector<float> bin1Min_;
+  std::vector<float> bin1Max_;
+  std::vector<float> bin2Min_;
+  std::vector<float> bin2Max_;
+  std::vector<float> values1D_;
+  std::vector<float> systPlus1D_;
+  std::vector<float> systMinus1D_;
+  std::vector<float> denominator1D_;
+
   int dimension_;
   std::string efficiencyName_;
   std::string efficiencyBinsFileName_;
 
   std::string effName_;
+  std::string effType_;
+  double vmax_,vmin_;
+  bool isEta_;
   void produceTxtFile1D();
   void produce1DHistograms(TFile * rootFile);
   //  void produce2DHistograms(TFile * rootFile);

@@ -30,6 +30,8 @@ bool EtaAcceptance::isInAcceptance(double p, Zone z) const {
     return isInAcceptance(p,zone_EB) || isInAcceptance(p,zone_EE);
   case (zone_ANY) :
     return isInAcceptance(p,zone_EB) || isInAcceptance(p,zone_EE) || isInAcceptance(p,zone_HF);
+  case (zone_ALL) :
+    return true;
   default: 
     edm::LogWarning("ZShape") << "Unknown acceptance request: " << z;
     return false;

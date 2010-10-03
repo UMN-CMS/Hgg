@@ -12,6 +12,9 @@
 
 #include "ZShape/EffAcc/interface/EfficiencyStore.h"
 #include "ZShape/Base/interface/EffTableLoader.h"
+#include "RooWorkspace.h"
+#include "RooRealVar.h"
+
 
 EfficiencyStore::EfficiencyStore()
 {
@@ -23,6 +26,7 @@ EfficiencyStore::EfficiencyStore()
   
 }
 
+/*
 EfficiencyStore::EfficiencyStore(TFile * file, std::string EffName, std::string EffBinsFile)
 { 
   doInit();
@@ -33,7 +37,18 @@ EfficiencyStore::EfficiencyStore(TFile * file, std::string EffName, std::string 
   setRootFile(file);
   textFileName_="";
 }
+*/
 
+EfficiencyStore::EfficiencyStore(TFile * file, std::string EffName, std::string EffType)
+{ 
+  doInit();
+  effName_ = EffName;
+  effType_ = EffType;
+  std::cout << "class EfficiencyStore created with root file: " << file->GetName() << std::endl;
+  isEta_ = strstr(EffType.c_str(),"eta");
+  setRootFile(file);
+  textFileName_="";
+}
 
 EfficiencyStore::EfficiencyStore(const std::string & textFileName)
 { 
@@ -83,69 +98,135 @@ void EfficiencyStore::setRootFile(TFile * file){
     
     
   // looping on objects in the file aiming at the 4 needed histograms 
-  
     
-  while(key=((TKey*) next()) ){
-      
-    //    std::cout << "object in file has name: " << key->GetName() << std::endl;
-    TH1F * tmp1;    TH2F * tmp2;
-    if(  strstr(key->GetName(),"eff") &&   strcmp(key->GetClassName(),"TH1F")==0 )
-         { 
-   	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
-	   values1DHisto_ = (TH1F *) tmp1->Clone();
-	   values1DHisto_->SetDirectory(0);
-	   //	values1DHisto_ = (TH1F*) theFile_->Get(key->GetName());
-	   //	   std::cout << " This Object is values_ " <<  key->GetName() << std::endl;
-         }
-       else if(  strstr(key->GetName(),"systematicPlus_") &&  strcmp(key->GetClassName(),"TH1F")==0) 
-         {
-	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
-	   systPlus1DHisto_ = (TH1F *) tmp1->Clone();
-	   systPlus1DHisto_->SetDirectory(0);
-	   //	   std::cout << " This Object is sytemtaicPlus_ " <<  key->GetName() << std::endl;        
-         }
-       else if(  strstr(key->GetName(),"systematicMinus_") &&   strcmp(key->GetClassName(),"TH1F")==0) 
-         {
-	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
-	   systMinus1DHisto_ = (TH1F *) tmp1->Clone();
-	   systMinus1DHisto_->SetDirectory(0);
-	   //	   std::cout << " This Object is systematicMinus_ " <<  key->GetName() << std::endl;
-         }
-       else if(  strstr(key->GetName(),"den") &&   strcmp(key->GetClassName(),"TH1F")==0)
-         {
-	   tmp1 = (TH1F*) theFile_->Get(key->GetName());
-	   denominator1DHisto_ = 	(TH1F *) tmp1->Clone();
-	   denominator1DHisto_->SetDirectory(0);
-	   //	   std::cout << " This Object is denominator_ " <<  key->GetName() << std::endl;
-         }
-      
-    if(  strstr(key->GetName(),"eff") && strcmp(key->GetClassName(),"TH2F")==0)
-         {
-	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
-	   values2DHisto_  = (TH2F *) tmp2->Clone();
-	   values2DHisto_->SetDirectory(0);
-         }
-    else if(  strstr(key->GetName(),"systematicPlus_") && strcmp(key->GetClassName(),"TH2F")==0)
-         {
-	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
-	   systPlus2DHisto_ =  (TH2F *) tmp2->Clone();
-	   systPlus2DHisto_->SetDirectory(0);
-         }
-    else if(  strstr(key->GetName(),"systematicMinus_") && strcmp(key->GetClassName(),"TH2F")==0)
-         {
-	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
-	   systMinus2DHisto_ =  (TH2F *) tmp2->Clone();
-	   systMinus2DHisto_->SetDirectory(0);
-         }
-    else if(  strstr(key->GetName(),"den") && strcmp(key->GetClassName(),"TH2F")==0)
-         {
-	   tmp2 = (TH2F*) theFile_->Get(key->GetName());
-	   denominator2DHisto_ =  (TH2F *) tmp2->Clone();
-	   denominator2DHisto_->SetDirectory(0);
-	 }
+  while((key=((TKey*) next()) )){
+    if (strcmp(key->GetClassName(),"TDirectoryFile")==0)
+      {
+	TDirectory *mdir = (TDirectory*) theFile_->Get(key->GetName());
+	TIter next1(mdir->GetListOfKeys());
+	TKey * key1;
+	while((key1=((TKey*) next1())) ){
+	  //at this step I need to check if I want eta or pt or whatever...
+	  //std::cout << " key1 " << key1->GetName() << " type " << key1->GetClassName() << std::endl;
+	  if (strcmp(key1->GetClassName(),"TDirectoryFile")==0 && strcmp(key1->GetName(),effType_.c_str())==0 )
+	    {	    
+	      TDirectory *mdir1 = (TDirectory*) mdir->Get(key1->GetName());
+	      TIter next2(mdir1->GetListOfKeys());
+	      TKey * key2;
+	      
+	      while((key2=((TKey*) next2())) ){
+		//std::cout << " key2 " << key2->GetName() << " type " << key2->GetClassName() << std::endl;
+		if (strcmp(key2->GetClassName(),"TDirectoryFile")==0 && strstr(key2->GetName(),"bin") )
+		  {
+		    TDirectory *mdir2 = (TDirectory*) mdir1->Get(key2->GetName());
+		    TIter next3(mdir2->GetListOfKeys());
+		    TKey * key3;
+		    
+		    while((key3=((TKey*) next3())) ){
+		      //std::cout << " key3 " << key3->GetName() << " type " << key3->GetClassName() << std::endl;
+		      //here is where I get the w's!!!
+		      if ( strcmp(key3->GetName(), "w")==0 )
+			{
+			  std::cout << " Found " << key3->GetName() << " in " << key2->GetName() << " in "<< key1->GetName() << " in "<< key->GetName() << std::endl;
+ 			  RooWorkspace* w = (RooWorkspace*) mdir2->Get(key3->GetName());
+			  //w->Print();
+			  RooRealVar *et  = isEta_ ? w->var("probe_sc_eta"): w->var("probe_sc_et") ;
+			  //Here I will one day need to do 'two-D'... that is why I have the bin1 and bin2
+			  RooRealVar *eff = w->var("efficiency");
+			  RooRealVar *nS  = w->var("numSignalAll");
+			  if (! et ) std::cout << " no et? " << std::endl;
+			  if (! eff ) std::cout << " no eff? " << std::endl;
+			  if (! nS ) std::cout << " no nS? " << std::endl;
+			  if (! nS || ! et ) continue; 
+			  int hbinnum =et->getBinning().binNumber(et->getVal());
+			  Double_t hval = et->getBinning().binHigh(hbinnum);
+			  Double_t lval = et->getBinning().binLow(hbinnum);
+
+			  //std::cout << "Efficiency: " << eff->getVal() << " Den: " << nS->getVal() <<  std::endl;
+			  std::cout << "Efficiency: " << eff->getVal() << " Den: " << nS->getVal() << " et min: " << lval << " et max: " <<   hval << " Eff Err Hi: " <<eff->getErrorHi() << " Eff Err Lo: " <<eff->getErrorLo() << std::endl;  
+			  //std::cout << "debug 40 " << std::endl;
+			  //crazy hack below... look into why I needed to do something like this...
+			  Double_t errorHi = eff->getErrorHi() < 0.0001 ? (1.0 - eff->getVal()) : eff->getErrorHi() ;
+			  std::cout << " new error high is " << errorHi << std::endl;
+			  //do the bins different based on eta or pt
+			  if (isEta_) {bin2Min_.push_back( lval );  bin2Max_.push_back( hval );}
+			  else { bin1Min_.push_back( lval );  bin1Max_.push_back( hval);}			  
+			  values1D_.push_back( eff->getVal());
+			  denominator1D_.push_back( nS->getVal());
+			  systPlus1D_.push_back(errorHi);
+			  systMinus1D_.push_back(eff->getErrorLo());
+			  // std::cout << " has a range " << et->hasRange() << std::endl; 
+			  //std::cout << " ave et is " << et->getVal() << std::endl;
+			  //std::cout << " numbins " << et->numBins() << std::endl;
+			  //et->printExtras(std::cout);
+			  //int highbin =et->getBinning().binNumber(et->getVal());
+			  //std::cout << std::endl << " bin info " << et->getBinning().binHigh(highbin) << " low " << et->getBinning().binLow(highbin) << std::endl;
+			}
+		    }
+		  }
+	      }
+	    }
+	}
+      }
   }
+    
+  vecToHist();
   std::cout << "leaving setRootFile  values1DHisto_ :" << values1DHisto_ << std::endl;
   
+}
+
+
+//-----------------------------------------------------------------------------------//
+void EfficiencyStore::vecToHist(void){
+  //Simple internal program converts the vector quantities into the histogram ones.
+  //Maybe I should keep some 'bools' around to test if the vec's or hist's are around.....
+
+  int binCounter = values1D_.size();
+
+  efficiencyName_ = "empty";
+
+  std::string title = std::string("values_")+efficiencyName_ + "EtaDet_Pt"; /// JUST A HACK for the MOMENT 
+  values1DHisto_ = new TH1F(title.c_str(),title.c_str(), binCounter, 0, binCounter);
+  title = std::string("systematicMinus_")+efficiencyName_;
+  systMinus1DHisto_ = new TH1F(title.c_str(),title.c_str(), binCounter, 0, binCounter);
+  title = std::string("systematicPlus_")+efficiencyName_;
+  systPlus1DHisto_ = new TH1F(title.c_str(),title.c_str(), binCounter, 0, binCounter);
+  title = std::string("denominator_")+efficiencyName_;
+  denominator1DHisto_ = new TH1F(title.c_str(),title.c_str(), binCounter, 0, binCounter);
+
+  for (int i=0; i<binCounter; ++i)
+    {
+      values1DHisto_->SetBinContent(i, values1D_[i] );
+      systPlus1DHisto_->SetBinContent(i, systPlus1D_[i]);
+      systMinus1DHisto_->SetBinContent(i, systMinus1D_[i]);
+      denominator1DHisto_->SetBinContent(i, denominator1D_[i]);
+    }
+  
+}
+
+//-----------------------------------------------------------------------------------//
+void EfficiencyStore::histToVec(void){
+  
+}
+
+
+//-----------------------------------------------------------------------------------//
+void EfficiencyStore::setVarMinMax(double vmin, double vmax){
+  vmax_=vmax;
+  vmin_=vmin;
+  for (uint j = 0; j < values1D_.size(); ++j)
+    {
+      if (isEta_) 
+	{
+	  bin1Min_.push_back(vmin);
+	  bin1Max_.push_back(vmax);
+	}
+      else
+	{
+	  bin2Min_.push_back(vmin);
+	  bin2Max_.push_back(vmax);
+	}
+    }
 }
   
   
@@ -226,49 +307,28 @@ void EfficiencyStore::produceHistograms(TFile * rootFile){
 //-----------------------------------------------------------------------------------//
 void EfficiencyStore::produceTxtFile1D(){
 
-  int numBinvalues1D = values1DHisto_ ->GetXaxis()->GetNbins();
-  ///int numBinsystPlus1D = systPlus1DHisto_ ->GetXaxis()->GetNbins();
-  ///int numBinsystMinus1D = systMinus1DHisto_->GetXaxis()->GetNbins();
-  int numBindenominator1D =denominator1DHisto_->GetXaxis()->GetNbins();
+  //int numBinvalues1D = values1DHisto_ ->GetXaxis()->GetNbins();
+  //int numBinsystPlus1D = systPlus1DHisto_ ->GetXaxis()->GetNbins();
+  //int numBinsystMinus1D = systMinus1DHisto_->GetXaxis()->GetNbins();
+  //int numBindenominator1D =denominator1DHisto_->GetXaxis()->GetNbins();
 
-  if (!
-      numBinvalues1D==
-	  //numBinsystPlus1D==
-      // numBinsystMinus1D==
-      numBindenominator1D
-      )
-    {
-      std::cout<<"The four 1d histograms do not have the same number of bins. Cannot produce 1d text file." << std::endl;
-      return;
-    }    
-
-
-  // assuming implicitely that if number of bins is the same
-  // also the binning is the same
-
-  std::vector<float> binMin;
-  std::vector<float> binMax;
-  std::vector<float> values1D;
-  std::vector<float> systPlus1D;
-  std::vector<float> systMinus1D;
-  std::vector<float> denominator1D;
-
-  for (int u =1; u<(1+numBinvalues1D); u++) 
-    {
-      binMin.push_back( values1DHisto_->GetBinLowEdge(u) );
-      binMax.push_back( values1DHisto_->GetBinLowEdge(u) + values1DHisto_->GetBinWidth(u) );
-      values1D.push_back( values1DHisto_->GetBinContent(u) );
-      //systPlus1D.push_back( systPlus1DHisto_->GetBinContent(u) );
-      //systMinus1D.push_back( systMinus1DHisto_->GetBinContent(u) );
-      systPlus1D.push_back( 1.0 ); //To allow for no systematic histos
-      systMinus1D.push_back( -1.0 ); //To allow for no systematic histos
-      denominator1D.push_back( denominator1DHisto_->GetBinContent(u) );
-    }
+  //if (!
+  //    (numBinvalues1D==
+  //    numBinsystPlus1D==
+  //    numBinsystMinus1D==
+  //     numBindenominator1D)
+  //    )
+  //  {
+  //    std::cout<<"The four 1d histograms do not have the same number of bins. Cannot produce 1d text file." << std::endl;
+  //    return;
+  //  }    
 
 
-  std::string theHistoTitle(values1DHisto_ ->GetTitle());
-  int v = theHistoTitle.find( std::string("_") );
-  std::string theEffTitle = theHistoTitle.substr( (v+1) );
+
+
+  //std::string theHistoTitle(values1DHisto_ ->GetTitle());
+  //int v = theHistoTitle.find( std::string("_") );
+  //std::string theEffTitle = theHistoTitle.substr( (v+1) );
   //std::string theEffTitle = theHistoTitle.substr(0 ,v );
   
 
@@ -292,18 +352,18 @@ void EfficiencyStore::produceTxtFile1D(){
   if (the1DEffFile.is_open())
     {
 	
-      for (int r=0; r<numBinvalues1D; r++) 
+      for (uint r=0; r< bin1Min_.size(); r++) 
 	{
-          std::vector<std::pair<float, float> > EffInfo = efftable_->GetCellInfo(r);
-	  the1DEffFile << " " << std::setw(10) << std::setprecision(4) <<  EffInfo[0].first 
-		       << " " << std::setw(10) << std::setprecision(4) <<  EffInfo[0].second
- 		       << " " << std::setw(10) << std::setprecision(4) <<  EffInfo[1].first 
-		       << " " << std::setw(10) << std::setprecision(4) <<  EffInfo[1].second
+          //std::vector<std::pair<float, float> > EffInfo = efftable_->GetCellInfo(r);
+	  the1DEffFile << " " << std::setw(10) << std::setprecision(4) <<  bin1Min_[r]  
+		       << " " << std::setw(10) << std::setprecision(4) <<  bin1Max_[r]
+ 		       << " " << std::setw(10) << std::setprecision(4) <<  bin2Min_[r]
+		       << " " << std::setw(10) << std::setprecision(4) <<  bin2Max_[r]
 		       << " " << std::setw(10) << std::setprecision(4) <<  4
-		       << " " << std::setw(10) << std::setprecision(4) <<  values1D[r]
-		       << " " << std::setw(10) << std::setprecision(4) << systPlus1D[r]
-		       << " " << std::setw(10) << std::setprecision(4) << systMinus1D[r]
-		       << " " << std::setw(10) << std::setprecision(5) << denominator1D[r]
+		       << " " << std::setw(10) << std::setprecision(4) <<  values1D_[r]
+		       << " " << std::setw(10) << std::setprecision(4) << systPlus1D_[r]
+		       << " " << std::setw(10) << std::setprecision(4) << systMinus1D_[r]
+		       << " " << std::setw(10) << std::setprecision(5) << denominator1D_[r]
 		       << "\n";
 	}
     }

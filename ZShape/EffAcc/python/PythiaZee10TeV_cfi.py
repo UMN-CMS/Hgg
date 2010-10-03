@@ -3,8 +3,9 @@
 
 import FWCore.ParameterSet.Config as cms
 
+source = cms.Source("EmptySource")
 
-source = cms.Source("PythiaSource",
+generator = cms.EDFilter("Pythia6GeneratorFilter",
 
      # to printout pythia event record (call pylist)
      pythiaPylistVerbosity = cms.untracked.int32(0),
@@ -14,13 +15,16 @@ source = cms.Source("PythiaSource",
 
      maxEventsToPrint = cms.untracked.int32(1),
 
+     filterEfficiency = cms.untracked.double(1.000),
+     comEnergy = cms.double(10000.0),
+     crossSection = cms.untracked.double(1300),
      PythiaParameters = cms.PSet(
 
     pythiaPylistVerbosity = cms.untracked.int32(0),
     filterEfficiency = cms.untracked.double(1.000),
     pythiaHepMCVerbosity = cms.untracked.bool(False),
     comEnergy = cms.untracked.double(10000.0),
-    crossSection = cms.untracked.double(1232),
+    crossSection = cms.untracked.double(1944),
     maxEventsToPrint = cms.untracked.int32(0),
 
          parameterSets = cms.vstring(
