@@ -252,8 +252,8 @@ process.z1TightLegFilter =cms.EDFilter('WenuCandidateFilter',
                                        vHltpathExtra = cms.untracked.vstring(HLT_path_name_extra0,HLT_path_name_extra1),
                                        vHltpathFilterExtra = cms.untracked.VInputTag(HLT_filter_name_extra0, HLT_filter_name_extra1),
                                        # ET Cut in the SC
-                                       ETCut = cms.untracked.double(25.),
-                                       METCut = cms.untracked.double(0.),
+                                       ETCut = cms.untracked.double(30.),
+                                       METCut = cms.untracked.double(30.),
                                        # reject events with a 2nd electron with ET > 20 that passes the WP95%
                                        vetoSecondElectronEvents = cms.untracked.bool(False),
                                        storeSecondElectron = cms.untracked.bool(False),
