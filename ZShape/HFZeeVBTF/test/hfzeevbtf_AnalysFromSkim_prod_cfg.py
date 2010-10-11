@@ -41,6 +41,8 @@ process.source.lumisToProcess.extend(myLumis)
 
 process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
 process.hfRecoEcalCandidate.intercept2DCut=0.3
+process.hfRecoEcalCandidate.e9e25Cut      =0.94
+# 0.94 is the same as default in the HF cluster producer
 
 
 process.TFileService = cms.Service("TFileService",
