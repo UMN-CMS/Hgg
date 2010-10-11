@@ -27,18 +27,6 @@ process.options = cms.untracked.PSet(
                             fileMode = cms.untracked.string('NOMERGE')
 )
 
-# JM: I guess you'll handle this with json but at CRAB level
-# in this file I collect the lumi sections intervals I am interested in
-# from ZShape.HFZeeVBTF.myGoodlumi_cfi import *
-# this is the equivalent of the JSON file 
-# process.source.lumisToProcess = cms.untracked.VLuminosityBlockRange(
-                                                                   # propmtRecoJsonAug4
-                                                                   # + propmtRecoJsonAug4 
-# )
-
-
-
-
 
 ## Load additional processes
 process.load("Configuration.StandardSequences.Geometry_cff")
@@ -283,8 +271,8 @@ process.z1TightLegFilter =cms.EDFilter('WenuCandidateFilter',
                                        vHltpathExtra = cms.untracked.vstring(HLT_path_name_extra0,HLT_path_name_extra1),
                                        vHltpathFilterExtra = cms.untracked.VInputTag(HLT_filter_name_extra0, HLT_filter_name_extra1),
                                        # ET Cut in the SC
-                                       ETCut = cms.untracked.double(25.),
-                                       METCut = cms.untracked.double(0.),
+                                       ETCut = cms.untracked.double(30.),
+                                       METCut = cms.untracked.double(30.),
                                        # reject events with a 2nd electron with ET > 20 that passes the WP95%
                                        vetoSecondElectronEvents = cms.untracked.bool(False),
                                        storeSecondElectron = cms.untracked.bool(False),
@@ -331,7 +319,7 @@ process.eeSC = cms.EDFilter("CandViewSelector",
                             cut = cms.string('abs( eta ) > 1.560 & abs( eta ) < 3')
                             )
 # join them in ECAL calidates (no-duplication guaranteed)
-process.ecalSC = cms.EDFilter("CandViewMerger",
+process.ecalSC = cms.EDProducer("CandViewMerger",
                               src = cms.VInputTag(cms.InputTag("ebSC"), cms.InputTag("eeSC"))
                               )                                                  
 # select ECAL sucperclusters above a certain Et
@@ -763,8 +751,6 @@ process.z1EcalLegTightPath = cms.Path(process.patDefaultSequence
                                    #  * process.dumpEv
                                    )
 
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
-
 import HLTrigger.HLTfilters.hltHighLevel_cfi
 process.orOfTheeSkimPaths = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
 #     TriggerResultsTag = cms.InputTag("TriggerResults","","Zshape-skim-analysis"),
@@ -796,4 +782,4 @@ process.analyzers = cms.EndPath(
    # *process.dumpEv
      )
 
-
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
