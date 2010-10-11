@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.8 2010/10/11 09:39:22 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.9 2010/10/11 09:44:31 franzoni Exp $
 //
 //
 
@@ -41,7 +41,6 @@
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidateFwd.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/EgammaReco/interface/HFEMClusterShapeAssociation.h"
-#include "DataFormats/EgammaReco/interface/HFEMClusterShape.h"
 #include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
@@ -91,9 +90,12 @@ private:
     // fill all histos of the set with the two electron candidates
     void fill(pat::ElectronCollection::const_iterator ecalE,  const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, const bool hasEleIDPassed, const edm::ParameterSet& myPs, const float hf_2d_cut, const float e9e25_cut);
     TH1* mee, *meeHFP, *meeHFM, *Yee, *Ptee;
-    TH1* ec_eta, *ec_phi, *ec_pt;
-    TH1* hf_eta, *hf_phi, *hf_pt, *hf_e9e25, *hf_var2d, *hf_eCOREe9, *hf_eSeL;
-    TH1* el_1_eta, *el_2_eta;
+    TH1* ec_eta,       *ec_phi,     *ec_pt;
+    TH1* hf_eta,       *hf_phi,     *hf_pt;
+    TH1* hf_e9e25,     *hf_eCOREe9, *hf_eSeL, *hf_var2d;
+    TH1* hf_seed_eSeL, *hf_e1e9;
+    TH1* hf_e,         *hf_e1x1,    *hf_core, *hf_e3x3, *hf_e5x5;
+    TH1* el_1_eta,     *el_2_eta;
     TH2* el_1_eta_VS_el_2_eta, *el_1_phi_VS_el_2_phi;
     // gf: add hisos for variables N-1 selected
     TH1* combIsoEB_nmo,  *relTkIsoEB_nmo, *relEcIsoEB_nmo, *relHcIsoEB_nmo, *sigiEtaiEtaEB_nmo, *dphiEB_nmo, *detaEB_nmo, *hOeEB_nmo;
@@ -141,30 +143,45 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   title=std::string("Y_{ee} ")+post;
   Yee=td.make<TH1D>("yee",title.c_str(),50,-4,4);  
   title=std::string("pT_{ee} ")+post;
-  Ptee=td.make<TH1D>("ptee",title.c_str(),90,0,90);  
+  Ptee=td.make<TH1D>("ptee",title.c_str(),100,0,100);  
 
   title=std::string("eta_{ecal} ")+post;
   ec_eta=td.make<TH1D>("etaecal",title.c_str(),30,-3,3);  
   title=std::string("phi_{ecal} ")+post;
   ec_phi=td.make<TH1D>("phiecal",title.c_str(),30,-3.14159,3.14159);  
   title=std::string("pt_{ecal} ")+post;
-  ec_pt=td.make<TH1D>("ptecal",title.c_str(),90,0,90);  
+  ec_pt=td.make<TH1D>("ptecal",title.c_str(),120,0,120);
 
   title=std::string("eta_{hf} ")+post;
   hf_eta=td.make<TH1D>("etahf",title.c_str(),50,-5,5);  
   title=std::string("phi_{hf} ")+post;
   hf_phi=td.make<TH1D>("phihf",title.c_str(),30,-3.14159,3.14159);
   title=std::string("pt_{hf} ")+post;
-  hf_pt=td.make<TH1D>("pthf",title.c_str(),90,0,90);  
-  title=std::string("iso e9e25 ")+post;
-  hf_e9e25=td.make<TH1D>("e9e25",title.c_str(),40,0,1);
-  title=std::string("eldId var2d")+post;
-  hf_var2d=td.make<TH1D>("var2d",title.c_str(),40,0,1.5);  
-  title=std::string("eCOREe9 ")+post;
-  hf_eCOREe9=td.make<TH1D>("eCOREe9",title.c_str(),40,0,1);  
-  title=std::string("eSeL ")+post;
-  hf_eSeL=td.make<TH1D>("eSeL",title.c_str(),40,0,1.5);  
+  hf_pt=td.make<TH1D>("pthf",title.c_str(),120,0,120);  
 
+  title=std::string("iso e9e25 ")+post;
+  hf_e9e25=td.make<TH1D>("e9e25",title.c_str(),50,0,1);
+  title=std::string("eldId var2d")+post;
+  hf_var2d=td.make<TH1D>("var2d",title.c_str(),75,0,1.5);  
+  title=std::string("eCOREe9 ")+post;
+  hf_eCOREe9=td.make<TH1D>("eCOREe9",title.c_str(),50,0,1);  
+  title=std::string("eSeL ")+post;
+  hf_eSeL=td.make<TH1D>("eSeL",title.c_str(),75,0,1.5);  
+
+  title=std::string("seed_eSeL ")+post;
+  hf_seed_eSeL=td.make<TH1D>("seed_eSeL",title.c_str(),40,0,1.5);  
+  title=std::string("e1e9 ")+post;
+  hf_e1e9=td.make<TH1D>("e1e9",title.c_str(),50,0,1);
+  title=std::string("e ")+post;
+  hf_e=td.make<TH1D>("e",title.c_str(),120,0,1200);
+  title=std::string("e1x1 ")+post;
+  hf_e1x1=td.make<TH1D>("e1x1",title.c_str(),120,0,1200);
+  title=std::string("e3x3 ")+post;
+  hf_e3x3=td.make<TH1D>("e3x3",title.c_str(),120,0,1200);
+  title=std::string("e5x5 ")+post;
+  hf_e5x5=td.make<TH1D>("e5x5",title.c_str(),120,0,1200);
+  title=std::string("core ")+post;
+  hf_core=td.make<TH1D>("core",title.c_str(),120,0,1200);
 
   title=std::string("eta_{el_1} ")+post;
   el_1_eta=td.make<TH1D>("etael1",title.c_str(),50,-5,5);  
@@ -238,8 +255,8 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
   
   reco::Particle::LorentzVector Z(ecalE->p4());
   Z+=hfE.p4();
-
-
+  
+  
   // if all selections are passed, fill standard plots
   if(hasEleIDPassed && 
      var2d > hf_2d_cut &&
@@ -267,6 +284,16 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
     hf_eCOREe9->Fill(hfshape.eCOREe9());
     hf_eSeL   ->Fill(hfshape.eSeL());
     
+
+    hf_seed_eSeL->Fill(hfshape.eLong1x1()/hfshape.eLong1x1());
+    hf_e1e9     ->Fill(hfshape.eLong1x1()/hfshape.eLong3x3());
+    hf_e        ->Fill(hfshape.eLong3x3()); // GF: check this with Kevin
+    hf_e1x1     ->Fill(hfshape.e1x1());
+    hf_e3x3     ->Fill(hfshape.e3x3());
+    hf_e5x5     ->Fill(hfshape.e5x5());
+    hf_core     ->Fill(hfshape.eCore());
+
+
     if(ecalE->pt() > hfE.pt()){
       el_1_eta->Fill(ecalE->eta());
       el_2_eta->Fill(hfE.eta());
