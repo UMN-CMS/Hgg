@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.7 2010/10/10 08:02:24 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.8 2010/10/11 09:39:22 franzoni Exp $
 //
 //
 
@@ -291,25 +291,6 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
   std::vector<double> eeParam = myPs.getParameter< std::vector<double> >("endcap"); 
 
 
-
-  //////////////////////////////////////////////////////////////////////////////////////
-  // establish cuts 
-  // gf: bring HF variables to PSet as well
-  // float e9e25_cut    = 0.90;
-  // float eSeL_cut     = 0.50;
-  // float eCOREe9_cut  = 0.70;
-  // float hf_2d_cut    = 0.32; // loose 
-  
-  // stay super loos for now
-  //float e9e25_cut    = 0.40;
-  //float eSeL_cut     = 0.75;
-  //float eCOREe9_cut  = 0.35;
-  // value for hf_2d_cut is set when calling this function
-  // fill(pat::ElectronCollection::const_iterator ecalE, ... , const float hf_2d_cut)
-  //float hf_2d_cut    = 0.20; // loose 
-  //float hf_2d_cut    = 0.45; // mid tight
-  //float hf_2d_cut    = 0.55; // tight
-
   float combIsolation_cut[2];
   float trackRel03_cut[2];
   float ecalRel03_cut[2];
@@ -438,6 +419,9 @@ static const double hf_2d_loose       = 0.32;
 static const double hf_2d_tight       = 0.45;
 static const double e9e25_loose   = 0.90;
 static const double e9e25_tight   = 0.94;
+//////////////////////////////////////////////////////////////////////////////////////
+// FIXME
+// gf: bring HF variables to PSet as well, as opposed to having them hard-coded
 
 
 
@@ -684,28 +668,15 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       //  preselections on HF isolation (0.9) and 2dvar (0.3) are already applied at clustering level.
       //  loosen as much as reasonable here
       hists.zMass.fill(ecalE,hfE,hfshape,true,robust90relIsoEleIDCutsV04_ps_,hf_2d_loose,e9e25_loose);
-      ///      if (var2d>=hf_2d_loose) {
-      //	if (w.doesElePass( ecalE->electronID("simpleEleId90relIso") )) hists.mee90loose.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,hf_2d_loose);
-      //	if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") )) hists.mee80loose.fill(ecalE,hfE,hfshape,robust80relIsoEleIDCutsV04_ps_,hf_2d_loose);
-      //	if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") )) hists.mee70loose.fill(ecalE,hfE,hfshape,robust70relIsoEleIDCutsV04_ps_,hf_2d_loose);
-      //	if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") )) hists.mee60loose.fill(ecalE,hfE,hfshape,robust60relIsoEleIDCutsV04_ps_,hf_2d_loose);
       hists.mee90loose.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId90relIso")),robust90relIsoEleIDCutsV04_ps_,hf_2d_loose,e9e25_tight);
       hists.mee80loose.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId80relIso")),robust80relIsoEleIDCutsV04_ps_,hf_2d_loose,e9e25_tight);
       hists.mee70loose.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId70relIso")),robust70relIsoEleIDCutsV04_ps_,hf_2d_loose,e9e25_tight);
       hists.mee60loose.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId60relIso")),robust60relIsoEleIDCutsV04_ps_,hf_2d_loose,e9e25_tight);
-      ///      }
-      /////      if (var2d>=hf_2d_tight) {
-      //	if (w.doesElePass( ecalE->electronID("simpleEleId90relIso") ) ) hists.mee90tight.fill(ecalE,hfE,hfshape,robust90relIsoEleIDCutsV04_ps_,hf_2d_tight);
-      //	if (w.doesElePass( ecalE->electronID("simpleEleId80relIso") ) )
-      //	  { hists.mee80tight.fill(ecalE,hfE,hfshape,robust80relIsoEleIDCutsV04_ps_,hf_2d_tight); std::cout << myName_  << "passed simpleEleId80relIso - HFtight" << std::endl;}
-      //	if (w.doesElePass( ecalE->electronID("simpleEleId70relIso") ) ) 
-      //	  {hists.mee70tight.fill(ecalE,hfE,hfshape,robust70relIsoEleIDCutsV04_ps_,hf_2d_tight);std::cout << myName_  << "passed simpleEleI70relIso - HFtight" << std::endl;}	
-      //	if (w.doesElePass( ecalE->electronID("simpleEleId60relIso") ) ) hists.mee60tight.fill(ecalE,hfE,hfshape,robust60relIsoEleIDCutsV04_ps_,hf_2d_tight);
+
       hists.mee90tight.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId90relIso")),robust90relIsoEleIDCutsV04_ps_,hf_2d_tight,e9e25_tight);
       hists.mee80tight.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId80relIso")),robust80relIsoEleIDCutsV04_ps_,hf_2d_tight,e9e25_tight);
       hists.mee70tight.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId70relIso")),robust70relIsoEleIDCutsV04_ps_,hf_2d_tight,e9e25_tight);
       hists.mee60tight.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId60relIso")),robust60relIsoEleIDCutsV04_ps_,hf_2d_tight,e9e25_tight);
-      /////      }//gf: why are electronID all treated the same?
       
     }// if mass is in Z window
     
