@@ -7,6 +7,8 @@ import ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi
 demo = cms.EDAnalyzer('HFZeeVBTF',
                       acceptedElectronIDs = cms.vint32( 7 ),
                       ECALid = cms.string('simpleEleId90relIso'),
+                      minEtECAL = cms.double(20),
+                      minEtHF   = cms.double(20),
                       myName = cms.string('HFZeeVBTF-IdIsoRej'),
                       DoLog = cms.bool(True),
                       robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),

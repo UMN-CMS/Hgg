@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.9 2010/10/11 09:44:31 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.10 2010/10/11 10:37:18 franzoni Exp $
 //
 //
 
@@ -78,6 +78,8 @@ private:
   std::string ecalID_, currentFile_;
   bool dolog_;
   std::string myName_;
+  double minEtECAL_;
+  double minEtHF_;
   std::vector<int> acceptedElectronIDs_;
   selectElectron w;
 
@@ -89,9 +91,13 @@ private:
     void book(TFileDirectory td,const std::string&);
     // fill all histos of the set with the two electron candidates
     void fill(pat::ElectronCollection::const_iterator ecalE,  const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, const bool hasEleIDPassed, const edm::ParameterSet& myPs, const float hf_2d_cut, const float e9e25_cut);
-    TH1* mee, *meeHFP, *meeHFM, *Yee, *Ptee;
+    TH1* mee, *meeHFP, *meeHFM;
+    TH2* mee_vsEta, *meeHFP_vsEta, *meeHFM_vsEta;
+    TH1* Yee, *Ptee;
     TH1* ec_eta,       *ec_phi,     *ec_pt;
     TH1* hf_eta,       *hf_phi,     *hf_pt;
+    TH1* hfp_eta,      *hfp_phi,    *hfp_pt;
+    TH1* hfm_eta,      *hfm_phi,    *hfm_pt;
     TH1* hf_e9e25,     *hf_eCOREe9, *hf_eSeL, *hf_var2d;
     TH1* hf_seed_eSeL, *hf_e1e9;
     TH1* hf_e,         *hf_e1x1,    *hf_core, *hf_e3x3, *hf_e5x5;
@@ -140,6 +146,14 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   meeHFP=td.make<TH1D>("mee-HFP",title.c_str(),90,40,130);  
   title=std::string("M_{ee,HF-} ")+post;
   meeHFM=td.make<TH1D>("mee-HFM",title.c_str(),90,40,130);  
+
+  title=std::string("M_{ee} vs eta")+post;
+  mee=td.make<TH2D>("mee_vsEta",title.c_str(),15,3,5,30,40,130);  
+  title=std::string("M_{ee,HF+} vs eta ")+post;
+  meeHFP=td.make<TH2D>("mee-HFP_vsEta",title.c_str(),15,3,5,30,40,130);  
+  title=std::string("M_{ee,HF-} vs eta ")+post;
+  meeHFM=td.make<TH2D>("mee-HFM_vsEta",title.c_str(),15,3,5,30,40,130);  
+
   title=std::string("Y_{ee} ")+post;
   Yee=td.make<TH1D>("yee",title.c_str(),50,-4,4);  
   title=std::string("pT_{ee} ")+post;
@@ -158,6 +172,20 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   hf_phi=td.make<TH1D>("phihf",title.c_str(),30,-3.14159,3.14159);
   title=std::string("pt_{hf} ")+post;
   hf_pt=td.make<TH1D>("pthf",title.c_str(),120,0,120);  
+
+  title=std::string("eta_{hf+} ")+post;
+  hfp_eta=td.make<TH1D>("etahfp",title.c_str(),50,-5,5);  
+  title=std::string("phi_{hf+} ")+post;
+  hfp_phi=td.make<TH1D>("phihfp",title.c_str(),30,-3.14159,3.14159);
+  title=std::string("pt_{hf+} ")+post;
+  hfp_pt=td.make<TH1D>("pthfp",title.c_str(),120,0,120);  
+
+  title=std::string("eta_{hf-} ")+post;
+  hfm_eta=td.make<TH1D>("etahfm",title.c_str(),50,-5,5);  
+  title=std::string("phi_{hf-} ")+post;
+  hfm_phi=td.make<TH1D>("phihfm",title.c_str(),30,-3.14159,3.14159);
+  title=std::string("pt_{hf-} ")+post;
+  hfm_pt=td.make<TH1D>("pthfm",title.c_str(),120,0,120);  
 
   title=std::string("iso e9e25 ")+post;
   hf_e9e25=td.make<TH1D>("e9e25",title.c_str(),50,0,1);
@@ -467,10 +495,12 @@ HFZeeVBTF::HFZeeVBTF(const edm::ParameterSet& iConfig)
 
 {
    //now do what ever initialization is needed
-  ecalID_=iConfig.getParameter<std::string>("ECALid");
-  dolog_=iConfig.getParameter<bool>("DoLog");
+  ecalID_              = iConfig.getParameter<std::string>("ECALid");
+  dolog_               = iConfig.getParameter<bool>("DoLog");
   acceptedElectronIDs_ = iConfig.getParameter< std::vector<int> >("acceptedElectronIDs");
-  myName_=iConfig.getParameter<std::string>("myName");
+  minEtECAL_           = iConfig.getParameter< double >("minEtECALminEtHF");
+  minEtHF_             = iConfig.getParameter< double >("minEtHF");
+  myName_              = iConfig.getParameter<std::string>("myName");
   myName_+=std::string("    ");
   
   std::vector<int>::const_iterator it;
@@ -478,12 +508,9 @@ HFZeeVBTF::HFZeeVBTF(const edm::ParameterSet& iConfig)
     {    w.add(*it);//      std::cout << "adding: " << (*it) << std::endl;
     }
 
-
-
   edm::Service<TFileService> fs;
   hists.nelec=fs->make<TH1D>("nelec","N_Elec",10,-0.5,9.5);
   hists.nhf=fs  ->make<TH1D>("nhf","N_HF",10,-0.5,9.5);
-  //hists.base.book(fs->mkdir("base"),"(base)");
   hists.mee90none.book(fs->mkdir("mee90none"),"(mee90none)");
   hists.zMass.book(fs->mkdir("zMass"),"(zMass)");
   hists.mee90loose.book(fs->mkdir("mee90loose"),"(90,loose)");
@@ -626,7 +653,7 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     // gf: 3) loose Z mass cut and min pt
     // ==> these are the CANDIATES
-    if (Z.M()>40 && Z.M()<130 && ecalE->pt()>15 && hfE.pt()>15) {
+    if (Z.M()>40 && Z.M()<130 && ecalE->pt()>minEtECAL_ && hfE.pt()>minEtHF_) {
       double var2d=hfshape.eCOREe9()-(hfshape.eSeL()*1.125);
       double eta_det=ecalE->superCluster().get()->eta();
       if (dolog_) {
