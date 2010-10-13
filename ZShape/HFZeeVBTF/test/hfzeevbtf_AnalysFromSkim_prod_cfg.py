@@ -54,6 +54,8 @@ import ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi
 
 process.IdIsoRej = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90relIso'),
+    minEtECAL = cms.double(20),
+    minEtHF   = cms.double(20),
     myName = cms.string('IdIsoRej'),
     DoLog = cms.bool(True),
 #   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
@@ -87,6 +89,8 @@ process.IdIsoRej = cms.EDAnalyzer('HFZeeVBTF',
 # ---> this is the instance to run AFTER the Wenu EWK filter
 process.IdIso = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90cIso'),
+    minEtECAL = cms.double(20),
+    minEtHF   = cms.double(20),
     myName = cms.string('IdIso'),
     DoLog = cms.bool(True),
 #   this is instance of the analysis code which I carry along to allow the keeping also of electrons that have not passed conversion rejection
@@ -111,6 +115,8 @@ process.IdIso = cms.EDAnalyzer('HFZeeVBTF',
 
 process.IdRej = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90relIso'),
+    minEtECAL = cms.double(20),
+    minEtHF   = cms.double(20),
     myName = cms.string('IdRej'),
     DoLog = cms.bool(True),
 #   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
@@ -141,6 +147,8 @@ process.IdRej = cms.EDAnalyzer('HFZeeVBTF',
 
 process.IsoRej = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90relIso'),
+    minEtECAL = cms.double(20),
+    minEtHF   = cms.double(20),
     myName = cms.string('IsoRej'),
     DoLog = cms.bool(True),
 #   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
@@ -176,6 +184,8 @@ process.IsoRej = cms.EDAnalyzer('HFZeeVBTF',
 
 process.Id = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90relIso'),
+    minEtECAL = cms.double(20),
+    minEtHF   = cms.double(20),
     myName = cms.string('Id'),
     DoLog = cms.bool(True),
 #   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
@@ -207,6 +217,8 @@ process.Id = cms.EDAnalyzer('HFZeeVBTF',
 
 process.Iso = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90relIso'),
+    minEtECAL = cms.double(20),
+    minEtHF   = cms.double(20),
     myName = cms.string('Iso'),
     DoLog = cms.bool(True),
 #   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
@@ -238,6 +250,8 @@ process.Iso = cms.EDAnalyzer('HFZeeVBTF',
 
 process.Rej = cms.EDAnalyzer('HFZeeVBTF',
     ECALid = cms.string('simpleEleId90relIso'),
+    minEtECAL = cms.double(20),
+    minEtHF   = cms.double(20),
     myName = cms.string('Rej'),
     DoLog = cms.bool(True),
 #   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
