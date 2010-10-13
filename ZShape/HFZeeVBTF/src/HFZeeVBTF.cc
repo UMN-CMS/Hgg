@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.10 2010/10/11 10:37:18 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.11 2010/10/13 17:05:27 franzoni Exp $
 //
 //
 
@@ -148,11 +148,11 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   meeHFM=td.make<TH1D>("mee-HFM",title.c_str(),90,40,130);  
 
   title=std::string("M_{ee} vs eta")+post;
-  mee=td.make<TH2D>("mee_vsEta",title.c_str(),15,3,5,30,40,130);  
+  mee=td.make<TH2D>("mee_vsEta",title.c_str(),10,3,5,30,40,130);  
   title=std::string("M_{ee,HF+} vs eta ")+post;
-  meeHFP=td.make<TH2D>("mee-HFP_vsEta",title.c_str(),15,3,5,30,40,130);  
+  meeHFP=td.make<TH2D>("mee-HFP_vsEta",title.c_str(),10,3,5,30,40,130);  
   title=std::string("M_{ee,HF-} vs eta ")+post;
-  meeHFM=td.make<TH2D>("mee-HFM_vsEta",title.c_str(),15,3,5,30,40,130);  
+  meeHFM=td.make<TH2D>("mee-HFM_vsEta",title.c_str(),10,3,5,30,40,130);  
 
   title=std::string("Y_{ee} ")+post;
   Yee=td.make<TH1D>("yee",title.c_str(),50,-4,4);  
