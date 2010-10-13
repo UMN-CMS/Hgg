@@ -18,3 +18,8 @@ void ZShapeStandardCuts::ptCuts(ZShapeElectron& elec) const {
   elec.cutResult("PT20",pt>=20);
   elec.cutResult("PT25",pt>=25);
 }
+
+void ZShapeStandardCuts::dummyCuts(ZShapeElectron& elec) const {
+  elec.cutResult("DummyPass",true);
+  elec.cutResult("DummyFail",false);
+}
