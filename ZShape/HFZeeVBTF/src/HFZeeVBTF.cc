@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.11 2010/10/13 17:05:27 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.12 2010/10/13 17:25:16 franzoni Exp $
 //
 //
 
@@ -498,7 +498,7 @@ HFZeeVBTF::HFZeeVBTF(const edm::ParameterSet& iConfig)
   ecalID_              = iConfig.getParameter<std::string>("ECALid");
   dolog_               = iConfig.getParameter<bool>("DoLog");
   acceptedElectronIDs_ = iConfig.getParameter< std::vector<int> >("acceptedElectronIDs");
-  minEtECAL_           = iConfig.getParameter< double >("minEtECALminEtHF");
+  minEtECAL_           = iConfig.getParameter< double >("minEtECAL");
   minEtHF_             = iConfig.getParameter< double >("minEtHF");
   myName_              = iConfig.getParameter<std::string>("myName");
   myName_+=std::string("    ");
