@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.12 2010/10/13 17:25:16 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.13 2010/10/14 07:00:51 franzoni Exp $
 //
 //
 
@@ -148,11 +148,11 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   meeHFM=td.make<TH1D>("mee-HFM",title.c_str(),90,40,130);  
 
   title=std::string("M_{ee} vs eta")+post;
-  mee=td.make<TH2D>("mee_vsEta",title.c_str(),10,3,5,30,40,130);  
+  mee_vsEta=td.make<TH2D>("mee_vsEta",title.c_str(),10,3,5,30,40,130);  
   title=std::string("M_{ee,HF+} vs eta ")+post;
-  meeHFP=td.make<TH2D>("mee-HFP_vsEta",title.c_str(),10,3,5,30,40,130);  
+  meeHFP_vsEta=td.make<TH2D>("mee-HFP_vsEta",title.c_str(),10,3,5,30,40,130);  
   title=std::string("M_{ee,HF-} vs eta ")+post;
-  meeHFM=td.make<TH2D>("mee-HFM_vsEta",title.c_str(),10,3,5,30,40,130);  
+  meeHFM_vsEta=td.make<TH2D>("mee-HFM_vsEta",title.c_str(),10,3,5,30,40,130);  
 
   title=std::string("Y_{ee} ")+post;
   Yee=td.make<TH1D>("yee",title.c_str(),50,-4,4);  
@@ -293,8 +293,18 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
     
     mee   ->Fill(Z.M());
     
-    if(hfE.p4().eta()>0)   meeHFP   ->Fill(Z.M());
-    else                   meeHFM   ->Fill(Z.M());
+    if(hfE.p4().eta()>0){
+      meeHFP   ->Fill(Z.M());
+      hfp_eta  ->Fill(hfE.p4().eta());
+      hfp_phi  ->Fill(hfE.p4().phi());
+      hfp_pt   ->Fill(hfE.pt());
+    }
+    else{
+      meeHFM   ->Fill(Z.M());
+      hfm_eta  ->Fill(hfE.p4().eta());
+      hfm_phi  ->Fill(hfE.p4().phi());
+      hfm_pt   ->Fill(hfE.pt());
+    }
     
     Yee   ->Fill(Z.Rapidity());
     Ptee  ->Fill(Z.pt());
