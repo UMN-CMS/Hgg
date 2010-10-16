@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.13 2010/10/14 07:00:51 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.14 2010/10/16 15:58:36 franzoni Exp $
 //
 //
 
@@ -292,18 +292,21 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
      60 < Z.M() && Z.M() < 130){ // make inv. mass requirement explicit
     
     mee   ->Fill(Z.M());
-    
+    mee_vsEta -> Fill(hfE.p4().eta(),Z.M());
+
     if(hfE.p4().eta()>0){
       meeHFP   ->Fill(Z.M());
       hfp_eta  ->Fill(hfE.p4().eta());
       hfp_phi  ->Fill(hfE.p4().phi());
       hfp_pt   ->Fill(hfE.pt());
+      meeHFP_vsEta -> Fill(hfE.p4().eta(),Z.M());
     }
     else{
       meeHFM   ->Fill(Z.M());
       hfm_eta  ->Fill(hfE.p4().eta());
       hfm_phi  ->Fill(hfE.p4().phi());
       hfm_pt   ->Fill(hfE.pt());
+      meeHFM_vsEta -> Fill(hfE.p4().eta(),Z.M());
     }
     
     Yee   ->Fill(Z.Rapidity());
