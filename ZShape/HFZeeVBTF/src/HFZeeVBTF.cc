@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.14 2010/10/16 15:58:36 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.15 2010/10/16 16:14:16 franzoni Exp $
 //
 //
 
@@ -92,7 +92,7 @@ private:
     // fill all histos of the set with the two electron candidates
     void fill(pat::ElectronCollection::const_iterator ecalE,  const reco::RecoEcalCandidate& hfE, const reco::HFEMClusterShape& hfshape, const bool hasEleIDPassed, const edm::ParameterSet& myPs, const float hf_2d_cut, const float e9e25_cut);
     TH1* mee, *meeHFP, *meeHFM;
-    TH2* mee_vsEta, *meeHFP_vsEta, *meeHFM_vsEta;
+    TH2* mee_vsEta, *mee_vsAbsEta, *meeHFP_vsEta, *meeHFM_vsEta;
     TH1* Yee, *Ptee;
     TH1* ec_eta,       *ec_phi,     *ec_pt;
     TH1* hf_eta,       *hf_phi,     *hf_pt;
@@ -149,10 +149,12 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
 
   title=std::string("M_{ee} vs eta")+post;
   mee_vsEta=td.make<TH2D>("mee_vsEta",title.c_str(),10,3,5,30,40,130);  
+  title=std::string("M_{ee,HF+} vs abs(eta) ")+post;
+  mee_vsAbsEta=td.make<TH2D>("mee_vsAbsEta",title.c_str(),10,3,5,30,40,130);  
   title=std::string("M_{ee,HF+} vs eta ")+post;
   meeHFP_vsEta=td.make<TH2D>("mee-HFP_vsEta",title.c_str(),10,3,5,30,40,130);  
   title=std::string("M_{ee,HF-} vs eta ")+post;
-  meeHFM_vsEta=td.make<TH2D>("mee-HFM_vsEta",title.c_str(),10,3,5,30,40,130);  
+  meeHFM_vsEta=td.make<TH2D>("mee-HFM_vsEta",title.c_str(),10,-5,-3,30,40,130);  
 
   title=std::string("Y_{ee} ")+post;
   Yee=td.make<TH1D>("yee",title.c_str(),50,-4,4);  
@@ -293,6 +295,7 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
     
     mee   ->Fill(Z.M());
     mee_vsEta -> Fill(hfE.p4().eta(),Z.M());
+    mee_vsAbsEta -> Fill(fabs(hfE.p4().eta()),Z.M());
 
     if(hfE.p4().eta()>0){
       meeHFP   ->Fill(Z.M());
