@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.15 2010/10/16 16:14:16 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.16 2010/10/16 21:10:04 franzoni Exp $
 //
 //
 
@@ -329,7 +329,7 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
     hf_eSeL   ->Fill(hfshape.eSeL());
     
 
-    hf_seed_eSeL->Fill(hfshape.eLong1x1()/hfshape.eLong1x1());
+    hf_seed_eSeL->Fill(hfshape.eShort1x1()/hfshape.eLong1x1());
     hf_e1e9     ->Fill(hfshape.eLong1x1()/hfshape.eLong3x3());
     hf_e        ->Fill(hfshape.eLong3x3()); // GF: check this with Kevin
     hf_e1x1     ->Fill(hfshape.e1x1());
