@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.16 2010/10/16 21:10:04 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.17 2010/10/18 21:43:48 franzoni Exp $
 //
 //
 
@@ -223,47 +223,47 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   title=std::string("phi_{el_1}_VS_phi_{el_2} ")+post;
   el_1_phi_VS_el_2_phi=td.make<TH2D>("phiel1-vs-phiel2",title.c_str(),30,-3.14159,3.14159,30,-3.14159,3.14159);
 
-  title=std::string("N-1 combIsoEB ")+post;
-  combIsoEB_nmo=td.make<TH1D>("N-1 combIsoEB",title.c_str(),100,0,2);
-  title=std::string("N-1 relTkIsoEB ")+post;
-  relTkIsoEB_nmo=td.make<TH1D>("N-1 relTkIsoEB",title.c_str(),40,0,0.5);  
-  title=std::string("N-1 relEcIsoEB ")+post;
-  relEcIsoEB_nmo=td.make<TH1D>("N-1 relEcIsoEB",title.c_str(),40,0,0.5);  
-  title=std::string("N-1 relHcIsoEB ")+post;
-  relHcIsoEB_nmo=td.make<TH1D>("N-1 relHcIsoEB",title.c_str(),40,0,0.5);  
-  title=std::string("N-1 sigiEtaiEtaEB ")+post;
-  sigiEtaiEtaEB_nmo=td.make<TH1D>("N-1 sigiEtaiEtaEB",title.c_str(),60,0,0.06);  
-  title=std::string("N-1 dphiEB ")+post;
-  dphiEB_nmo=td.make<TH1D>("N-1 dphiEB",title.c_str(),75,-0.75,0.75);
-  title=std::string("N-1 detaEB ")+post;
-  detaEB_nmo=td.make<TH1D>("N-1 detaEB",title.c_str(),40,-0.02,0.02);  
-  title=std::string("N-1 hOeEB ")+post;
-  hOeEB_nmo=td.make<TH1D>("N-1 hOeEB",title.c_str(),40,0,1);
-  title=std::string("N-1 combIsoEE ")+post;
-  combIsoEE_nmo=td.make<TH1D>("N-1 combIsoEE",title.c_str(),100,0,2); 
-  title=std::string("N-1 relTkIsoEE ")+post;
-  relTkIsoEE_nmo=td.make<TH1D>("N-1 relTkIsoEE",title.c_str(),40,0,0.5);  
-  title=std::string("N-1 relEcIsoEE ")+post;
-  relEcIsoEE_nmo=td.make<TH1D>("N-1 relEcIsoEE",title.c_str(),40,0,0.5);
-  title=std::string("N-1 relHcIsoEE ")+post;
-  relHcIsoEE_nmo=td.make<TH1D>("N-1 relHcIsoEE",title.c_str(),40,0,0.5);  
-  title=std::string("N-1 sigiEtaiEtaEE ")+post;
-  sigiEtaiEtaEE_nmo=td.make<TH1D>("N-1 sigiEtaiEtaEE",title.c_str(),60,0,0.06);  
-  title=std::string("N-1 dphiEE ")+post;
-  dphiEE_nmo=td.make<TH1D>("N-1 dphiEE",title.c_str(),75,-0.75,0.75);
-  title=std::string("N-1 detaEE ")+post;
-  detaEE_nmo=td.make<TH1D>("N-1 detaEE",title.c_str(),40,-0.02,0.02);  
-  title=std::string("N-1 hOeEE ")+post;
-  hOeEE_nmo=td.make<TH1D>("N-1 hOeEE",title.c_str(),40,0,0.2);
+  title=std::string("N-1_combIsoEB ")+post;
+  combIsoEB_nmo=td.make<TH1D>("N-1_combIsoEB",title.c_str(),100,0,2);
+  title=std::string("N-1_relTkIsoEB ")+post;
+  relTkIsoEB_nmo=td.make<TH1D>("N-1_relTkIsoEB",title.c_str(),40,0,0.5);  
+  title=std::string("N-1_relEcIsoEB ")+post;
+  relEcIsoEB_nmo=td.make<TH1D>("N-1_relEcIsoEB",title.c_str(),40,0,0.5);  
+  title=std::string("N-1_relHcIsoEB ")+post;
+  relHcIsoEB_nmo=td.make<TH1D>("N-1_relHcIsoEB",title.c_str(),40,0,0.5);  
+  title=std::string("N-1_sigiEtaiEtaEB ")+post;
+  sigiEtaiEtaEB_nmo=td.make<TH1D>("N-1_sigiEtaiEtaEB",title.c_str(),60,0,0.06);  
+  title=std::string("N-1_dphiEB ")+post;
+  dphiEB_nmo=td.make<TH1D>("N-1_dphiEB",title.c_str(),75,-0.75,0.75);
+  title=std::string("N-1_detaEB ")+post;
+  detaEB_nmo=td.make<TH1D>("N-1_detaEB",title.c_str(),40,-0.02,0.02);  
+  title=std::string("N-1_hOeEB ")+post;
+  hOeEB_nmo=td.make<TH1D>("N-1_hOeEB",title.c_str(),40,0,1);
+  title=std::string("N-1_combIsoEE ")+post;
+  combIsoEE_nmo=td.make<TH1D>("N-1_combIsoEE",title.c_str(),100,0,2); 
+  title=std::string("N-1_relTkIsoEE ")+post;
+  relTkIsoEE_nmo=td.make<TH1D>("N-1_relTkIsoEE",title.c_str(),40,0,0.5);  
+  title=std::string("N-1_relEcIsoEE ")+post;
+  relEcIsoEE_nmo=td.make<TH1D>("N-1_relEcIsoEE",title.c_str(),40,0,0.5);
+  title=std::string("N-1_relHcIsoEE ")+post;
+  relHcIsoEE_nmo=td.make<TH1D>("N-1_relHcIsoEE",title.c_str(),40,0,0.5);  
+  title=std::string("N-1_sigiEtaiEtaEE ")+post;
+  sigiEtaiEtaEE_nmo=td.make<TH1D>("N-1_sigiEtaiEtaEE",title.c_str(),60,0,0.06);  
+  title=std::string("N-1_dphiEE ")+post;
+  dphiEE_nmo=td.make<TH1D>("N-1_dphiEE",title.c_str(),75,-0.75,0.75);
+  title=std::string("N-1_detaEE ")+post;
+  detaEE_nmo=td.make<TH1D>("N-1_detaEE",title.c_str(),40,-0.02,0.02);  
+  title=std::string("N-1_hOeEE ")+post;
+  hOeEE_nmo=td.make<TH1D>("N-1_hOeEE",title.c_str(),40,0,0.2);
 
-  title=std::string("N-1 HF iso e9e25 ")+post;
-  e9e25_nmo=td.make<TH1D>("N-1 e9e25",title.c_str(),40,0,1);
-  title=std::string("N-1 HF eldId var2d")+post;
-  var2d_nmo=td.make<TH1D>("N-1 var2d",title.c_str(),40,0,1.5);  
-  title=std::string("N-1 eCOREe9 ")+post;
-  eCOREe9_nmo=td.make<TH1D>("N-1 eCOREe9",title.c_str(),40,0,1);  
-  title=std::string("N-1 eSeL ")+post;
-  eSeL_nmo=td.make<TH1D>("N-1 eSeL",title.c_str(),40,0,1.5);  
+  title=std::string("N-1_HF iso e9e25 ")+post;
+  e9e25_nmo=td.make<TH1D>("N-1_e9e25",title.c_str(),40,0,1);
+  title=std::string("N-1_HF eldId var2d")+post;
+  var2d_nmo=td.make<TH1D>("N-1_var2d",title.c_str(),40,0,1.5);  
+  title=std::string("N-1_eCOREe9 ")+post;
+  eCOREe9_nmo=td.make<TH1D>("N-1_eCOREe9",title.c_str(),40,0,1);  
+  title=std::string("N-1_eSeL ")+post;
+  eSeL_nmo=td.make<TH1D>("N-1_eSeL",title.c_str(),40,0,1.5);  
 
 }
 
@@ -356,7 +356,7 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
   
   //////////////////////////////////////////////////////////////////////////////////////
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/SimpleCutBasedEleID
-  // here follows filling of histograms for selection variables when the other N-1 have passed
+  // here follows filling of histograms for selection variables when the other N-1_have passed
   // which cuts values are used? Depends on which parameter set you pass...
   std::vector<double> ebParam = myPs.getParameter< std::vector<double> >("barrel"); 
   std::vector<double> eeParam = myPs.getParameter< std::vector<double> >("endcap"); 
