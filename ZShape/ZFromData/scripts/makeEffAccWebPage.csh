@@ -44,6 +44,7 @@ echo '<A HREF=ZRapTotalStacked_Z0_Y.png> <img height="300" src="ZRapTotalStacked
 echo '<A HREF=ZRapTotalEach_Z0_Y.png> <img height="300" src="ZRapTotalEach_Z0_Y.png"> </A>' >> ${PlotDir}/index.html
 echo '<A HREF=ZEffMCRapTotal_Z0_Y.png> <img height="300" src="ZEffMCRapTotal_Z0_Y.png"> </A>' >> ${PlotDir}/index.html
 echo '<A HREF=ZRapMCTotalStacked_Z0_Y.png> <img height="300" src="ZRapMCTotalStacked_Z0_Y.png"> </A>' >> ${PlotDir}/index.html
+echo '<A HREF=ZRapCOOL_Z0_Y.png> <img height="300" src="ZRapCOOL_Z0_Y.png"> </A>' >> ${PlotDir}/index.html
 echo '<p>These are the combined reconstructed Z Rapidity distributions. This is shown in a combined form, a stacked form, and individual Z definition form. Also a comparison for the MC is included</p>' >> ${PlotDir}/index.html
 
 echo '<h3><A name="EB"><FONT color="Blue">Efficiency X Acceptance For Single Z Definitions</FONT></A><BR></h3>' >> ${PlotDir}/index.html

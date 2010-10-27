@@ -359,13 +359,12 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	       
 	// acceptance is always the first cut
 	if (!q->second->pass(evt_,1,1,0,&pairing)) continue;
-	
-        if (pairing) {std::swap(e1,e2); }
-        int e1n = e1; 
-        int e2n = e2; 
-	// fill standard histograms after acceptance
-	plots->acceptance_.Fill(evt_.elec(e1), evt_.elec(e2),evtMC_.elec(e1).p4_, evtMC_.elec(e2).p4_,wgt,doMC_);
-	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1), evt_.elec(e2), evtMC_.elec(e1), evtMC_.elec(e2),wgt,doMC_);
+	int e1n = e1;
+	int e2n = e2;
+        if (pairing) {std::swap(e1n,e2n); }
+        // fill standard histograms after acceptance
+	plots->acceptance_.Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt,doMC_);
+	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n),wgt,doMC_);
 	
 	// next n-cuts
 	bool ok=true;

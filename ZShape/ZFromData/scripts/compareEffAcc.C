@@ -13,6 +13,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <TText.h>
+#include <TLatex.h>
 #include <fstream>
 #include <iomanip>
 #include <TArrayD.h>
@@ -90,6 +91,7 @@ class EffAccHistos {
   vecstring ZDefVec_;
   effstr Effs_;
   colors Cols_;
+  colors Mark_;
   Histos_t theHistos_[NUMEFFS];
   vechists FromDataHists_;
   McHistos_t MCHistos_;
@@ -106,6 +108,8 @@ class EffAccHistos {
   double xlabc_, ylabpc_, ylabtc_;
   double xlabb_, ylabpb_, ylabtb_;
   double xlabr_, ylabpr_, ylabtr_;
+  double xlabl_, ylabpl_, ylabtl_;
+
 };
 
 
@@ -123,12 +127,12 @@ EffAccHistos::EffAccHistos(std::string fromDataFile, std::string mcFile, vecstri
    Effs_[4] = "HFElectronId";
 
   //Next we initialize the colors
-   Cols_[0] = kBlack;
-   Cols_[1] = kBlue;
-   Cols_[2] = kMagenta;
-   Cols_[3] = kRed;
-   Cols_[4] = kCyan+1;
-   Cols_[5] = 3;
+   Cols_[5] = kBlack;
+   Cols_[0] = kBlue;
+   Cols_[1] = kMagenta;
+   Cols_[2] = kRed;
+   Cols_[3] = kCyan+1;
+   Cols_[4] = 3;
    Cols_[6] = 40;
    Cols_[7] = 46;
    Cols_[8] = kMagenta;
@@ -144,6 +148,28 @@ EffAccHistos::EffAccHistos(std::string fromDataFile, std::string mcFile, vecstri
    Cols_[18] = 40;
    Cols_[19] = 46;
  
+   Mark_[0] = kOpenCircle;
+   Mark_[1] = kOpenTriangleUp;
+   Mark_[2] = kOpenCross;
+   Mark_[3] = kOpenSquare;
+   Mark_[4] = kOpenDiamond;
+   Mark_[5] = kOpenStar;
+   Mark_[6] = kFullCircle;
+   Mark_[7] = kFullSquare;
+   Mark_[8] = kFullTriangleUp;
+   Mark_[9] = kFullStar;
+   Mark_[10] = kFullTriangleDown;
+   Mark_[11] = 33;
+   Mark_[12] = 34;
+   Mark_[13] = 31;
+   Mark_[14] = 32;
+   Mark_[15] = 2;
+   Mark_[16] = 3;
+   Mark_[17] = 5;
+   Mark_[18] = 20;
+   Mark_[19] = 21;
+
+
    //Cout some of the information for the record
    for (itvecstring mine = ZDefVec_.begin(); mine != ZDefVec_.end(); ++mine)
    {
@@ -174,6 +200,8 @@ EffAccHistos::EffAccHistos(std::string fromDataFile, std::string mcFile, vecstri
    xlabc_=0.56; ylabpc_=0.90; ylabtc_=0.87;
    xlabb_=0.88; ylabpb_=0.74; ylabtb_=0.71;
    xlabr_=0.88; ylabpr_=0.90; ylabtr_=0.87;
+   xlabl_=0.32; ylabpl_=0.90; ylabtl_=0.87;
+
 }
 
 void
@@ -204,7 +232,7 @@ EffAccHistos::getHistos(void)
 
    MCHistos_.ZRapMC->GetYaxis()->CenterTitle(kTRUE);
    MCHistos_.ZRapMC->GetYaxis()->SetTitleOffset(1.2);
-   MCHistos_.ZRapMC->GetYaxis()->SetTitle(Form("Events/%0.1f Units of Rapidity",MCHistos_.ZRapMC->GetXaxis()->GetBinWidth(1)));
+   MCHistos_.ZRapMC->GetYaxis()->SetTitle(Form("Events/%0.2f Units of Rapidity",MCHistos_.ZRapMC->GetXaxis()->GetBinWidth(1)));
 
   std::cout << " got MC tree level tree " << std::endl;
 
@@ -214,7 +242,7 @@ EffAccHistos::getHistos(void)
    MCHistos_.ZRapMC_FD->GetXaxis()->CenterTitle(kTRUE);
    MCHistos_.ZRapMC_FD->GetYaxis()->CenterTitle(kTRUE);
    MCHistos_.ZRapMC_FD->GetYaxis()->SetTitleOffset(1.2);
-   MCHistos_.ZRapMC_FD->GetYaxis()->SetTitle(Form("Events/%0.1f Units of Rapidity",MCHistos_.ZRapMC_FD->GetXaxis()->GetBinWidth(1)));
+   MCHistos_.ZRapMC_FD->GetYaxis()->SetTitle(Form("Events/%0.2f Units of Rapidity",MCHistos_.ZRapMC_FD->GetXaxis()->GetBinWidth(1)));
 
   std::cout << " got data tree level tree " << std::endl;
    for (itvecstring mine = ZDefVec_.begin(); mine != ZDefVec_.end(); ++mine)
@@ -259,7 +287,7 @@ EffAccHistos::getHistos(void)
 			 else if (strstr(xtitlezmc,"phi")) {units = "radians";}
 			 else if (strstr(xtitlezmc,"eta")) {units = "units of #eta";}
 			 zmctemphist->GetYaxis()->SetTitleOffset(1.2);
-			 zmctemphist->GetYaxis()->SetTitle(Form("Events/%0.1f %s",zmctemphist->GetXaxis()->GetBinWidth(1),units));
+			 zmctemphist->GetYaxis()->SetTitle(Form("Events/%0.2f %s",zmctemphist->GetXaxis()->GetBinWidth(1),units));
              //zmctemphist->Scale(scale_);
              singleHistsZMC.push_back(zmctemphist);
              TH1F* zfdtemphist = (TH1F*)ZFDdirtemp->Get(keyd->GetName());
@@ -272,7 +300,7 @@ EffAccHistos::getHistos(void)
 			 else if (strstr(xtitlezfd,"phi")) {unitsfd = "radians";}
 			 else if (strstr(xtitlezfd,"eta")) {unitsfd = "units of #eta";}
 			 zfdtemphist->GetYaxis()->SetTitleOffset(1.2);
-             zfdtemphist->GetYaxis()->SetTitle(Form("Events/%0.1f %s",zfdtemphist->GetXaxis()->GetBinWidth(1),unitsfd));
+             zfdtemphist->GetYaxis()->SetTitle(Form("Events/%0.2f %s",zfdtemphist->GetXaxis()->GetBinWidth(1),unitsfd));
 
              singleHistsZFD.push_back(zfdtemphist);
           }
@@ -389,6 +417,15 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
   tlabel -> SetTextSize(0.02);
   tlabel -> SetTextAlign(22);
   tlabel -> SetTextAngle(0);
+
+  TLatex *tllabel = new TLatex();
+  tllabel-> SetNDC();
+  tllabel -> SetTextFont(1);
+  tllabel -> SetTextColor(1);
+  tllabel -> SetTextSize(0.02);
+  tllabel -> SetTextAlign(22);
+  tllabel -> SetTextAngle(0);
+
   for (uint i =0; i < ZDefVec_.size(); ++i)
   {
      const char *rtype = ZDefVec_[i].c_str();
@@ -505,6 +542,7 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
            (*zfdvhit)->Draw("sameeP");
            (*zfdvhit)->SetMarkerStyle(kOpenCircle);
            (*zfdvhit)->SetMarkerSize(0.9);
+           (*zfdvhit)->SetMarkerColor(kBlack);
            (*zfdvhit)->SetLineColor(kBlack);
            (*zfdvhit)->SetLineWidth(2);
            if (strstr((*zmcvhit)->GetName(),"eta")) 
@@ -571,16 +609,28 @@ tlabel -> SetTextSize(0.02);
 tlabel -> SetTextAlign(22);
 tlabel -> SetTextAngle(0);
 
+TLatex *tllabel = new TLatex();
+tllabel-> SetNDC();
+//tllabel -> SetTextFont(1);
+tllabel -> SetTextColor(1);
+tllabel -> SetTextSize(0.03);
+tllabel -> SetTextAlign(22);
+tllabel -> SetTextAngle(0);
+
 TCanvas *tempCan = new TCanvas("tempcan","tempcan",800,600);
 TLegend *myLegl = new TLegend(.80,.45,.97,.75);
+TLegend *myLegpl = new TLegend(.80,.65,.98,.95);
 TLegend *myLegf = new TLegend(.80,.45,.97,.75);
 myLegl->SetFillColor(kWhite);
 myLegf->SetFillColor(kWhite);
 for (uint i =0; i < ZDefVec_.size(); ++i)
   {
       const char *rtype = ZDefVec_[i].c_str();
-      myLegl->AddEntry(FromDataHists_[i],rtype,"l");
-      myLegf->AddEntry(FromDataHists_[i],rtype,"f");
+      const char *myrtype = (strstr(rtype,"ECAL95-ECAL95-20")) ? ("WP95-WP95") :(rtype) ; 
+      const char *myNrtype = (strstr(myrtype,"ECAL80-HF")) ? ("WP80-HF") :(myrtype) ; 
+      myLegl->AddEntry(FromDataHists_[i],myNrtype,"l");
+      myLegpl->AddEntry(FromDataHists_[i],myNrtype,"pl");
+      myLegf->AddEntry(FromDataHists_[i],myNrtype,"f");
   }
 
 FinalHistos_.ZEffAccTotSk->Draw("hist");
@@ -618,6 +668,10 @@ for (uint i =0; i < ZDefVec_.size(); ++i)
   {
       FromDataHists_[i]->SetFillColor(kWhite);
       MCHistos_.EffAcc[i]->SetFillColor(kWhite);
+      FromDataHists_[i]->SetMarkerStyle(Mark_[i]);
+      FromDataHists_[i]->SetMarkerSize(0.9);
+      FromDataHists_[i]->SetMarkerColor(Cols_[i]);
+      FromDataHists_[i]->SetLineWidth(2);
   }
 
 
@@ -630,6 +684,25 @@ FinalHistos_.ZRapTotSk->Draw("nostack");
 myLegl->Draw();
      plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");   //  tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZRapTotalEach_Z0_Y.%s",ftype));
+
+FinalHistos_.ZResult->SetMarkerStyle(kOpenCircle);
+FinalHistos_.ZResult->SetMarkerSize(0.9);
+FinalHistos_.ZResult->SetLineWidth(2);
+FinalHistos_.ZResult->Draw();
+FinalHistos_.ZRapTotSk->Draw("same,nostack,e1p");
+MCHistos_.ZRapMC->Scale(scale_);
+MCHistos_.ZRapMC->SetLineColor(kRed);
+MCHistos_.ZRapMC->SetLineWidth(2);
+MCHistos_.ZRapMC->Draw("histsame");
+FinalHistos_.ZResult->Draw("same");
+myLegpl->AddEntry(FinalHistos_.ZResult,"Corrected Data","pl");
+myLegpl->AddEntry(MCHistos_.ZRapMC,"Pythia Z2","pl");
+
+
+myLegpl->Draw();
+     plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "5 pb^{-1}");
+tempCan->Print(Form("ZRapCOOL_Z0_Y.%s",ftype));
+MCHistos_.ZRapMC->Scale(1.0/scale_);
 
 
 

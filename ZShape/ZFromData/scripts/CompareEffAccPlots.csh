@@ -8,6 +8,7 @@
 set outdir=$1
 set filetype=$2
 set deffile="/home/grad/haupt/CMSSW/ZShape/CMSSW_3_6_5/src/ZShape/EffAcc/data"
+set mytype=$3
 
 root -l -b <<!
 #include <map>
@@ -20,8 +21,13 @@ setTDRStyle();
 
 zdef zdefvec;
 
-std::cout << " I m Trying here " << std::endl;
-std::map<std::string, zdef> zdefvecvec;  
+std::cout << " Im Trying here " << std::endl;
+//std::map<std::string, zdef> zdefvecvec;  
+std::cout << " Im Trying here -1 " << std::endl;
+std::cout << " My type " << $mytype << std::endl;
+
+int mytype = $mytype;
+std::cout << " My type " << mytype << std::endl;
 //zdefvec.push_back("Tight-EB-Loose-ECAL");
 //zdefvec.push_back("Tight-ECAL-Loose-EE");
 //zdefvec.push_back("Tight-ECAL-Loose-ECAL"); 
@@ -53,10 +59,38 @@ std::map<std::string, zdef> zdefvecvec;
 //zdefvec.push_back("ECAL95EE-ECAL95EE");
 //zdefvec.push_back("ECAL95EB-ECAL95EE");
 //zdefvec.push_back("ECAL80-HFTight-20");
-zdefvec.push_back("ECAL95-ECAL95-20");
+//zdefvec.push_back("ECAL95-ECAL95-20");
+std::cout << " My type again " << mytype << std::endl;
+
+if ( mytype == 0 ) {std::cout << " Im Trying here 0 " << std::endl;zdefvec.push_back("ECAL80-HF");zdefvec.push_back("ECAL95-ECAL95-20");}
+
+if ( mytype == 1  ) {std::cout << " Im Trying here 10 " << std::endl;std::cout << " in 1 " << std::endl;zdefvec.push_back("ECAL95-ECAL95-20");}  
+
+if ( mytype == 2 ) {zdefvec.push_back("ECAL80-ECAL80");}
+if ( mytype == 3 ){zdefvec.push_back("ECAL95EB-ECAL95EB");zdefvec.push_back("ECAL95EE-ECAL95EE");zdefvec.push_back("ECAL95EB-ECAL95EE");} 
+
+if ( $mytype == 4 ){zdefvec.push_back("ECAL95EB-ECAL95EB");zdefvec.push_back("ECAL95EE-ECAL95EE");zdefvec.push_back("ECAL95EB-ECAL95EE");}
+ 
+if ( $mytype == 5 ){zdefvec.push_back("ECAL95-ECAL95-20");zdefvec.push_back("ECAL80-HFTight-20");}
+
+if ( $mytype == 6 ){zdefvec.push_back("ECAL95-ECAL95-20");zdefvec.push_back("ECAL80-HF");}
+
+if ( $mytype == 7 ){defvec.push_back("ECAL95-ECAL95-20");zdefvec.push_back("ECAL85-HFTight");}
+
+if ( $mytype == 8 ){zdefvec.push_back("ECAL95-ECAL95-20");zdefvec.push_back("ECAL85-HF");}
+
+if ( $mytype == 9 ){zdefvec.push_back("ECAL95-ECAL95-20");zdefvec.push_back("ECAL90-HFTight");}
+
+if ( $mytype == 10 ){zdefvec.push_back("ECAL95-ECAL95-20");zdefvec.push_back("ECAL90-HF");}
+
+if ( $mytype == 11 ){zdefvec.push_back("ECAL95-ECAL95-20");zdefvec.push_back("ECAL95-HFTight");}
+
+if ( $mytype == 12 ){zdefvec.push_back("ECAL95-ECAL95-20");zdefvec.push_back("ECAL95-HF");}
+
+if ( $mytype == 13 ){zdefvec.push_back("ECAL95-HF");zdefvec.push_back("ECAL90-HF");zdefvec.push_back("ECAL85-HF");zdefvec.push_back("ECAL80-HF");zdefvec.push_back("ECAL95-HFTight");zdefvec.push_back("ECAL90-HFTight");zdefvec.push_back("ECAL85-HFTight");zdefvec.push_back("ECAL80-HFTight");}
 
 
-
+std::cout << " DID I GET HERE " << std::endl;
 
 gStyle->SetTitleAlign(22);
 
@@ -78,8 +112,11 @@ gStyle->SetTitleAlign(22);
 //2077.2 for 24
 //
 //EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeFromDataJeremyTEMPLATE/histoJason10_only1hlt_TRIAL_ZFULL.root","/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeMCFromDataJeremyTEMPLATE/MCZFD.root",zdefvec, 108.1259);
-EffAccHistos *myEffAccHistos = new EffAccHistos("/data/cms004/oradata/FullhistoFull.root","/local/cms/user/haupt/Electrons/TNPTREE10/testProdZEfficiencySmeared_10MTEMPLATE/MCHist.root",zdefvec, 3720.0);
-
+EffAccHistos *myEffAccHistos = new EffAccHistos("/local/cms/user/haupt/Electrons/TNPTREE10/ZFD.FULLOct20th.root","/local/cms/user/haupt/Electrons/TNPTREE10/testProdZEfficiencySmeared_10MTEMPLATE/MCHist.root",zdefvec, 772.0);
+//WAS 3724
+//2208 for 4.5
+//ZMC 1930 for 5.3
+//Z2Tune 2086 for 15 
 myEffAccHistos->getFiles();
 myEffAccHistos->getHistos();
 myEffAccHistos->printSumHistos("${filetype}");

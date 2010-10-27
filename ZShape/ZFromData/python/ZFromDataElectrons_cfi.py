@@ -67,10 +67,10 @@ EndcapSuperClusters = cms.EDProducer("ConcreteEcalCandidateProducer",
 )
 EESuperClusters = cms.EDFilter("CandViewSelector",
     src = cms.InputTag("EndcapSuperClusters"),
-    cut = cms.string('abs( eta ) > 1.560 & abs( eta ) < 2.5')
+    cut = cms.string('abs( eta ) > 1.566 & abs( eta ) < 2.9')
 )
 
-allSuperClusters = cms.EDFilter("CandViewMerger",
+allSuperClusters = cms.EDProducer("CandViewMerger",
     src = cms.VInputTag(cms.InputTag("EBSuperClusters"), cms.InputTag("EESuperClusters"),cms.InputTag("theHFSuperClusters"))
 )
 
@@ -100,108 +100,34 @@ theHFSuperClusters = cms.EDFilter("CandViewSelector",
 theSuperClusters = cms.EDFilter("CandViewSelector",
     #src = cms.InputTag("superClusterCands"),
     src = cms.InputTag("allSuperClusters"),
-    cut = cms.string('et  > 10.0 && abs(eta)<2.5 && !(1.4442< abs(eta) <1.560)'),
+    cut = cms.string('et  > 10.0 && abs(eta)<2.9 && !(1.4442< abs(eta) <1.566)'),
     filter = cms.bool(True) #LOOK UP WHAT THIS DOES
 )
 
-sc_sequence = cms.Sequence( ( hfSuperClusterCandidate * theHFSuperClusters + hfRecoEcalCandidateTight) * HybridSuperClusters * EBSuperClusters + EndcapSuperClusters * EESuperClusters * allSuperClusters * theSuperClusters)
+NTElecLoose = cms.EDFilter("PhotonSelector",
+                                   src = cms.InputTag("photons"),
+                                   cut = cms.string("hadronicOverEm<0.07"
+                                                    " && (superCluster.rawEnergy*sin(superCluster.position.theta)>20.0)"
+                                                    " && (abs(superCluster.eta)>2.5) " # && abs(superCluster.eta)<2.8
+                                                    " && (sigmaIetaIeta<0.03)"
+                                                    " && (ecalRecHitSumEtConeDR03/(p4.Pt) < 0.06)"
+                                                    " && (hcalTowerSumEtConeDR03/(p4.Pt) < 0.05)")
+                                   )
+
+NTElecTight = cms.EDFilter("PhotonSelector",
+                                   src = cms.InputTag("photons"),
+                                   cut = cms.string("hadronicOverEm<0.025"
+                                                    " && (superCluster.rawEnergy*sin(superCluster.position.theta)>20.0)"
+                                                    " && (abs(superCluster.eta)>2.5) " # && abs(superCluster.eta)<2.8
+                                                    " && (sigmaIetaIeta<0.03)"
+                                                    " && (ecalRecHitSumEtConeDR03/(p4.Pt) < 0.05)"
+                                                    " && (hcalTowerSumEtConeDR03/(p4.Pt) < 0.025)")
+                                   )
 
 
 
-##    ____      __ _____ _           _                   
-##   / ___|___ / _| ____| | ___  ___| |_ _ __ ___  _ __  
-##  | |  _/ __| |_|  _| | |/ _ \/ __| __| '__/ _ \| '_ \ 
-##  | |_| \__ \  _| |___| |  __/ (__| |_| | | (_) | | | |
-##   \____|___/_| |_____|_|\___|\___|\__|_|  \___/|_| |_|
-##  
-    ############################################# 
-    ############  GsfElectrons  ################
-    #############################################
- 
-theGsfElectrons = cms.EDFilter("GsfElectronRefSelector",
-    src = cms.InputTag("gsfElectrons"),
-    cut = cms.string('(abs(superCluster.eta)<2.5) && !(1.4442<abs(superCluster.eta)<1.560) && (( caloEnergy * sin( caloPosition.theta ) )  > 15.0)')
-)
+sc_sequence = cms.Sequence( ( hfSuperClusterCandidate * theHFSuperClusters + hfRecoEcalCandidateTight) * HybridSuperClusters * EBSuperClusters + EndcapSuperClusters * EESuperClusters * allSuperClusters * theSuperClusters +NTElecLoose + NTElecTight )
 
-
-HFElectronID = cms.EDFilter("CandViewSelector",
-    src = cms.InputTag("hfRecoEcalCandidate"),
-    cut = cms.string('et > 15.0')
-)
-
-HFElectronIDTight = cms.EDFilter("CandViewSelector",
-    src = cms.InputTag("hfRecoEcalCandidateTight"),
-    cut = cms.string('et > 15.0')
-)
-
-theGsfHf = cms.EDFilter("CandViewMerger",
-    #src = cms.VInputTag(cms.InputTag("theGsfElectrons"), cms.InputTag("theHFSuperClusters"), cms.InputTag("theEEHFGapSuperClusters"))
-    src = cms.VInputTag(cms.InputTag("theGsfElectrons"), cms.InputTag("theHFSuperClusters"))
-)
-
-
-##     ___           _       _   _             
-##    |_ _|___  ___ | | __ _| |_(_) ___  _ __  
-##     | |/ __|/ _ \| |/ _` | __| |/ _ \| '_ \ 
-##     | |\__ \ (_) | | (_| | |_| | (_) | | | |
-##    |___|___/\___/|_|\__,_|\__|_|\___/|_| |_|
-
-    
-## #  Isolation  ################
-
-theIsolation = cms.EDFilter("GsfElectronRefSelector",
-    src = cms.InputTag("gsfElectrons"),
-    cut = cms.string(theGsfElectrons.cut.value() +
-         " && (( isEB && (dr04TkSumPt<7.2) && (dr04EcalRecHitSumEt<5.7) && (dr04HcalTowerSumEt<8.1)"
-         " && (deltaEtaSuperClusterTrackAtVtx<0.0071) && (deltaPhiSuperClusterTrackAtVtx<1.0)"
-         " && (sigmaEtaEta<0.01))"
-         " || (isEE && (dr04TkSumPt<5.1) && (dr04EcalRecHitSumEt<5.0) && (dr04HcalTowerSumEt<3.4)"
-         " && (deltaEtaSuperClusterTrackAtVtx<0.0066) && (deltaPhiSuperClusterTrackAtVtx<1.0)"
-         " && (sigmaEtaEta<0.028)))")
-)
-
-##    _____ _           _                     ___    _ 
-##   | ____| | ___  ___| |_ _ __ ___  _ __   |_ _|__| |
-##   |  _| | |/ _ \/ __| __| '__/ _ \| '_ \   | |/ _` |
-##   | |___| |  __/ (__| |_| | | (_) | | | |  | | (_| |
-##   |_____|_|\___|\___|\__|_|  \___/|_| |_| |___\__,_|
-##   
-
-# Electron ID  ######
-theId = cms.EDFilter("GsfElectronRefSelector",
-    src = cms.InputTag("gsfElectrons"),
-    cut = cms.string(theIsolation.cut.value() +
-          " && ( (isEB && sigmaIetaIeta<0.01 && deltaEtaSuperClusterTrackAtVtx<0.0071)"
-          "|| (isEE && sigmaIetaIeta<0.028 && deltaEtaSuperClusterTrackAtVtx<0.0066) )")   
-)
-
-
-##    _____     _                         __  __       _       _     _             
-##   |_   _| __(_) __ _  __ _  ___ _ __  |  \/  | __ _| |_ ___| |__ (_)_ __   __ _ 
-##     | || '__| |/ _` |/ _` |/ _ \ '__| | |\/| |/ _` | __/ __| '_ \| | '_ \ / _` |
-##     | || |  | | (_| | (_| |  __/ |    | |  | | (_| | || (__| | | | | | | | (_| |
-##     |_||_|  |_|\__, |\__, |\___|_|    |_|  |_|\__,_|\__\___|_| |_|_|_| |_|\__, |
-##                |___/ |___/                                                |___/ 
-##   
-
-# Trigger  ##################
-theHLT = cms.EDProducer("trgMatchedGsfElectronProducer",                     
-    InputProducer = cms.InputTag("theId"),                          
-    #hltTag = cms.untracked.InputTag("HLT_Ele15_SW_LooseTrackIso_L1R","","HLT"),
-    #hltTag = cms.untracked.InputTag("HLT_L1SingleEG8","","HLT"),    
-    hltTag = cms.untracked.InputTag("HLT_Photon15_L1R","","HLT"),  
-    triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
-)
-
-theHLTGsf = cms.EDProducer("trgMatchedGsfElectronProducer",                     
-    InputProducer = cms.InputTag("theGsfElectrons"),                          
-    #hltTag = cms.untracked.InputTag("HLT_Ele15_SW_LooseTrackIso_L1R","","HLT"),
-    #hltTag = cms.untracked.InputTag("HLT_L1SingleEG8","","HLT"),    
-    hltTag = cms.untracked.InputTag("HLT_Photon15_L1R","","HLT"),                      
-    triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
-)
-
-electron_sequence = cms.Sequence(theGsfElectrons * theHLTGsf * theGsfHf * theIsolation * theId * theHLT * (HFElectronID + HFElectronIDTight) )
 
 
 ##
@@ -337,7 +263,157 @@ ElectronID80WConv = cms.EDFilter("PATElectronRefSelector",
 
 
 
-neweleseq=cms.Sequence(makePatElectrons* (Iso95 * ElectronID95 + Iso90 * ElectronID90 * Iso85 * ElectronID85 + Iso80 * ElectronID80+ Iso70 * ElectronID70 + Iso60 * ElectronID60 + Iso80Only + Iso80WConv + ElectronID80Only + ElectronID80WConv )  )
+
+neweleseq=cms.Sequence(makePatElectrons* (Iso95 * ElectronID95 + Iso90 * ElectronID90 * Iso85 * ElectronID85 + Iso80 * ElectronID80+ Iso70 * ElectronID70 + Iso60 * ElectronID60 + Iso80Only + Iso80WConv + ElectronID80Only + ElectronID80WConv ) )
+
+
+
+
+##    ____      __ _____ _           _                   
+##   / ___|___ / _| ____| | ___  ___| |_ _ __ ___  _ __  
+##  | |  _/ __| |_|  _| | |/ _ \/ __| __| '__/ _ \| '_ \ 
+##  | |_| \__ \  _| |___| |  __/ (__| |_| | | (_) | | | |
+##   \____|___/_| |_____|_|\___|\___|\__|_|  \___/|_| |_|
+##  
+    ############################################# 
+    ############  GsfElectrons  ################
+    #############################################
+ 
+#theGsfElectrons = cms.EDFilter("GsfElectronRefSelector",
+#    src = cms.InputTag("gsfElectrons"),
+#    cut = cms.string('(abs(superCluster.eta)<2.5) && !(1.4442<abs(superCluster.eta)<1.566) && (( caloEnergy * sin( caloPosition.theta ) )  > 15.0)')
+#)
+
+PassingGsf = cms.EDFilter("PATElectronRefSelector",
+    src = cms.InputTag("patElectrons"),
+    cut = cms.string("(abs(superCluster.eta)<2.5) && !(1.4442<abs(superCluster.eta)<1.566)"
+                     " && (ecalEnergy*sin(superClusterPosition.theta)>20.0) && (hadronicOverEm<0.15)")    
+)
+
+theGsfElectrons = PassingGsf.clone()
+
+HFElectronID = cms.EDFilter("CandViewSelector",
+    src = cms.InputTag("hfRecoEcalCandidate"),
+    cut = cms.string('et > 15.0')
+)
+
+HFElectronIDTight = cms.EDFilter("CandViewSelector",
+    src = cms.InputTag("hfRecoEcalCandidateTight"),
+    cut = cms.string('et > 15.0')
+)
+
+theGsfHf = cms.EDProducer("CandViewMerger",
+    #src = cms.VInputTag(cms.InputTag("theGsfElectrons"), cms.InputTag("theHFSuperClusters"), cms.InputTag("theEEHFGapSuperClusters"))
+    src = cms.VInputTag(cms.InputTag("PassingGsf"), cms.InputTag("theHFSuperClusters"))
+)
+
+
+##     ___           _       _   _             
+##    |_ _|___  ___ | | __ _| |_(_) ___  _ __  
+##     | |/ __|/ _ \| |/ _` | __| |/ _ \| '_ \ 
+##     | |\__ \ (_) | | (_| | |_| | (_) | | | |
+##    |___|___/\___/|_|\__,_|\__|_|\___/|_| |_|
+
+    
+## #  Isolation  ################
+
+theIsolation = Iso95.clone()
+
+#theIsolation = cms.EDFilter("GsfElectronRefSelector",
+#    src = cms.InputTag("gsfElectrons"),
+#    cut = cms.string(PassingGsf.cut.value() +
+#         " && (( isEB && (dr04TkSumPt<7.2) && (dr04EcalRecHitSumEt<5.7) && (dr04HcalTowerSumEt<8.1)"
+#         " && (deltaEtaSuperClusterTrackAtVtx<0.0071) && (deltaPhiSuperClusterTrackAtVtx<1.0)"
+#         " && (sigmaEtaEta<0.01))"
+#         " || (isEE && (dr04TkSumPt<5.1) && (dr04EcalRecHitSumEt<5.0) && (dr04HcalTowerSumEt<3.4)"
+#         " && (deltaEtaSuperClusterTrackAtVtx<0.0066) && (deltaPhiSuperClusterTrackAtVtx<1.0)"
+#         " && (sigmaEtaEta<0.028)))")
+#)
+
+##    _____ _           _                     ___    _ 
+##   | ____| | ___  ___| |_ _ __ ___  _ __   |_ _|__| |
+##   |  _| | |/ _ \/ __| __| '__/ _ \| '_ \   | |/ _` |
+##   | |___| |  __/ (__| |_| | | (_) | | | |  | | (_| |
+##   |_____|_|\___|\___|\__|_|  \___/|_| |_| |___\__,_|
+##   
+
+# Electron ID  ######
+#theId = cms.EDFilter("GsfElectronRefSelector",
+#    src = cms.InputTag("gsfElectrons"),
+#    cut = cms.string(theIsolation.cut.value() +
+#          " && ( (isEB && sigmaIetaIeta<0.01 && deltaEtaSuperClusterTrackAtVtx<0.0071)"
+#          "|| (isEE && sigmaIetaIeta<0.028 && deltaEtaSuperClusterTrackAtVtx<0.0066) )")   
+#)
+#
+
+theId = ElectronID95.clone()
+
+##    _____     _                         __  __       _       _     _             
+##   |_   _| __(_) __ _  __ _  ___ _ __  |  \/  | __ _| |_ ___| |__ (_)_ __   __ _ 
+##     | || '__| |/ _` |/ _` |/ _ \ '__| | |\/| |/ _` | __/ __| '_ \| | '_ \ / _` |
+##     | || |  | | (_| | (_| |  __/ |    | |  | | (_| | || (__| | | | | | | | (_| |
+##     |_||_|  |_|\__, |\__, |\___|_|    |_|  |_|\__,_|\__\___|_| |_|_|_| |_|\__, |
+##                |___/ |___/                                                |___/ 
+##   
+
+# Trigger  ##################
+theHLT = cms.EDProducer("trgMatchedGsfElectronProducer",                     
+    InputProducer = cms.InputTag("theId"),                          
+    hltTag = cms.untracked.VInputTag(
+                cms.InputTag("HLT_Photon15_Cleaned_L1R","","HLT"),
+                cms.InputTag("HLT_Ele15_SW_L1R","","HLT"),
+                cms.InputTag("HLT_Ele15_SW_CaloEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_CaloEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_EleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_LooseEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele27_SW_TightCaloEleIdTrack_L1R ","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1","","HLT"),
+                cms.InputTag("HLT_DoubleEle15_SW_L1R","","HLT"),
+                cms.InputTag("HLT_DoubleEle15_SW_L1R_v1","","HLT"),
+                cms.InputTag("HLT_Ele22_SW_CaloEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TighterEleIdIsol_L1R_v2","","HLT"),
+                cms.InputTag("HLT_Ele22_SW_TighterEleId_L1R_v2","","HLT"),
+                cms.InputTag("HLT_Ele22_SW_TighterCaloIdIsol_L1R_v1","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1","","HLT"),
+                cms.InputTag("HLT_DoubleEle17_SW_L1R","","HLT"),
+                cms.InputTag("HLT_Ele32_SW_TighterEleId_L1R","","HLT")),
+    triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
+)
+
+theHLTGsf = cms.EDProducer("trgMatchedGsfElectronProducer",                     
+    InputProducer = cms.InputTag("PassingGsf"),                          
+    hltTag = cms.untracked.VInputTag(
+                cms.InputTag("HLT_Photon15_Cleaned_L1R","","HLT"),
+                cms.InputTag("HLT_Ele15_SW_L1R","","HLT"),
+                cms.InputTag("HLT_Ele15_SW_CaloEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_CaloEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_EleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_LooseEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele27_SW_TightCaloEleIdTrack_L1R ","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1","","HLT"),
+                cms.InputTag("HLT_DoubleEle15_SW_L1R","","HLT"),
+                cms.InputTag("HLT_DoubleEle15_SW_L1R_v1","","HLT"),
+                cms.InputTag("HLT_Ele22_SW_CaloEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TighterEleIdIsol_L1R_v2","","HLT"),
+                cms.InputTag("HLT_Ele22_SW_TighterEleId_L1R_v2","","HLT"),
+                cms.InputTag("HLT_Ele22_SW_TighterCaloIdIsol_L1R_v1","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1","","HLT"),
+                cms.InputTag("HLT_DoubleEle17_SW_L1R","","HLT"),
+                cms.InputTag("HLT_Ele32_SW_TighterEleId_L1R","","HLT")),                
+    triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
+)
+
+theGsfHFLoose =  cms.EDProducer("CandViewMerger",
+    src = cms.VInputTag(cms.InputTag("PassingGsf"), cms.InputTag("HFElectronID"), cms.InputTag("NTElecLoose"))
+)
+
+electron_sequence = cms.Sequence(PassingGsf * theGsfElectrons * theHLTGsf * theGsfHf * theIsolation * theId * theHLT * (HFElectronID + HFElectronIDTight) * theGsfHFLoose )
 
 
 ##    _____ ___   ____    ____       _          
@@ -371,7 +447,7 @@ tpMapSuperClusters = cms.EDProducer("CandViewShallowCloneCombiner",
 
 
 tpMapGsfElectrons = cms.EDProducer("CandViewShallowCloneCombiner",
-    decay = cms.string("theGsfElectrons theGsfElectrons"), # charge coniugate states are implied
+    decay = cms.string("PassingGsf PassingGsf"), # charge coniugate states are implied
     cut   = cms.string("60 < mass < 120"),
     checkCharge = cms.bool(False),
 )
@@ -399,14 +475,22 @@ tpMapHFSuperClusters = cms.EDProducer("CandViewShallowCloneCombiner",
 
 tpMapGsfAndHF =  cms.EDProducer("CandViewShallowCloneCombiner",
     #decay = cms.string("theHLTGsf theGsfHf"), # charge coniugate states are implied
-    decay = cms.string("theGsfElectrons theGsfHf"),
+    decay = cms.string("PassingGsf theGsfHf"),
     cut   = cms.string("50 < mass < 130"),
+    checkCharge = cms.bool(False),
+)
+
+tpMapWP95AndHF =  cms.EDProducer("CandViewShallowCloneCombiner",
+    #decay = cms.string("theHLTGsf theGsfHf"), # charge coniugate states are implied
+    decay = cms.string("ElectronID95 theGsfHFLoose"),
+    cut   = cms.string("50 < mass < 140"),
     checkCharge = cms.bool(False),
 )
 
 
 
-tpMap_sequence = cms.Sequence( tpMapSuperClusters + tpMapGsfElectrons + tpMapIsolation + tpMapId + tpMapHFSuperClusters + tpMapGsfAndHF)
+
+tpMap_sequence = cms.Sequence( tpMapSuperClusters + tpMapGsfElectrons + tpMapIsolation + tpMapId + tpMapHFSuperClusters + tpMapGsfAndHF + tpMapWP95AndHF)
 #tpMap_sequence = cms.Sequence( tpMapGsfElectrons + tpMapIsolation + tpMapId + tpMapHFSuperClusters + tpMapGsfAndHF)
 
 ##    __  __  ____   __  __       _       _               
@@ -432,7 +516,7 @@ SuperClustersMatch = cms.EDFilter("MCTruthDeltaRMatcherNew",
 
 GsfElectronsMatch = cms.EDFilter("MCTruthDeltaRMatcherNew",
     pdgId = cms.vint32(11),
-    src = cms.InputTag("theGsfElectrons"),
+    src = cms.InputTag("PassingGsf"),
     distMin = cms.double(0.3),
     matched = cms.InputTag("genParticles")
 )
@@ -477,7 +561,7 @@ truthMatch_sequence = cms.Sequence( SuperClustersMatch + GsfElectronsMatch + Iso
 #truthMatch_sequence = cms.Sequence( GsfElectronsMatch + IsolationMatch + IdMatch + HLTMatch + HFSCMatch + HFIDMatch)
 #lepton_cands = cms.Sequence(genParticles * hfEMClusteringSequence * sc_sequence * electron_sequence * tpMap_sequence * truthMatch_sequence)
 
-lepton_cands = cms.Sequence(hfEMClusteringSequence * sc_sequence * electron_sequence * neweleseq  * tpMap_sequence )
+lepton_cands = cms.Sequence(hfEMClusteringSequence * sc_sequence * neweleseq * electron_sequence * tpMap_sequence )
 
 
    
