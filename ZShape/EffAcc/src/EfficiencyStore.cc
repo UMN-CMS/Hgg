@@ -46,6 +46,7 @@ EfficiencyStore::EfficiencyStore(TFile * file, std::string EffName, std::string 
   effType_ = EffType;
   std::cout << "class EfficiencyStore created with root file: " << file->GetName() << std::endl;
   isEta_ = strstr(EffType.c_str(),"eta");
+  isBoth_ = (bool (strstr(EffType.c_str(),"eta")) && bool (strstr(EffType.c_str(),"pt")));
   setRootFile(file);
   textFileName_="";
 }
@@ -130,7 +131,8 @@ void EfficiencyStore::setRootFile(TFile * file){
 			  std::cout << " Found " << key3->GetName() << " in " << key2->GetName() << " in "<< key1->GetName() << " in "<< key->GetName() << std::endl;
  			  RooWorkspace* w = (RooWorkspace*) mdir2->Get(key3->GetName());
 			  //w->Print();
-			  RooRealVar *et  = isEta_ ? w->var("probe_sc_eta"): w->var("probe_sc_et") ;
+			  RooRealVar *et  = (isEta_ && !isBoth_) ? w->var("probe_sc_eta"): w->var("probe_sc_et") ; //dear anyone reading this, it is EITHER et or eta!!
+			  RooRealVar *eta = isBoth_ ? w->var("probe_sc_eta"): 0 ;
 			  //Here I will one day need to do 'two-D'... that is why I have the bin1 and bin2
 			  RooRealVar *eff = w->var("efficiency");
 			  RooRealVar *nS  = w->var("numSignalAll");
@@ -144,13 +146,24 @@ void EfficiencyStore::setRootFile(TFile * file){
 
 			  //std::cout << "Efficiency: " << eff->getVal() << " Den: " << nS->getVal() <<  std::endl;
 			  std::cout << "Efficiency: " << eff->getVal() << " Den: " << nS->getVal() << " et min: " << lval << " et max: " <<   hval << " Eff Err Hi: " <<eff->getErrorHi() << " Eff Err Lo: " <<eff->getErrorLo() << std::endl;  
-			  //std::cout << "debug 40 " << std::endl;
 			  //crazy hack below... look into why I needed to do something like this...
+			  //MAYBE for more events using the default errors will be just 'fine'.
 			  Double_t errorHi = eff->getErrorHi() < 0.0001 ? (1.0 - eff->getVal()) : eff->getErrorHi() ;
 			  std::cout << " new error high is " << errorHi << std::endl;
 			  //do the bins different based on eta or pt
-			  if (isEta_) {bin2Min_.push_back( lval );  bin2Max_.push_back( hval );}
-			  else { bin1Min_.push_back( lval );  bin1Max_.push_back( hval);}			  
+			  if (isBoth_)
+			  {
+			    int hbinnumeta =eta->getBinning().binNumber(eta->getVal());
+			    Double_t hvaleta = eta->getBinning().binHigh(hbinnumeta);
+			    Double_t lvaleta = eta->getBinning().binLow(hbinnumeta); 
+			    bin1Min_.push_back( lval );     bin1Max_.push_back( hval);
+			    bin2Min_.push_back( lvaleta );  bin2Max_.push_back( hvaleta );
+			  }
+			  else 
+			  {
+			    if (isEta_) {bin2Min_.push_back( lval );  bin2Max_.push_back( hval );}
+			    else { bin1Min_.push_back( lval );  bin1Max_.push_back( hval);}			  
+			  }
 			  values1D_.push_back( eff->getVal());
 			  denominator1D_.push_back( nS->getVal());
 			  systPlus1D_.push_back(errorHi);
@@ -214,6 +227,7 @@ void EfficiencyStore::histToVec(void){
 void EfficiencyStore::setVarMinMax(double vmin, double vmax){
   vmax_=vmax;
   vmin_=vmin;
+  if (isBoth_) return;
   for (uint j = 0; j < values1D_.size(); ++j)
     {
       if (isEta_) 

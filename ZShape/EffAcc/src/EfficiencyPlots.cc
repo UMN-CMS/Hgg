@@ -23,7 +23,16 @@ EfficiencyPlots::EfficiencyPlots(char *txtFile, char *cutType, int binStart, cha
    else if (strstr(cutType_,"Iso") ) {trueeff = "Isolation WP95"; if ( strstr(cutType_,"80")) trueeff = "Isolation WP80"; }
    else if (strstr(cutType_,"ElectronId") ) {trueeff = "Electron Identification WP95";if (strstr(cutType_,"80")) trueeff = "Electron Identification WP80";}
    else if (strstr(cutType_,"HLT") ) trueeff = "Trigger Efficiency";
-   else if (strstr(cutType_,"HF") ) trueeff = "HF Electron Identification";
+   else if (strstr(cutType_,"HFEIdT") ) trueeff = "HF Tight Electron Identification";
+   else if (strstr(cutType_,"HF") ) trueeff = "HF Loose Electron Identification";
+   else if (strstr(cutType_,"WP95") ) trueeff = "WP95";
+   else if (strstr(cutType_,"WP90") ) trueeff = "WP90";
+   else if (strstr(cutType_,"WP85") ) trueeff = "WP85";
+   else if (strstr(cutType_,"WP80") ) trueeff = "WP80";
+   else if (strstr(cutType_,"WP70") ) trueeff = "WP70";
+   else if (strstr(cutType_,"WP60") ) trueeff = "WP60";
+   else if (strstr(cutType_,"NTEIdT") ) trueeff = "NT Tight Electron Identification";
+   else if (strstr(cutType_,"NT") ) trueeff = "NT Loose Electron Identification";
 
    //File we initialize the strings for the efficiencies
    Effs_[0] = "GsfTrack"; 
@@ -265,7 +274,7 @@ EfficiencyPlots::printSumHistos(const char *ftype)
                double max = effgraphs_[b]->GetYaxis()->GetXmax();
                if (max > 0.98 || binsTable_->size() > 1 ) effgraphs_[b]->SetMaximum(1.02);
                if (binsTable_->size() > 1) effgraphs_[b]->SetMinimum(min-0.15);
-               else if (min < 0.6) effgraphs_[b]->SetMinimum(0.80);
+               else if (min < 0.2) effgraphs_[b]->SetMinimum(0.70);
            }
            else effgraphs_[b]->Draw("P");
            myLeg->AddEntry(effgraphs_[b],Form("%s %.2f to %.2f %s",

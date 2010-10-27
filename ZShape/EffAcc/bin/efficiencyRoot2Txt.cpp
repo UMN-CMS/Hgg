@@ -17,7 +17,7 @@ int main( int argc, char **argv ) {
   float min=-100;
   float max=100; 
 
-  if(argc<7 ){
+  if(argc<5 ){
     std::cout << "\nlacking arguments. Usage:    efficiencyRoot2Txt <path/efficiencyFileName.root> <path/effFileName.txt> <eff name> <efftype> Min Max\n" << std::endl;
     return -1;
   }
@@ -27,10 +27,19 @@ int main( int argc, char **argv ) {
     min = atof(argv[5]);
     max = atof(argv[6]);
   }
+  else if (argc == 5){
+    eff = argv[3];
+    bins= argv[4];
+  }
   else if (argc >7){
     std::cout << "too many arguments.   Usage: efficiencyFileHisto <path/efficiencyFileName.root> <path/effFile.txt> Efficiency  EffType Min Max\n" << std::endl;
     return -1;
   }
+  else if (argc == 6){
+    std::cout << "one more argument.   Usage: efficiencyFileHisto <path/efficiencyFileName.root> <path/effFile.txt> Efficiency   EffType Min Max\n" << std::endl;
+    return -1;
+  }
+
 
   char * effRootFileName = argv[1];
   char * effTxtFileName = argv[2];
@@ -56,7 +65,7 @@ int main( int argc, char **argv ) {
   EfficiencyStore Root2TxtObject(effFile, eff,bins);
 
   std::string textFileName(effTxtFileName);
-  Root2TxtObject.setVarMinMax(min,max);
+  Root2TxtObject.setVarMinMax(min,max); //I should only do this is there are actually 7 args....
   Root2TxtObject.produceTxtFile(textFileName);
 
 }

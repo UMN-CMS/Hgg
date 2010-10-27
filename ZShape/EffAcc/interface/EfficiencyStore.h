@@ -90,6 +90,7 @@ class EfficiencyStore {
   std::string effType_;
   double vmax_,vmin_;
   bool isEta_;
+  bool isBoth_;
   void produceTxtFile1D();
   void produce1DHistograms(TFile * rootFile);
   //  void produce2DHistograms(TFile * rootFile);
