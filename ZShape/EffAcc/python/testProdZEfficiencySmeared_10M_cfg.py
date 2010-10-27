@@ -80,11 +80,11 @@ process.mcEff = cms.EDAnalyzer("ZEfficiencyCalculator",
             name = cms.untracked.string('HFSuperCluster-Et')
         ),
         cms.PSet(
-            effFile = cms.FileInPath('ZShape/EffAcc/data/NTEId-Pt.txt'),
+            effFile = cms.FileInPath('ZShape/EffAcc/data/NTEId-EtaDet.txt'),
             name = cms.untracked.string('NTLooseElectronId')
         ),
         cms.PSet(
-            effFile = cms.FileInPath('ZShape/EffAcc/data/NTEIdT-Pt.txt'),
+            effFile = cms.FileInPath('ZShape/EffAcc/data/NTEIdT-EtaDet.txt'),
             name = cms.untracked.string('NTTightElectronId')
         ),
         cms.PSet(
