@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("hfzeevbtf_AnalysFromSkim")
+process = cms.Process("hfzeevbtfAnalysFromSkim")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 2000
