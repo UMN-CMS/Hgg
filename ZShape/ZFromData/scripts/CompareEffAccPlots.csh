@@ -112,7 +112,7 @@ gStyle->SetTitleAlign(22);
 //2077.2 for 24
 //
 //EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeFromDataJeremyTEMPLATE/histoJason10_only1hlt_TRIAL_ZFULL.root","/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeMCFromDataJeremyTEMPLATE/MCZFD.root",zdefvec, 108.1259);
-EffAccHistos *myEffAccHistos = new EffAccHistos("/local/cms/user/haupt/Electrons/TNPTREE10/ZFD.FULLOct20th.root","/local/cms/user/haupt/Electrons/TNPTREE10/testProdZEfficiencySmeared_10MTEMPLATE/MCHist.root",zdefvec, 772.0);
+EffAccHistos *myEffAccHistos = new EffAccHistos("/local/cms/user/haupt/Electrons/TNPTREE10/ZFD.Oct26th.root","/local/cms/user/haupt/Electrons/TNPTREE10/testProdZEfficiencySmeared_10MTEMPLATE/MCHist.root",zdefvec, 1213.0);
 //WAS 3724
 //2208 for 4.5
 //ZMC 1930 for 5.3
