@@ -13,7 +13,7 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.17 2010/10/18 21:43:48 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.18 2010/10/19 13:35:20 franzoni Exp $
 //
 //
 
@@ -107,6 +107,7 @@ private:
     TH1* combIsoEB_nmo,  *relTkIsoEB_nmo, *relEcIsoEB_nmo, *relHcIsoEB_nmo, *sigiEtaiEtaEB_nmo, *dphiEB_nmo, *detaEB_nmo, *hOeEB_nmo;
     TH1* combIsoEE_nmo,  *relTkIsoEE_nmo, *relEcIsoEE_nmo, *relHcIsoEE_nmo, *sigiEtaiEtaEE_nmo, *dphiEE_nmo, *detaEE_nmo, *hOeEE_nmo;
     TH1* e9e25_nmo, *var2d_nmo, *eCOREe9_nmo, *eSeL_nmo;
+    TH2* eSeL_vs_logEl;
   };
 std::vector<std::string> HLT_Names;
 bool init_;
@@ -139,22 +140,24 @@ bool init_;
 
 void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   std::string title;
-
+  double minZrange = 60;
+  double maxZrange = 120;
+  
   title=std::string("M_{ee} ")+post;
-  mee=td.make<TH1D>("mee",title.c_str(),90,40,130);  
+  mee=td.make<TH1D>("mee",title.c_str(),120,minZrange,maxZrange);  
   title=std::string("M_{ee,HF+} ")+post;
-  meeHFP=td.make<TH1D>("mee-HFP",title.c_str(),90,40,130);  
+  meeHFP=td.make<TH1D>("mee-HFP",title.c_str(),120,minZrange,maxZrange);  
   title=std::string("M_{ee,HF-} ")+post;
-  meeHFM=td.make<TH1D>("mee-HFM",title.c_str(),90,40,130);  
+  meeHFM=td.make<TH1D>("mee-HFM",title.c_str(),120,minZrange,maxZrange);  
 
   title=std::string("M_{ee} vs eta")+post;
-  mee_vsEta=td.make<TH2D>("mee_vsEta",title.c_str(),10,3,5,30,40,130);  
+  mee_vsEta=td.make<TH2D>("mee_vsEta",title.c_str(),10,3,5,30,minZrange,maxZrange);
   title=std::string("M_{ee,HF+} vs abs(eta) ")+post;
-  mee_vsAbsEta=td.make<TH2D>("mee_vsAbsEta",title.c_str(),10,3,5,30,40,130);  
+  mee_vsAbsEta=td.make<TH2D>("mee_vsAbsEta",title.c_str(),10,3,5,30,minZrange,maxZrange);  
   title=std::string("M_{ee,HF+} vs eta ")+post;
-  meeHFP_vsEta=td.make<TH2D>("mee-HFP_vsEta",title.c_str(),10,3,5,30,40,130);  
+  meeHFP_vsEta=td.make<TH2D>("mee-HFP_vsEta",title.c_str(),10,3,5,30,minZrange,maxZrange);  
   title=std::string("M_{ee,HF-} vs eta ")+post;
-  meeHFM_vsEta=td.make<TH2D>("mee-HFM_vsEta",title.c_str(),10,-5,-3,30,40,130);  
+  meeHFM_vsEta=td.make<TH2D>("mee-HFM_vsEta",title.c_str(),10,-5,-3,30,minZrange,maxZrange);  
 
   title=std::string("Y_{ee} ")+post;
   Yee=td.make<TH1D>("yee",title.c_str(),50,-4,4);  
@@ -190,28 +193,28 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   hfm_pt=td.make<TH1D>("pthfm",title.c_str(),120,0,120);  
 
   title=std::string("iso e9e25 ")+post;
-  hf_e9e25=td.make<TH1D>("e9e25",title.c_str(),50,0,1);
+  hf_e9e25=td.make<TH1D>("e9e25",title.c_str(),60,0,1.2);
   title=std::string("eldId var2d")+post;
   hf_var2d=td.make<TH1D>("var2d",title.c_str(),75,0,1.5);  
   title=std::string("eCOREe9 ")+post;
-  hf_eCOREe9=td.make<TH1D>("eCOREe9",title.c_str(),50,0,1);  
+  hf_eCOREe9=td.make<TH1D>("eCOREe9",title.c_str(),60,0,1.2);  
   title=std::string("eSeL ")+post;
   hf_eSeL=td.make<TH1D>("eSeL",title.c_str(),75,0,1.5);  
 
   title=std::string("seed_eSeL ")+post;
-  hf_seed_eSeL=td.make<TH1D>("seed_eSeL",title.c_str(),40,0,1.5);  
+  hf_seed_eSeL=td.make<TH1D>("seed_eSeL",title.c_str(),75,0,1.5);  
   title=std::string("e1e9 ")+post;
-  hf_e1e9=td.make<TH1D>("e1e9",title.c_str(),50,0,1);
+  hf_e1e9=td.make<TH1D>("e1e9",title.c_str(),60,0,1.2);
   title=std::string("e ")+post;
-  hf_e=td.make<TH1D>("e",title.c_str(),120,0,1200);
+  hf_e=td.make<TH1D>("e",title.c_str(),150,0,1500);
   title=std::string("e1x1 ")+post;
-  hf_e1x1=td.make<TH1D>("e1x1",title.c_str(),120,0,1200);
+  hf_e1x1=td.make<TH1D>("e1x1",title.c_str(),150,0,1500);
   title=std::string("e3x3 ")+post;
-  hf_e3x3=td.make<TH1D>("e3x3",title.c_str(),120,0,1200);
+  hf_e3x3=td.make<TH1D>("e3x3",title.c_str(),150,0,1500);
   title=std::string("e5x5 ")+post;
-  hf_e5x5=td.make<TH1D>("e5x5",title.c_str(),120,0,1200);
+  hf_e5x5=td.make<TH1D>("e5x5",title.c_str(),150,0,1500);
   title=std::string("core ")+post;
-  hf_core=td.make<TH1D>("core",title.c_str(),120,0,1200);
+  hf_core=td.make<TH1D>("core",title.c_str(),150,0,1500);
 
   title=std::string("eta_{el_1} ")+post;
   el_1_eta=td.make<TH1D>("etael1",title.c_str(),50,-5,5);  
@@ -263,8 +266,9 @@ void HFZeeVBTF::HistPerDef::book(TFileDirectory td, const std::string& post) {
   title=std::string("N-1_eCOREe9 ")+post;
   eCOREe9_nmo=td.make<TH1D>("N-1_eCOREe9",title.c_str(),40,0,1);  
   title=std::string("N-1_eSeL ")+post;
-  eSeL_nmo=td.make<TH1D>("N-1_eSeL",title.c_str(),40,0,1.5);  
-
+  eSeL_nmo=td.make<TH1D>("N-1_eSeL",title.c_str(),75,0,1.5);
+  title=std::string("eSeL_vs_logEl ")+post;
+  eSeL_vs_logEl=td.make<TH2D>("eSeL_vs_logEl",title.c_str(),25,3,8,75,0,1.5);
 }
 
 void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,  
@@ -293,9 +297,10 @@ void HFZeeVBTF::HistPerDef::fill(pat::ElectronCollection::const_iterator ecalE,
      e9e25 > e9e25_cut &&
      60 < Z.M() && Z.M() < 130){ // make inv. mass requirement explicit
     
-    mee   ->Fill(Z.M());
-    mee_vsEta -> Fill(hfE.p4().eta(),Z.M());
+    mee          ->Fill(Z.M());
+    mee_vsEta    -> Fill(hfE.p4().eta(),Z.M());
     mee_vsAbsEta -> Fill(fabs(hfE.p4().eta()),Z.M());
+    eSeL_vs_logEl-> Fill(log(hfshape.eLong3x3()),hfshape.eSeL());
 
     if(hfE.p4().eta()>0){
       meeHFP   ->Fill(Z.M());
