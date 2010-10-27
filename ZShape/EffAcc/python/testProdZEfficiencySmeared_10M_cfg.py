@@ -60,7 +60,7 @@ process.mcEff = cms.EDAnalyzer("ZEfficiencyCalculator",
             name = cms.untracked.string('ISO80')
         ),
         cms.PSet(
-            effFile = cms.FileInPath('ZShape/EffAcc/data/GsfTrack-EtaDet.txtt'),
+            effFile = cms.FileInPath('ZShape/EffAcc/data/GsfTrack-EtaDet.txt'),
             name = cms.untracked.string('GsfTrack-EtaDet')
         ), 
         cms.PSet(
