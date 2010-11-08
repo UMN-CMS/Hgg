@@ -21,7 +21,7 @@ process.source = cms.Source("PoolSource",
     fileNames=cms.untracked.vstring(     )
        # 'file:/data/whybee0a/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0009/F074213B-4446-DF11-923D-00E081791875.root'  #  this is a MC test
                  )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.options = cms.untracked.PSet(
                             fileMode = cms.untracked.string('NOMERGE')

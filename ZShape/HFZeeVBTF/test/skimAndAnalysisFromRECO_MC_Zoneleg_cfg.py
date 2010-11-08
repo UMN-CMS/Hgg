@@ -15,7 +15,7 @@ process.source = cms.Source("PoolSource",
     fileNames=cms.untracked.vstring(     )
                   
 )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 ## Load additional processes
 process.load("Configuration.StandardSequences.Geometry_cff")
