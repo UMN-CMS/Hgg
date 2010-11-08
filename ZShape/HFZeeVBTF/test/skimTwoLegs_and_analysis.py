@@ -18,28 +18,7 @@ process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 # source
 process.source = cms.Source("PoolSource",      
-    fileNames=cms.untracked.vstring(
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/8AA1B3E6-BB47-DF11-A25B-003048D476B4.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/8A952443-B046-DF11-BAB9-00E081791745.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/86EBF926-BD47-DF11-87A9-0025B3E065CA.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/86E15B24-6248-DF11-8CCF-003048D460F8.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/849C0563-6648-DF11-BC7B-003048D45FA0.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/84040CF8-AF46-DF11-9721-003048674016.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/829FEDE7-C147-DF11-BB4E-003048D476C6.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/8279E216-E346-DF11-9F91-00E081791813.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/7EE668E4-BB47-DF11-8DFF-003048673E70.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/7CF3B724-6248-DF11-A6B2-003048D45FAC.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/7A8466E0-E746-DF11-B8F3-003048D45FD6.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/766B07EE-C446-DF11-8A30-00E081791735.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/74BF458D-AE46-DF11-9E63-0025B3E063A0.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/74B26B2D-BD47-DF11-8A6C-0025B3E05CDA.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/74759403-E346-DF11-933C-00E08178C121.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/7420BB8E-AE46-DF11-93E2-003048D476E2.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/72526DAC-D146-DF11-98D1-003048D47704.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/70A4298C-AE46-DF11-8BDF-0025B3E06516.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/6CF20024-6248-DF11-A86A-003048D47720.root',
-         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/6C91F7F9-6448-DF11-A325-001A64789E44.root'
-     )
+    fileNames=cms.untracked.vstring(     )
        # 'file:/data/whybee0a/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0009/F074213B-4446-DF11-923D-00E081791875.root'  #  this is a MC test
                  )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
@@ -398,7 +377,7 @@ process.hfRecoEcalCandidate.e9e25Cut      =0.94
 # 0.94 is the same as default in the HF cluster producer
 
 process.TFileService = cms.Service("TFileService",
-       fileName = cms.string("/local/cms/user/franzoni/ele2010/nov08//skimTwoLegs_and_analysis_MC.3hack.py/TFskimTwoLegs_and_analysis_MC.3hack-testFornice_005.root"),
+       fileName = cms.string("TFskimAndAnalysisFromRECO_MC_Zoneleg.root"),
 )
 
 
