@@ -18,10 +18,31 @@ process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 # source
 process.source = cms.Source("PoolSource",      
-    fileNames=cms.untracked.vstring(     )
+    fileNames=cms.untracked.vstring(
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/8AA1B3E6-BB47-DF11-A25B-003048D476B4.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/8A952443-B046-DF11-BAB9-00E081791745.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/86EBF926-BD47-DF11-87A9-0025B3E065CA.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/86E15B24-6248-DF11-8CCF-003048D460F8.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/849C0563-6648-DF11-BC7B-003048D45FA0.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/84040CF8-AF46-DF11-9721-003048674016.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/829FEDE7-C147-DF11-BB4E-003048D476C6.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/8279E216-E346-DF11-9F91-00E081791813.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/7EE668E4-BB47-DF11-8DFF-003048673E70.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/7CF3B724-6248-DF11-A6B2-003048D45FAC.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/7A8466E0-E746-DF11-B8F3-003048D45FD6.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/766B07EE-C446-DF11-8A30-00E081791735.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/74BF458D-AE46-DF11-9E63-0025B3E063A0.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/74B26B2D-BD47-DF11-8A6C-0025B3E05CDA.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/74759403-E346-DF11-933C-00E08178C121.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/7420BB8E-AE46-DF11-93E2-003048D476E2.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/72526DAC-D146-DF11-98D1-003048D47704.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/70A4298C-AE46-DF11-8BDF-0025B3E06516.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/6CF20024-6248-DF11-A86A-003048D47720.root',
+         'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0035/6C91F7F9-6448-DF11-A325-001A64789E44.root'
+     )
        # 'file:/data/whybee0a/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0009/F074213B-4446-DF11-923D-00E081791875.root'  #  this is a MC test
                  )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 
 process.options = cms.untracked.PSet(
                             fileMode = cms.untracked.string('NOMERGE')
@@ -370,276 +391,68 @@ process.hfSel = cms.EDFilter("CandViewCountFilter",
 
 # get HF cluster reco going
 process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
-process.hfRecoEcalCandidate.intercept2DCut=0.3
+#process.hfRecoEcalCandidate.intercept2DCut=-100 # this is to avoid COMPLETELY the usage of the esel 
+#process.hfRecoEcalCandidate.intercept2DCut=0.10 # this is to avoid NEARLY completely the usage of the esel 
+process.hfRecoEcalCandidate.intercept2DCut=0.3   # standard setting (for this analysis)
 process.hfRecoEcalCandidate.e9e25Cut      =0.94
 # 0.94 is the same as default in the HF cluster producer
 
 process.TFileService = cms.Service("TFileService",
-       fileName = cms.string("TFskimAndAnalysisFromRECO_MC_Zoneleg.root"),
+       fileName = cms.string("/local/cms/user/franzoni/ele2010/nov08//skimTwoLegs_and_analysis_MC.3hack.py/TFskimTwoLegs_and_analysis_MC.3hack-testFornice_005.root"),
 )
 
 
 # to access values of EldId cuts
 import ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi
 
-process.IdIsoRej = cms.EDAnalyzer('HFZeeVBTF',
-    ECALid = cms.string('simpleEleId90relIso'),
-    minEtECAL = cms.double(20),
-    minEtHF   = cms.double(20),
-    myName = cms.string('IdIsoRej'),
-    DoLog = cms.bool(True),
-#   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
-    acceptedElectronIDs = cms.vint32( 7 ),
-                              
-#    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-                              minimal = cms.PSet(
-    barrel =  cms.vdouble(9999., 1.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 1.2e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    endcap =  cms.vdouble(9999., 3.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 5.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    ),
-    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-    robust90relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90relIsoEleIDCutsV04.clone()),
-    robust85relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85relIsoEleIDCutsV04.clone()),
-    robust80relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80relIsoEleIDCutsV04.clone()),
-    robust70relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70relIsoEleIDCutsV04.clone()),
-    robust60relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60relIsoEleIDCutsV04.clone()),
-    robust95cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95cIsoEleIDCutsV04.clone()),
-    robust90cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90cIsoEleIDCutsV04.clone()),
-    robust85cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85cIsoEleIDCutsV04.clone()),
-    robust80cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80cIsoEleIDCutsV04.clone()),
-    robust70cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70cIsoEleIDCutsV04.clone()),
-    robust60cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60cIsoEleIDCutsV04.clone())
-    
-                              
-)
+#from PhysicsTools.NtupleUtils.HLTrigResultsDumper_cfi import *
+#process.TriggerResults = HLTrigResultsDumper.clone()
 
+from ZShape.HFZeeVBTF.hfzeevbtf_cfi import *
+
+process.IdIsoRej                     = demo.clone()
+process.IdIsoRej.myName              = cms.string('HFZeeVBTF-IdIsoRej')
+process.IdIsoRej.acceptedElectronIDs = cms.vint32( 7 )
+process.IdIsoRej.DoLog               = cms.bool(True)
 
 # EWK analyzer: different Z definitions with one ECAL electron and one HF electron
 # ---> this is the instance to run AFTER the Wenu EWK filter
-process.IdIso = cms.EDAnalyzer('HFZeeVBTF',
-    ECALid = cms.string('simpleEleId90cIso'),
-    minEtECAL = cms.double(20),
-    minEtHF   = cms.double(20),
-    myName = cms.string('IdIso'),
-    DoLog = cms.bool(True),
-#   this is instance of the analysis code which I carry along to allow the keeping also of electrons that have not passed conversion rejection
-    acceptedElectronIDs = cms.vint32( 3, 7 ),
-                              
-#    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-    robust90relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90relIsoEleIDCutsV04.clone()),
-    robust85relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85relIsoEleIDCutsV04.clone()),
-    robust80relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80relIsoEleIDCutsV04.clone()),
-    robust70relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70relIsoEleIDCutsV04.clone()),
-    robust60relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60relIsoEleIDCutsV04.clone()),
-    robust95cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95cIsoEleIDCutsV04.clone()),
-    robust90cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90cIsoEleIDCutsV04.clone()),
-    robust85cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85cIsoEleIDCutsV04.clone()),
-    robust80cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80cIsoEleIDCutsV04.clone()),
-    robust70cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70cIsoEleIDCutsV04.clone()),
-    robust60cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60cIsoEleIDCutsV04.clone())
+process.IdIso                     = demo.clone()
+process.IdIso.myName              = cms.string('HFZeeVBTF-IdIso')
+process.IdIso.acceptedElectronIDs = cms.vint32( 3, 7 )
 
 
-)
-
-process.IdRej = cms.EDAnalyzer('HFZeeVBTF',
-    ECALid = cms.string('simpleEleId90relIso'),
-    minEtECAL = cms.double(20),
-    minEtHF   = cms.double(20),
-    myName = cms.string('IdRej'),
-    DoLog = cms.bool(True),
-#   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
-    acceptedElectronIDs = cms.vint32( 5 , 7),
-                              
-#    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-                              minimal = cms.PSet(
-    barrel =  cms.vdouble(9999., 1.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 1.2e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    endcap =  cms.vdouble(9999., 3.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 5.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    ),
-    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-    robust90relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90relIsoEleIDCutsV04.clone()),
-    robust85relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85relIsoEleIDCutsV04.clone()),
-    robust80relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80relIsoEleIDCutsV04.clone()),
-    robust70relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70relIsoEleIDCutsV04.clone()),
-    robust60relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60relIsoEleIDCutsV04.clone()),
-    robust95cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95cIsoEleIDCutsV04.clone()),
-    robust90cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90cIsoEleIDCutsV04.clone()),
-    robust85cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85cIsoEleIDCutsV04.clone()),
-    robust80cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80cIsoEleIDCutsV04.clone()),
-    robust70cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70cIsoEleIDCutsV04.clone()),
-    robust60cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60cIsoEleIDCutsV04.clone())
-    
-                              
-)
-
-process.IsoRej = cms.EDAnalyzer('HFZeeVBTF',
-    ECALid = cms.string('simpleEleId90relIso'),
-    minEtECAL = cms.double(20),
-    minEtHF   = cms.double(20),
-    myName = cms.string('IsoRej'),
-    DoLog = cms.bool(True),
-#   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
-    acceptedElectronIDs = cms.vint32( 6 , 7),
-                              
-#    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-                              minimal = cms.PSet(
-    barrel =  cms.vdouble(9999., 1.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 1.2e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    endcap =  cms.vdouble(9999., 3.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 5.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    ),
-    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-    robust90relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90relIsoEleIDCutsV04.clone()),
-    robust85relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85relIsoEleIDCutsV04.clone()),
-    robust80relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80relIsoEleIDCutsV04.clone()),
-    robust70relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70relIsoEleIDCutsV04.clone()),
-    robust60relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60relIsoEleIDCutsV04.clone()),
-    robust95cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95cIsoEleIDCutsV04.clone()),
-    robust90cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90cIsoEleIDCutsV04.clone()),
-    robust85cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85cIsoEleIDCutsV04.clone()),
-    robust80cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80cIsoEleIDCutsV04.clone()),
-    robust70cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70cIsoEleIDCutsV04.clone()),
-    robust60cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60cIsoEleIDCutsV04.clone())
-    
-                              
-)
+process.IdRej                     = demo.clone()
+process.IdRej.myName              = cms.string('HFZeeVBTF-IdRej')
+process.IdRej.acceptedElectronIDs = cms.vint32( 5, 7 )
 
 
+process.IsoRej                     = demo.clone()
+process.IsoRej.myName              = cms.string('HFZeeVBTF-IsoRej')
+process.IsoRej.acceptedElectronIDs = cms.vint32( 6, 7 )
 
 
+process.Id                     = demo.clone()
+process.Id.myName              = cms.string('HFZeeVBTF-Id')
+process.Id.acceptedElectronIDs = cms.vint32( 1, 3, 5, 7 )
 
 
-process.Id = cms.EDAnalyzer('HFZeeVBTF',
-    ECALid = cms.string('simpleEleId90relIso'),
-    minEtECAL = cms.double(20),
-    minEtHF   = cms.double(20),
-    myName = cms.string('Id'),
-    DoLog = cms.bool(True),
-#   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
-    acceptedElectronIDs = cms.vint32( 1 , 3, 5, 7),
-                              
-#    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-                              minimal = cms.PSet(
-    barrel =  cms.vdouble(9999., 1.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 1.2e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    endcap =  cms.vdouble(9999., 3.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 5.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    ),
-    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-    robust90relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90relIsoEleIDCutsV04.clone()),
-    robust85relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85relIsoEleIDCutsV04.clone()),
-    robust80relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80relIsoEleIDCutsV04.clone()),
-    robust70relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70relIsoEleIDCutsV04.clone()),
-    robust60relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60relIsoEleIDCutsV04.clone()),
-    robust95cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95cIsoEleIDCutsV04.clone()),
-    robust90cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90cIsoEleIDCutsV04.clone()),
-    robust85cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85cIsoEleIDCutsV04.clone()),
-    robust80cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80cIsoEleIDCutsV04.clone()),
-    robust70cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70cIsoEleIDCutsV04.clone()),
-    robust60cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60cIsoEleIDCutsV04.clone())
-    
-                              
-)
+process.Iso                     = demo.clone()
+process.Iso.myName              = cms.string('HFZeeVBTF-Iso')
+process.Iso.acceptedElectronIDs = cms.vint32( 2, 3, 6, 7 )
 
 
-process.Iso = cms.EDAnalyzer('HFZeeVBTF',
-    ECALid = cms.string('simpleEleId90relIso'),
-    minEtECAL = cms.double(20),
-    minEtHF   = cms.double(20),
-    myName = cms.string('Iso'),
-    DoLog = cms.bool(True),
-#   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
-    acceptedElectronIDs = cms.vint32( 2, 3, 6, 7 ),
-                              
-#    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-                              minimal = cms.PSet(
-    barrel =  cms.vdouble(9999., 1.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 1.2e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    endcap =  cms.vdouble(9999., 3.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 5.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    ),
-    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-    robust90relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90relIsoEleIDCutsV04.clone()),
-    robust85relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85relIsoEleIDCutsV04.clone()),
-    robust80relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80relIsoEleIDCutsV04.clone()),
-    robust70relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70relIsoEleIDCutsV04.clone()),
-    robust60relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60relIsoEleIDCutsV04.clone()),
-    robust95cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95cIsoEleIDCutsV04.clone()),
-    robust90cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90cIsoEleIDCutsV04.clone()),
-    robust85cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85cIsoEleIDCutsV04.clone()),
-    robust80cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80cIsoEleIDCutsV04.clone()),
-    robust70cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70cIsoEleIDCutsV04.clone()),
-    robust60cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60cIsoEleIDCutsV04.clone())
-    
-                              
-)
+process.Rej                     = demo.clone()
+process.Rej.myName              = cms.string('HFZeeVBTF-Rej')
+process.Rej.acceptedElectronIDs = cms.vint32( 4, 5, 6, 7 )
 
-
-process.Rej = cms.EDAnalyzer('HFZeeVBTF',
-    ECALid = cms.string('simpleEleId90relIso'),
-    minEtECAL = cms.double(20),
-    minEtHF   = cms.double(20),
-    myName = cms.string('Rej'),
-    DoLog = cms.bool(True),
-#   this is instance of the analysis code which matters; keep only enectrons that pass the full selection
-    acceptedElectronIDs = cms.vint32( 4, 5, 6 , 7 ),
-                              
-#    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-                              minimal = cms.PSet(
-    barrel =  cms.vdouble(9999., 1.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 1.2e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    endcap =  cms.vdouble(9999., 3.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 5.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    ),
-    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-    robust90relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90relIsoEleIDCutsV04.clone()),
-    robust85relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85relIsoEleIDCutsV04.clone()),
-    robust80relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80relIsoEleIDCutsV04.clone()),
-    robust70relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70relIsoEleIDCutsV04.clone()),
-    robust60relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60relIsoEleIDCutsV04.clone()),
-    robust95cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95cIsoEleIDCutsV04.clone()),
-    robust90cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90cIsoEleIDCutsV04.clone()),
-    robust85cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85cIsoEleIDCutsV04.clone()),
-    robust80cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80cIsoEleIDCutsV04.clone()),
-    robust70cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70cIsoEleIDCutsV04.clone()),
-    robust60cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60cIsoEleIDCutsV04.clone())
-    
-                              
-)
 
 #  this module is run at the beginning of the job sequence just to count the number of events
 #  the analysis has been running on
-process.demoBefCuts = cms.EDAnalyzer('HFZeeVBTF',
-    ECALid = cms.string('simpleEleId90relIso'),
-    minEtECAL = cms.double(20),
-    minEtHF   = cms.double(20),
-    myName = cms.string('demoBefCuts'),
-    DoLog = cms.bool(False),
-
-    acceptedElectronIDs = cms.vint32( 7 ),
-                              
-                              minimal = cms.PSet(
-    barrel =  cms.vdouble(9999., 1.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 1.2e-01, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    endcap =  cms.vdouble(9999., 3.0e-02, 9999., 9999., -1, -1, 9999., 9999., 9999., 9999., 9999., 9999., 
-                          9999., 5.0e-02, 9999., 9999., 9999., 9999., 0.0, -9999., 9999., 9999., 1, -1, 0.0, 0.0, ),
-    ),
-    robust95relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95relIsoEleIDCutsV04.clone()),
-    robust90relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90relIsoEleIDCutsV04.clone()),
-    robust85relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85relIsoEleIDCutsV04.clone()),
-    robust80relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80relIsoEleIDCutsV04.clone()),
-    robust70relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70relIsoEleIDCutsV04.clone()),
-    robust60relIsoEleIDCutsV04 = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60relIsoEleIDCutsV04.clone()),
-    robust95cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust95cIsoEleIDCutsV04.clone()),
-    robust90cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust90cIsoEleIDCutsV04.clone()),
-    robust85cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust85cIsoEleIDCutsV04.clone()),
-    robust80cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust80cIsoEleIDCutsV04.clone()),
-    robust70cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust70cIsoEleIDCutsV04.clone()),
-    robust60cIsoEleIDCutsV04   = cms.PSet(ElectroWeakAnalysis.WENu.simpleCutBasedElectronIDSpring10_cfi.simpleCutBasedElectronID.robust60cIsoEleIDCutsV04.clone())
-)
+process.demoBefCuts                     = demo.clone()
+process.demoBefCuts.myName              = cms.string('demoBefCuts')
+process.demoBefCuts.acceptedElectronIDs = cms.vint32( 7 )
+process.demoBefCuts.DoLog               = cms.bool(False)
 
 
 from ZShape.HFZeeVBTF.elewithmet_cfi import *
