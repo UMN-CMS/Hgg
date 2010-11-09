@@ -37,10 +37,10 @@ void EffHistos::Book(TFileDirectory& tdf) {
   YZTL_  = tdf.make<TH1F>("Z0_YTL","Z0_Y Tree Level;Y_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY);
   ptZTL_ = tdf.make<TH1F>("Z0_PtTL","Z0_Pt Tree Level;p_{T,Z0}", 200, 0, maxPt);
 
-  e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta;detector #eta_{e1}", 103, detetaBins);
-  e2eta_ = tdf.make<TH1F>("e2_eta","e2_eta;detector #eta_{e2}", 103, detetaBins);
-  e1phi_ = tdf.make<TH1F>("e1_phi","e1_phi;#phi_{e1}", 100, -pi, pi);
-  e2phi_ = tdf.make<TH1F>("e2_phi","e2_phi;#phi_{e2}", 100,  -pi, pi);
+  e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta;detector #eta_{e1}", 50, -5, 5);
+  e2eta_ = tdf.make<TH1F>("e2_eta","e2_eta;detector #eta_{e2}", 50, -5, 5);
+  e1phi_ = tdf.make<TH1F>("e1_phi","e1_phi;#phi_{e1}", 50, -pi, pi);
+  e2phi_ = tdf.make<TH1F>("e2_phi","e2_phi;#phi_{e2}", 50,  -pi, pi);
   e1pt_  = tdf.make<TH1F>("e1_P_t","e1_P_t;p_{T,e1}", 200, 0, maxPt);
   e2pt_  = tdf.make<TH1F>("e2_P_t","e2_P_t;p_{T,e2}", 200, 0, maxPt);
  
