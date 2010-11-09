@@ -373,9 +373,9 @@ std::cout << " divide the first 50 " << std::endl;
      FinalHistos_.ZRapAfter.push_back(tempHist);
   }
 std::cout << " divide the first 60 " << std::endl;
-  FinalHistos_.ZRapTotal    = new TH1F("ZRapTotal","Z Rapidity;Z0_Y;Number of Events/0.25 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
-  FinalHistos_.ZMCRapTotal  = new TH1F("ZMCRapTotal","Z Rapidity;Z0_Y;Number of Events/0.25 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
-  FinalHistos_.ZEffAccTotal = new TH1F("EffAccTotal","EffxAcc Total;Z0_Y;EffxAcc",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
+  FinalHistos_.ZRapTotal    = new TH1F("ZRapTotal","Z Rapidity;Y_{Z0};Events/0.25 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
+  FinalHistos_.ZMCRapTotal  = new TH1F("ZMCRapTotal","Z Rapidity;Y_{Z0};Events/0.25 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
+  FinalHistos_.ZEffAccTotal = new TH1F("EffAccTotal","EffxAcc Total;Y_{Z0};EffxAcc",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
   FinalHistos_.ZRapTotSk = new THStack();
   FinalHistos_.ZEffAccTotSk= new THStack();
   FinalHistos_.ZRapTotal->GetXaxis()->CenterTitle(kTRUE);
@@ -455,7 +455,7 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
        plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
   tempCan1->Print(Form("ZEffAccTotal_Z0_Y.%s",ftype));
 
-  FinalHistos_.ZRapTotal->Draw();
+  FinalHistos_.ZRapTotal->Draw("pe1");
        plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
   tempCan1->Print(Form("ZEffRapTotal_Z0_Y.%s",ftype));
 
@@ -635,20 +635,20 @@ for (uint i =0; i < ZDefVec_.size(); ++i)
 
 FinalHistos_.ZEffAccTotSk->Draw("hist");
 myLegf->Draw();
-FinalHistos_.ZEffAccTotSk->GetXaxis()->SetTitle("Z0_Y");
+FinalHistos_.ZEffAccTotSk->GetXaxis()->SetTitle("Y_{Z0}");
      plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");   //  tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZEffAccTotalStacked_Z0_Y.%s",ftype));
 
 
 FinalHistos_.ZRapTotSk->Draw();
-FinalHistos_.ZRapTotSk->GetXaxis()->SetTitle("Z0_Y");
+FinalHistos_.ZRapTotSk->GetXaxis()->SetTitle("Y_{Z0}");
 myLegf->Draw();
      plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZRapTotalStacked_Z0_Y.%s",ftype));
 
 if (FinalHistos_.ZRapTotSk->GetMaximum() > FinalHistos_.ZMCRapTotal->GetMaximum()) {
 FinalHistos_.ZRapTotSk->Draw();
-FinalHistos_.ZRapTotSk->GetXaxis()->SetTitle("Z0_Y");
+FinalHistos_.ZRapTotSk->GetXaxis()->SetTitle("Y_{Z0}");
 FinalHistos_.ZMCRapTotal->Draw("samehist");
 FinalHistos_.ZMCRapTotal->SetLineColor(kRed);
 }
@@ -657,7 +657,7 @@ else
 FinalHistos_.ZMCRapTotal->Draw("hist");
 FinalHistos_.ZMCRapTotal->SetLineColor(kRed);
 FinalHistos_.ZRapTotSk->Draw("same");
-FinalHistos_.ZRapTotSk->GetXaxis()->SetTitle("Z0_Y");
+FinalHistos_.ZRapTotSk->GetXaxis()->SetTitle("Y_{Z0}");
 }
 myLegf->SetTextSize(0.02);
 myLegf->AddEntry(FinalHistos_.ZMCRapTotal,"Zee MC","l");
@@ -680,7 +680,7 @@ FinalHistos_.ZEffAccTotSk->Draw("histnostack");
 myLegl->Draw();
      plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY"); //    tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZEffAccTotalEach_Z0_Y.%s",ftype));
-FinalHistos_.ZRapTotSk->Draw("nostack");
+FinalHistos_.ZRapTotSk->Draw("e1p,nostack");
 myLegl->Draw();
      plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");   //  tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZRapTotalEach_Z0_Y.%s",ftype));
@@ -700,7 +700,7 @@ myLegpl->AddEntry(MCHistos_.ZRapMC,"Pythia Z2","pl");
 
 
 myLegpl->Draw();
-     plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "5 pb^{-1}");
+     plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "4 pb^{-1}");
 tempCan->Print(Form("ZRapCOOL_Z0_Y.%s",ftype));
 MCHistos_.ZRapMC->Scale(1.0/scale_);
 

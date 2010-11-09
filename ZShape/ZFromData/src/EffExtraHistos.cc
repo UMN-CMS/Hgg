@@ -29,10 +29,10 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
   DmZ_  = tdf.make<TH1F>("Z0_mass_Delta","Z0_mass_Delta;Delta m_{Z0} (GeV/c^{2})", 50, -60, 60);  
   DYZ_  = tdf.make<TH1F>("Z0_Y_Delta","Z0_Y_Delta;Y_{Z0}", int((maxY*2)*4), -maxY, maxY);  
   DptZ_ = tdf.make<TH1F>("Z0_Pt_Delta","Z0_Pt_Delta;p_{T,Z0}", 100, -50., 50.); 
-  De1eta_ = tdf.make<TH1F>("e1_eta_Delta","e1_eta_Delta;detector #eta_{e1}", 103, detetaBins);  
-  De2eta_ = tdf.make<TH1F>("e2_eta_Delta","e2_eta_Delta;detector #eta_{e2}", 103, detetaBins);
-  De1phi_ = tdf.make<TH1F>("e1_phi_Delta","e1_phi_Delta;#phi_{e1}", 100, -pi, pi);  
-  De2phi_ = tdf.make<TH1F>("e2_phi_Delta","e2_phi_Delta;#phi_{e2}", 100,  -pi, pi);  
+  De1eta_ = tdf.make<TH1F>("e1_eta_Delta","e1_eta_Delta;detector #eta_{e1}", 50, -5, 5);  
+  De2eta_ = tdf.make<TH1F>("e2_eta_Delta","e2_eta_Delta;detector #eta_{e2}", 50, -5, 5);
+  De1phi_ = tdf.make<TH1F>("e1_phi_Delta","e1_phi_Delta;#phi_{e1}", 50, -pi, pi);  
+  De2phi_ = tdf.make<TH1F>("e2_phi_Delta","e2_phi_Delta;#phi_{e2}", 50,  -pi, pi);  
   De1pt_  = tdf.make<TH1F>("e1_P_t_Delta","e1_P_t_Delta;p_{T,e1}", 200, -50., 50.);  
   De2pt_  = tdf.make<TH1F>("e2_P_t_Delta","e2_P_t_Delta;p_{T,e2}", 200, -50., 50.);
 
@@ -48,10 +48,10 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
   MCmZ_  = tdf.make<TH1F>("Z0_mass_MC","Z0_mass_MC;m_{Z0} (GeV/c^{2})", 60, 35., 150.);  
   MCYZ_  = tdf.make<TH1F>("Z0_Y_MC","Z0_Y_MC;Y_{Z0}", int((maxY*2)*4), -maxY, maxY);  
   MCptZ_ = tdf.make<TH1F>("Z0_Pt_MC","Z0_Pt_MC;p_{T,Z0}", 200, 0., maxPt); 
-  MCe1eta_ = tdf.make<TH1F>("e1_eta_MC","e1_eta_MC;detector #eta_{e1}", 103, detetaBins);  
-  MCe2eta_ = tdf.make<TH1F>("e2_eta_MC","e2_eta_MC;detector #eta_{e2}", 103, detetaBins);
-  MCe1phi_ = tdf.make<TH1F>("e1_phi_MC","e1_phi_MC;#phi_{e1}", 100, -pi, pi);  
-  MCe2phi_ = tdf.make<TH1F>("e2_phi_MC","e2_phi_MC;#phi_{e2}", 100,  -pi, pi);  
+  MCe1eta_ = tdf.make<TH1F>("e1_eta_MC","e1_eta_MC;detector #eta_{e1}", 50, -5, 5);  
+  MCe2eta_ = tdf.make<TH1F>("e2_eta_MC","e2_eta_MC;detector #eta_{e2}", 50, -5, 5);
+  MCe1phi_ = tdf.make<TH1F>("e1_phi_MC","e1_phi_MC;#phi_{e1}", 50, -pi, pi);  
+  MCe2phi_ = tdf.make<TH1F>("e2_phi_MC","e2_phi_MC;#phi_{e2}", 50,  -pi, pi);  
   MCe1pt_  = tdf.make<TH1F>("e1_P_t_MC","e1_P_t_MC;p_{T,e1}", 200, 0., maxPt);  
   MCe2pt_  = tdf.make<TH1F>("e2_P_t_MC","e2_P_t_MC;p_{T,e2}", 200, 0., maxPt);
 }
