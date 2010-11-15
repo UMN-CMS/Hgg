@@ -15,8 +15,8 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
-    fileNames=cms.untracked.vstring( )
-)
+   # fileNames=cms.untracked.vstring('file:/hdfs/cms/skim/elec/EG-Run2010A-Sep17ReReco_v2-oct9/skimOnly_ZtwoLegs-Run2010A-Sep17ReReco_v2-dbsOct10_001.root')#GF
+                            )
 
 
 # # in this file I collect the lumi sections intervals I am interested in
@@ -39,6 +39,34 @@ process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRang
 process.source.lumisToProcess.extend(myLumis)
 
 
+## global tag for data
+process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.GlobalTag.globaltag = 'START38_V7::All' ## needed for CMSSW_3_8_0 due to changes in the DB access for JEC ## process.GlobalTag.globaltag = cms.string('GR_R_35X_V8B::All')
+
+process.es_ascii = cms.ESSource("HcalTextCalibrations",
+                                                       input = cms.VPSet(
+           cms.PSet(
+               object = cms.string('RespCorrs'),
+               #file = cms.FileInPath('ZShape/HFZeeVBTF/test/prelim_correctionsHBHEHF.txt')
+               file = cms.FileInPath('Work/HFRescaler/data/prelim_correctionsHBHEHF.txt')
+                          )
+                  )
+                                                       )
+process.prefer("es_ascii")
+
+process.hfrecalib=cms.EDProducer('HFRescaler',
+                                                                 input = cms.InputTag('hfreco'),
+                                                                 invert = cms.bool(False)
+                                 )
+process.load("RecoEgamma.EgammaHFProducers.hfEMClusteringSequence_cff")
+
+process.hfEMClusters.hits=cms.InputTag("hfrecalib")
+
+
+
+
 process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
 process.hfRecoEcalCandidate.intercept2DCut=0.3
 process.hfRecoEcalCandidate.e9e25Cut      =0.94
@@ -47,7 +75,7 @@ process.hfRecoEcalCandidate.e9e25Cut      =0.94
 process.hfRecoEcalCandidate.correctionType=cms.int32(0)
 
 process.TFileService = cms.Service("TFileService",
-       fileName = cms.string('')
+       fileName = cms.string( )
 )
 
 # to access values of EldId cuts
@@ -213,9 +241,10 @@ process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 process.p = cms.Path(
       # process.EG_1e28 *
-    process.hfRecoEcalCandidate
+    process.demoBefCuts # this one is just to count events (needed in MC!)
+    * process.hfrecalib
+    * process.hfRecoEcalCandidate
     * process.hfRecoEcalCandidateLoose
-    * process.demoBefCuts # this one is just to count events (needed in MC!)
     * process.IdIso
     * process.IdRej
     * process.IsoRej
