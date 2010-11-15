@@ -18,9 +18,10 @@ process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 # source
 process.source = cms.Source("PoolSource",      
-    fileNames=cms.untracked.vstring(     )
-       # 'file:/data/whybee0a/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0009/F074213B-4446-DF11-923D-00E081791875.root'  #  this is a MC test
-                 )
+    fileNames=cms.untracked.vstring(     
+   #     'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0036/F635D8DC-9949-DF11-9934-001A64789E6C.root'  #  this is a MC test
+))
+
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 
 process.options = cms.untracked.PSet(
@@ -426,6 +427,23 @@ process.Rej.myName              = cms.string('HFZeeVBTF-Rej')
 process.Rej.acceptedElectronIDs = cms.vint32( 4, 5, 6, 7 )
 
 
+from RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi import *
+process.hfRecoEcalCandidateLoose            = hfRecoEcalCandidate.clone()
+process.hfRecoEcalCandidateLoose.hfclusters = cms.InputTag("hfEMClusters")
+process.hfRecoEcalCandidateLoose.intercept2DCut=-100# this is to avoid JUST completely the usage of the esel
+process.hfRecoEcalCandidateLoose.e9e25Cut      =0.94
+# 0: correction is off; 1: correction is activated
+process.hfRecoEcalCandidateLoose.correctionType=cms.int32(0)
+
+process.IdIsoRejHFIsoOnly                     = demo.clone()
+process.IdIsoRejHFIsoOnly.myName              = cms.string('HFZeeVBTF-IdIsoRejHFIsonly')
+process.IdIsoRejHFIsoOnly.acceptedElectronIDs = cms.vint32( 7 )
+# the following params are, respectively: e9e25_loose, e9e25_tight,  var2d_loose, var2d_tight,  eCOREe9_loose, eCOREe9_tight,  eSeL_loose, eSeL_tight;
+process.IdIsoRejHFIsoOnly.hFselParams         = cms.vdouble(0.90, 0.94,      -9999, -9999,    0.7, 0.85,     9999, 9999)
+process.IdIsoRejHFIsoOnly.DoLog               = cms.bool(True)
+process.IdIsoRejHFIsoOnly.hFElectrons         = cms.InputTag("hfRecoEcalCandidateLoose","","skim-and-Zshape-analysis")
+
+
 #  this module is run at the beginning of the job sequence just to count the number of events
 #  the analysis has been running on
 process.demoBefCuts                     = demo.clone()
@@ -573,6 +591,7 @@ process.analyzers = cms.EndPath(
       process.demoBefCuts # this one is just to count events (needed in MC!)
      *process.orOfTheeSkimPaths 
      *process.hfRecoEcalCandidate
+     *process.hfRecoEcalCandidateLoose
      *process.IdIso
      *process.IdRej
      *process.IsoRej
@@ -580,6 +599,7 @@ process.analyzers = cms.EndPath(
      *process.Iso
      *process.Rej
      *process.IdIsoRej
+     *process.IdIsoRejHFIsoOnly
      *process.metEleIdIsoRej
      *process.metEleIdIso
      *process.metEleIdRej
