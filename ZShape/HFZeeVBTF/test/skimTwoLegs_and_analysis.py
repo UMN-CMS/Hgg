@@ -375,6 +375,7 @@ process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
 #process.hfRecoEcalCandidate.intercept2DCut=0.10 # this is to avoid NEARLY completely the usage of the esel 
 process.hfRecoEcalCandidate.intercept2DCut=0.3   # standard setting (for this analysis)
 process.hfRecoEcalCandidate.e9e25Cut      =0.94
+process.hfRecoEcalCandidate.correctionType=cms.int32(0)
 # 0.94 is the same as default in the HF cluster producer
 
 process.TFileService = cms.Service("TFileService",
