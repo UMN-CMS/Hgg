@@ -44,7 +44,7 @@ process.hfRecoEcalCandidate.intercept2DCut=0.3
 process.hfRecoEcalCandidate.e9e25Cut      =0.94
 # 0.94 is the same as default in the HF cluster producer
 # 0: correction is off; 1: correction is activated
-process.hfRecoEcalCandidate.correctionType=0
+process.hfRecoEcalCandidate.correctionType=cms.int32(0)
 
 process.TFileService = cms.Service("TFileService",
        fileName = cms.string('')
@@ -99,7 +99,7 @@ process.hfRecoEcalCandidateLoose.hfclusters = cms.InputTag("hfEMClusters")
 process.hfRecoEcalCandidateLoose.intercept2DCut=-100# this is to avoid JUST completely the usage of the esel
 process.hfRecoEcalCandidateLoose.e9e25Cut      =0.94
 # 0: correction is off; 1: correction is activated
-process.hfRecoEcalCandidateLoose.correctionType=0
+process.hfRecoEcalCandidateLoose.correctionType=cms.int32(0)
 
 process.IdIsoRejHFIsoOnly                     = demo.clone()
 process.IdIsoRejHFIsoOnly.myName              = cms.string('HFZeeVBTF-IdIsoRejHFIsonly')
