@@ -61,8 +61,10 @@ process.hfrecalib=cms.EDProducer('HFRescaler',
                                                                  invert = cms.bool(False)
                                  )
 process.load("RecoEgamma.EgammaHFProducers.hfEMClusteringSequence_cff")
-
+## feed the re-calibrated HF rechits into a new clustering
 process.hfEMClusters.hits=cms.InputTag("hfrecalib")
+# 0 = no corrections applied; 1=corrections applie
+process.hfEMClusters.correctionType=0
 
 
 
@@ -71,8 +73,6 @@ process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
 process.hfRecoEcalCandidate.intercept2DCut=0.3
 process.hfRecoEcalCandidate.e9e25Cut      =0.94
 # 0.94 is the same as default in the HF cluster producer
-# 0: correction is off; 1: correction is activated
-process.hfRecoEcalCandidate.correctionType=cms.int32(0)
 
 process.TFileService = cms.Service("TFileService",
        fileName = cms.string( )
@@ -126,8 +126,6 @@ process.hfRecoEcalCandidateLoose            = hfRecoEcalCandidate.clone()
 process.hfRecoEcalCandidateLoose.hfclusters = cms.InputTag("hfEMClusters")
 process.hfRecoEcalCandidateLoose.intercept2DCut=-100# this is to avoid JUST completely the usage of the esel
 process.hfRecoEcalCandidateLoose.e9e25Cut      =0.94
-# 0: correction is off; 1: correction is activated
-process.hfRecoEcalCandidateLoose.correctionType=cms.int32(0)
 
 process.IdIsoRejHFIsoOnly                     = demo.clone()
 process.IdIsoRejHFIsoOnly.myName              = cms.string('HFZeeVBTF-IdIsoRejHFIsonly')
@@ -243,6 +241,7 @@ process.p = cms.Path(
       # process.EG_1e28 *
     process.demoBefCuts # this one is just to count events (needed in MC!)
     * process.hfrecalib
+    * process.hfEMClusteringSequence
     * process.hfRecoEcalCandidate
     * process.hfRecoEcalCandidateLoose
     * process.IdIso
