@@ -18,11 +18,11 @@ process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 # source
 process.source = cms.Source("PoolSource",      
-    fileNames=cms.untracked.vstring(     
+    fileNames=cms.untracked.vstring(     )
    #     'file:/local/cms/phedex/store/mc/Spring10/Zee/GEN-SIM-RECO/START3X_V26_S09-v1/0036/F635D8DC-9949-DF11-9934-001A64789E6C.root'  #  this is a MC test
-))
+)
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.options = cms.untracked.PSet(
                             fileMode = cms.untracked.string('NOMERGE')
@@ -368,6 +368,11 @@ process.hfSel = cms.EDFilter("CandViewCountFilter",
 ###  Setting up RECO and analyzers: ECAL-HF Z's and metEle; one instance per  ele selection
 ################################################################################################
 
+process.load("RecoEgamma.EgammaHFProducers.hfEMClusteringSequence_cff")
+## feed the re-calibrated HF rechits into a new clustering
+# 0 = no corrections applied; 1=corrections applie
+process.hfEMClusters.correctionType=0
+
 
 # get HF cluster reco going
 process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
@@ -375,7 +380,6 @@ process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
 #process.hfRecoEcalCandidate.intercept2DCut=0.10 # this is to avoid NEARLY completely the usage of the esel 
 process.hfRecoEcalCandidate.intercept2DCut=0.3   # standard setting (for this analysis)
 process.hfRecoEcalCandidate.e9e25Cut      =0.94
-process.hfRecoEcalCandidate.correctionType=cms.int32(0)
 # 0.94 is the same as default in the HF cluster producer
 
 process.TFileService = cms.Service("TFileService",
@@ -433,8 +437,6 @@ process.hfRecoEcalCandidateLoose            = hfRecoEcalCandidate.clone()
 process.hfRecoEcalCandidateLoose.hfclusters = cms.InputTag("hfEMClusters")
 process.hfRecoEcalCandidateLoose.intercept2DCut=-100# this is to avoid JUST completely the usage of the esel
 process.hfRecoEcalCandidateLoose.e9e25Cut      =0.94
-# 0: correction is off; 1: correction is activated
-process.hfRecoEcalCandidateLoose.correctionType=cms.int32(0)
 
 process.IdIsoRejHFIsoOnly                     = demo.clone()
 process.IdIsoRejHFIsoOnly.myName              = cms.string('HFZeeVBTF-IdIsoRejHFIsonly')
@@ -591,6 +593,7 @@ process.orOfTheeSkimPaths = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.c
 process.analyzers = cms.EndPath(
       process.demoBefCuts # this one is just to count events (needed in MC!)
      *process.orOfTheeSkimPaths 
+     *process.hfEMClusteringSequence
      *process.hfRecoEcalCandidate
      *process.hfRecoEcalCandidateLoose
      *process.IdIso
