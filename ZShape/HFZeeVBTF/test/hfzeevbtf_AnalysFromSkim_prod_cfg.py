@@ -15,8 +15,17 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
-    fileNames=cms.untracked.vstring( )
+   # fileNames=cms.untracked.vstring('file:/hdfs/cms/skim/elec/EG-Run2010A-Sep17ReReco_v2-oct9/skimOnly_ZtwoLegs-Run2010A-Sep17ReReco_v2-dbsOct10_001.root')
+
+    fileNames=cms.untracked.vstring(    )
+                            ,
+                            inputCommands = cms.untracked.vstring('keep *'
+                                                                  ,'drop *_hfRecoEcalCandidate_*_RECO' # drop hfRecoEcalCandidate as remade in this process
+                                                                  )
+                            )
+
 )
+
 
 
 # # in this file I collect the lumi sections intervals I am interested in
@@ -39,15 +48,43 @@ process.source.lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRang
 process.source.lumisToProcess.extend(myLumis)
 
 
+## global tag for data
+process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.GlobalTag.globaltag = 'START38_V7::All' ## needed for CMSSW_3_8_0 due to changes in the DB access for JEC ## process.GlobalTag.globaltag = cms.string('GR_R_35X_V8B::All')
+
+process.es_ascii = cms.ESSource("HcalTextCalibrations",
+                                                       input = cms.VPSet(
+           cms.PSet(
+               object = cms.string('RespCorrs'),
+               #file = cms.FileInPath('ZShape/HFZeeVBTF/test/prelim_correctionsHBHEHF.txt')
+               file = cms.FileInPath('Work/HFRescaler/data/prelim_correctionsHBHEHF.txt')
+                          )
+                  )
+                                                       )
+process.prefer("es_ascii")
+
+process.hfrecalib=cms.EDProducer('HFRescaler',
+                                                                 input = cms.InputTag('hfreco'),
+                                                                 invert = cms.bool(False)
+                                 )
+process.load("RecoEgamma.EgammaHFProducers.hfEMClusteringSequence_cff")
+## feed the re-calibrated HF rechits into a new clustering
+process.hfEMClusters.hits=cms.InputTag("hfrecalib")
+# 0 = no corrections applied; 1=corrections applie
+process.hfEMClusters.correctionType=0
+
+
+
+
 process.load("RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi")
 process.hfRecoEcalCandidate.intercept2DCut=0.3
 process.hfRecoEcalCandidate.e9e25Cut      =0.94
 # 0.94 is the same as default in the HF cluster producer
-# 0: correction is off; 1: correction is activated
-process.hfRecoEcalCandidate.correctionType=0
 
 process.TFileService = cms.Service("TFileService",
-       fileName = cms.string('')
+       fileName = cms.string( )
 )
 
 # to access values of EldId cuts
@@ -98,8 +135,6 @@ process.hfRecoEcalCandidateLoose            = hfRecoEcalCandidate.clone()
 process.hfRecoEcalCandidateLoose.hfclusters = cms.InputTag("hfEMClusters")
 process.hfRecoEcalCandidateLoose.intercept2DCut=-100# this is to avoid JUST completely the usage of the esel
 process.hfRecoEcalCandidateLoose.e9e25Cut      =0.94
-# 0: correction is off; 1: correction is activated
-process.hfRecoEcalCandidateLoose.correctionType=0
 
 process.IdIsoRejHFIsoOnly                     = demo.clone()
 process.IdIsoRejHFIsoOnly.myName              = cms.string('HFZeeVBTF-IdIsoRejHFIsonly')
@@ -212,10 +247,12 @@ import FWCore.Modules.printContent_cfi
 process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 process.p = cms.Path(
-      # process.EG_1e28 *
-    process.hfRecoEcalCandidate
-    * process.hfRecoEcalCandidateLoose
-    * process.demoBefCuts # this one is just to count events (needed in MC!)
+    # process.hfrecalib *
+    # process.hfEMClusteringSequence * 
+    process.hfRecoEcalCandidate *     # redo the candidates, with the locally defined HF id cuts
+    process.hfRecoEcalCandidateLoose  # never remove this because a module will need its product (which are not originally present in RECO)
+    
+    # * process.dumpEv
     * process.IdIso
     * process.IdRej
     * process.IsoRej
@@ -231,7 +268,6 @@ process.p = cms.Path(
     * process.metEleId
     * process.metEleIso
     * process.metEleRej
-    #* process.dumpEv
     )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
