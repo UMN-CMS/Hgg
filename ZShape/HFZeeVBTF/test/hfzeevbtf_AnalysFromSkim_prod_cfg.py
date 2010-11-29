@@ -24,8 +24,6 @@ process.source = cms.Source("PoolSource",
                                                                   )
                             )
 
-)
-
 
 
 # # in this file I collect the lumi sections intervals I am interested in
