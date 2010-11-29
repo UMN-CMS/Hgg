@@ -14,8 +14,18 @@ process.options = cms.untracked.PSet(
 )
 
 process.source = cms.Source("PoolSource",
+    # replace 'myfile.root' with the source file you want to use
+   # fileNames=cms.untracked.vstring('file:/hdfs/cms/skim/elec/EG-Run2010A-Sep17ReReco_v2-oct9/skimOnly_ZtwoLegs-Run2010A-Sep17ReReco_v2-dbsOct10_001.root')
+
     fileNames=cms.untracked.vstring(    )
+                            ,
+                            inputCommands = cms.untracked.vstring('keep *'
+                                                                  ,'drop *_hfRecoEcalCandidate_*_RECO' # drop hfRecoEcalCandidate as remade in this process
+                                                                  )
+                            )
+
 )
+
 
 
 # # in this file I collect the lumi sections intervals I am interested in
@@ -237,12 +247,12 @@ import FWCore.Modules.printContent_cfi
 process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 process.p = cms.Path(
-      # process.EG_1e28 *
-    process.demoBefCuts # this one is just to count events (needed in MC!)
-    * process.hfrecalib
-    * process.hfEMClusteringSequence
-    * process.hfRecoEcalCandidate
-    * process.hfRecoEcalCandidateLoose
+    # process.hfrecalib *
+    # process.hfEMClusteringSequence * 
+    process.hfRecoEcalCandidate *     # redo the candidates, with the locally defined HF id cuts
+    process.hfRecoEcalCandidateLoose  # never remove this because a module will need its product (which are not originally present in RECO)
+    
+    # * process.dumpEv
     * process.IdIso
     * process.IdRej
     * process.IsoRej
@@ -258,7 +268,6 @@ process.p = cms.Path(
     * process.metEleId
     * process.metEleIso
     * process.metEleRej
-    #* process.dumpEv
     )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
