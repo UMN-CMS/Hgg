@@ -15,7 +15,6 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
-   # fileNames=cms.untracked.vstring('file:/hdfs/cms/skim/elec/EG-Run2010A-Sep17ReReco_v2-oct9/skimOnly_ZtwoLegs-Run2010A-Sep17ReReco_v2-dbsOct10_001.root')
 
     fileNames=cms.untracked.vstring(    )
                             ,
