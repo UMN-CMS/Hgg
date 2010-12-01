@@ -10,7 +10,7 @@ process.options = cms.untracked.PSet(
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10000)
+    input = cms.untracked.int32(-1)
     )
 
 process.dumpEv = cms.EDAnalyzer("EventContentAnalyzer")
@@ -109,6 +109,7 @@ process.mcEff = cms.EDAnalyzer("ZEfficiencyCalculator",
     zElectronsCollection = cms.untracked.InputTag("SmearedElectronsProducer","ZEventParticles"),
     zTreeLevelElectronsCollection = cms.untracked.InputTag("ZIntoElectronsEventProducer","ZEventEle3"), quiet = cms.untracked.bool(True),
     zElectronsCone = cms.double(0.00),
+    acceptanceMassWindow = cms.vdouble(70.0,110.0),                               
     ZDefs = cms.untracked.VPSet(cms.PSet(
         name = cms.untracked.string('Golden-EB-EB'),
         Z = cms.untracked.vstring('m(70,110)'),
@@ -419,4 +420,4 @@ process.p = cms.Path(process.SmearedElectronsProducer
                      + process.mcEff
                      #+ process.dumpEv
                      )
- 
+  

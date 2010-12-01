@@ -12,12 +12,13 @@ void EffHistos::Book(TFileDirectory& tdf) {
   // add here all extremes, tidily
   const float pi       = 3.141593;
   const float maxPt    = 400;
-  const float maxY     = 5.5;
+  const float maxY     = 5.45;
+  const float yBinSize = 0.1;
   const float minZmass = 50;
   const float maxZmass = 150;
   const int binsZmass  = 50;
-  // const int yBinsPerUnitFine = 10;
-  const int yBinsPerUnitCoarse = 4;
+  const int yBinsTotal = int((maxY*2)/yBinSize+0.5);
+
 
   float detetaBins[104] = {-5., -4.9, -4.8, -4.7, -4.6, -4.5, -4.4, -4.3, -4.2, -4.1, -4., -3.9, -3.8, -3.7, -3.6,  //14
                        -3.5, -3.4, -3.3,  -3.2, -3.1, -3., //6
@@ -30,11 +31,11 @@ void EffHistos::Book(TFileDirectory& tdf) {
                        4.0, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5. }; //11
  
   mZ_  = tdf.make<TH1F>("Z0_mass","Z0_mass;m_{Z} (GeV/c^{2})", binsZmass, minZmass, maxZmass);
-  YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y;Y_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY);
+  YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y;Y_{Z0}", yBinsTotal, -maxY, maxY);
   ptZ_ = tdf.make<TH1F>("Z0_Pt","Z0_Pt;p_{T,Z0}", 200, 0, maxPt);
 
   mZTL_  = tdf.make<TH1F>("Z0_massTL","Z0_M Tree Level;m_{Z0} (GeV/c^{2})", 50, minZmass, maxZmass);
-  YZTL_  = tdf.make<TH1F>("Z0_YTL","Z0_Y Tree Level;Y_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY);
+  YZTL_  = tdf.make<TH1F>("Z0_YTL","Z0_Y Tree Level;Y_{Z0}", yBinsTotal, -maxY, maxY);
   ptZTL_ = tdf.make<TH1F>("Z0_PtTL","Z0_Pt Tree Level;p_{T,Z0}", 200, 0, maxPt);
 
   e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta;detector #eta_{e1}", 50, -5, 5);
@@ -46,18 +47,18 @@ void EffHistos::Book(TFileDirectory& tdf) {
  
   //Now make the 2-D histograms
 
-  mZ_Y_ = tdf.make<TH2F>("Z0_Y_v_mass","Z0_Y_v_mass;Y_{Z0};m_{Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, binsZmass, minZmass, maxZmass);
-  pt_Y_ = tdf.make<TH2F>("Z0_Y_v_pt","Z0_Y_v_pt;Y_{Z0};p_{T,Z0}", int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY, 50, 0, maxPt/4.0);
+  mZ_Y_ = tdf.make<TH2F>("Z0_Y_v_mass","Z0_Y_v_mass;Y_{Z0};m_{Z0}", yBinsTotal, -maxY, maxY, binsZmass, minZmass, maxZmass);
+  pt_Y_ = tdf.make<TH2F>("Z0_Y_v_pt","Z0_Y_v_pt;Y_{Z0};p_{T,Z0}", yBinsTotal, -maxY, maxY, 50, 0, maxPt/4.0);
   mZ_pt_ = tdf.make<TH2F>("Z0_pt_v_mass","Z0_pt_v_mass;p_{T,Z0};m_{Z0}", 50,0, maxPt/4.0, binsZmass, minZmass, maxZmass);
 
-  e1eta_YZ_    = tdf.make<TH2F>("e1_eta_vs_Z0Y","e1_eta_vs_Z0Y;detector #eta_{e1};Y_{Z0}", 50, -5, 5,int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY );
-  e2eta_YZ_    = tdf.make<TH2F>("e2_eta_vs_Z0Y","e2_eta_vs_Z0Y;detector #eta_{e2};Y_{Z0}", 50, -5, 5,int((maxY*2)*yBinsPerUnitCoarse), -maxY, maxY );
+  e1eta_YZ_    = tdf.make<TH2F>("e1_eta_vs_Z0Y","e1_eta_vs_Z0Y;detector #eta_{e1};Y_{Z0}", 50, -5, 5,yBinsTotal, -maxY, maxY );
+  e2eta_YZ_    = tdf.make<TH2F>("e2_eta_vs_Z0Y","e2_eta_vs_Z0Y;detector #eta_{e2};Y_{Z0}", 50, -5, 5,yBinsTotal, -maxY, maxY );
   e1eta_ptZ_   = tdf.make<TH2F>("e1_eta_vs_Ptz","e1_eta_vs_PtZ;detector #eta_{e1};p_{T,Z0}", 50, -5, 5,50, 0, maxPt );
   e2eta_ptZ_   = tdf.make<TH2F>("e2_eta_vs_Ptz","e2_eta_vs_PtZ;detector #eta_{e2};p_{T,Z0}", 50, -5, 5,50, 0, maxPt );
   e1eta_e2eta_ = tdf.make<TH2F>("e1_eta_vs_e2_eta","e1_eta_vs_e2_eta;detector #eta_{e1};detector #eta_{e2}", 50, -5, 5,50, -5, 5 );
  
-  YZTL_YZ_       = tdf.make<TH2F>("YZTL_vs_YZ","YZTL_vs_YZ;Y_{Z};Y_{ZtreeLevel}",int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY,int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY); 
-  YZTL_YZ_matrix_= tdf.make<TH2F>("YZTL_vs_YZ_matrix","YZTL_vs_YZ_matrix;Y_{Z};Y_{ZtreeLevel}",int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY,int((maxY*2)*yBinsPerUnitCoarse),-maxY,maxY); 
+  YZTL_YZ_       = tdf.make<TH2F>("YZTL_vs_YZ","YZTL_vs_YZ;Y_{Z};Y_{ZtreeLevel}",yBinsTotal,-maxY,maxY,yBinsTotal,-maxY,maxY); 
+  YZTL_YZ_matrix_= tdf.make<TH2F>("YZTL_vs_YZ_matrix","YZTL_vs_YZ_matrix;Y_{Z};Y_{ZtreeLevel}",yBinsTotal,-maxY,maxY,yBinsTotal,-maxY,maxY); 
 
 } 
 

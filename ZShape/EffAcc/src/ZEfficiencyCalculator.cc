@@ -21,6 +21,11 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   //
   //now do what ever initialization is needed
 
+  std::vector<double> limits;
+  limits=iConfig.getParameter<std::vector<double> >("acceptanceMassWindow");
+  massLow_=limits[0];
+  massHigh_=limits[1];
+
   //
   // multiple PSets==Zdefinitions: each electron required to pass a set of cuts
   
@@ -124,8 +129,6 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   if (evt_.n_TLelec!=2) return; // need 2 and only 2 
 
   //
-  // fill histograms for before any selection
-  allCase_.Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
 
   // these stages merely _fill_ bits.  They do not apply cuts!
   for (int ne=0; ne<2; ne++) {
@@ -136,25 +139,31 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 
   // fill the generator-level acceptance cuts...
   {
-    math::XYZTLorentzVector p1(evt_.elec(0).p4_);
-    math::XYZTLorentzVector p2(evt_.elec(1).p4_);
+    math::XYZTLorentzVector p1(evt_.elecTreeLevel(0).polarP4()); //evt_.elec(0).p4_);
+    math::XYZTLorentzVector p2(evt_.elecTreeLevel(1).polarP4()); //evt_.elec(1).p4_);
     math::XYZTLorentzVector pZ = p1 + p2 ;
 
 
-    int necal=(evt_.elec(0).passed("ACC(ECAL+TRK)")?(1):(0))+(evt_.elec(1).passed("ACC(ECAL+TRK)")?(1):(0));
-    int ntrk=(evt_.elec(0).passed("ACC(ECAL-TRK)")?(1):(0))+(evt_.elec(1).passed("ACC(ECAL-TRK)")?(1):(0));
-    int nhf=(evt_.elec(0).passed("ACC(HF)")?(1):(0))+(evt_.elec(1).passed("ACC(HF)")?(1):(0));
+    if (pZ.M()>=massLow_ && pZ.M()<massHigh_) {
 
-    if (necal==2) accHistos_.ecal_ecal->Fill(pZ.Rapidity());
-    else if (necal==1 && ntrk==1) accHistos_.ecal_ntrk->Fill(pZ.Rapidity());
-    else if (necal==1 && nhf==1) accHistos_.ecal_hf->Fill(pZ.Rapidity());
-    else if (necal==1) accHistos_.ecal_noacc->Fill(pZ.Rapidity());
-    else if (ntrk==2)  accHistos_.ntrk_ntrk->Fill(pZ.Rapidity());
-    else if (ntrk==1 && nhf==1)  accHistos_.ntrk_hf->Fill(pZ.Rapidity());
-    else if (ntrk==1)  accHistos_.ntrk_noacc->Fill(pZ.Rapidity());
-    else if (nhf==2)  accHistos_.hf_hf->Fill(pZ.Rapidity());
-    else if (nhf==1)  accHistos_.hf_noacc->Fill(pZ.Rapidity());
-    else accHistos_.noacc_noacc->Fill(pZ.Rapidity());
+      // fill histograms for before any selection (except mass window for logic...)
+      allCase_.Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
+
+      int necal=(evt_.elec(0).passed("ACC(ECAL+TRK)")?(1):(0))+(evt_.elec(1).passed("ACC(ECAL+TRK)")?(1):(0));
+      int ntrk=(evt_.elec(0).passed("ACC(ECAL-TRK)")?(1):(0))+(evt_.elec(1).passed("ACC(ECAL-TRK)")?(1):(0));
+      int nhf=(evt_.elec(0).passed("ACC(HF)")?(1):(0))+(evt_.elec(1).passed("ACC(HF)")?(1):(0));
+      
+      if (necal==2) accHistos_.ecal_ecal->Fill(pZ.Rapidity());
+      else if (necal==1 && ntrk==1) accHistos_.ecal_ntrk->Fill(pZ.Rapidity());
+      else if (necal==1 && nhf==1) accHistos_.ecal_hf->Fill(pZ.Rapidity());
+      else if (necal==1) accHistos_.ecal_noacc->Fill(pZ.Rapidity());
+      else if (ntrk==2)  accHistos_.ntrk_ntrk->Fill(pZ.Rapidity());
+      else if (ntrk==1 && nhf==1)  accHistos_.ntrk_hf->Fill(pZ.Rapidity());
+      else if (ntrk==1)  accHistos_.ntrk_noacc->Fill(pZ.Rapidity());
+      else if (nhf==2)  accHistos_.hf_hf->Fill(pZ.Rapidity());
+      else if (nhf==1)  accHistos_.hf_noacc->Fill(pZ.Rapidity());
+      else accHistos_.noacc_noacc->Fill(pZ.Rapidity());
+    }
   }
     
   EfficiencyCut* keep=0;
@@ -395,19 +404,21 @@ ZEfficiencyCalculator::beginJob()
   TFileDirectory subDir=fs->mkdir("All");  
   allCase_.Book(subDir);
 
-  const float maxY=5.5;
-  const int yBinsPerUnit=4;
+  const float maxY=5.45;
+  const float yBinSize=0.10;
+  const int yBinsTotal = int((maxY*2)/yBinSize+0.5);
 
-  accHistos_.ecal_ecal=subDir.make<TH1F>("ECAL-ECAL","ECAL-ECAL", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
-  accHistos_.ecal_ntrk=subDir.make<TH1F>("ECAL-NTRK","ECAL-NTRK", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
-  accHistos_.ecal_hf=subDir.make<TH1F>("ECAL-HF","ECAL-HF", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
-  accHistos_.ecal_noacc=subDir.make<TH1F>("ECAL-NOACC","ECAL-NOACC", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
-  accHistos_.ntrk_ntrk=subDir.make<TH1F>("NTRK-NTRK","NTRK-NTRK", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
-  accHistos_.ntrk_hf=subDir.make<TH1F>("NTRK-HF","NTRK-HF", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
-  accHistos_.ntrk_noacc=subDir.make<TH1F>("NTRK-NOACC","NTRK-NOACC", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
-  accHistos_.hf_hf=subDir.make<TH1F>("HF-HF","HF-HF", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
-  accHistos_.hf_noacc=subDir.make<TH1F>("HF-NOACC","HF-NOACC", int((maxY*2)*yBinsPerUnit), -maxY, maxY);
-  accHistos_.noacc_noacc=subDir.make<TH1F>("NOACC-NOACC","NOACC-NOACC", int((maxY*2)*yBinsPerUnit), -maxY, maxY);  
+
+  accHistos_.ecal_ecal=subDir.make<TH1F>("ECAL-ECAL","ECAL-ECAL", yBinsTotal, -maxY, maxY);
+  accHistos_.ecal_ntrk=subDir.make<TH1F>("ECAL-NTRK","ECAL-NTRK", yBinsTotal, -maxY, maxY);
+  accHistos_.ecal_hf=subDir.make<TH1F>("ECAL-HF","ECAL-HF", yBinsTotal, -maxY, maxY);
+  accHistos_.ecal_noacc=subDir.make<TH1F>("ECAL-NOACC","ECAL-NOACC", yBinsTotal, -maxY, maxY);
+  accHistos_.ntrk_ntrk=subDir.make<TH1F>("NTRK-NTRK","NTRK-NTRK", yBinsTotal, -maxY, maxY);
+  accHistos_.ntrk_hf=subDir.make<TH1F>("NTRK-HF","NTRK-HF", yBinsTotal, -maxY, maxY);
+  accHistos_.ntrk_noacc=subDir.make<TH1F>("NTRK-NOACC","NTRK-NOACC", yBinsTotal, -maxY, maxY);
+  accHistos_.hf_hf=subDir.make<TH1F>("HF-HF","HF-HF", yBinsTotal, -maxY, maxY);
+  accHistos_.hf_noacc=subDir.make<TH1F>("HF-NOACC","HF-NOACC", yBinsTotal, -maxY, maxY);
+  accHistos_.noacc_noacc=subDir.make<TH1F>("NOACC-NOACC","NOACC-NOACC", yBinsTotal, -maxY, maxY);  
 
   //
   // one directory for plots for each Z definition
