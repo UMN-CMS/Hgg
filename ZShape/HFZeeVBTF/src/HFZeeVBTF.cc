@@ -13,10 +13,9 @@
 //
 // Original Author:  Jeremy M Mans
 //         Created:  Mon May 31 07:00:26 CDT 2010
-// $Id: HFZeeVBTF.cc,v 1.19 2010/10/27 20:58:10 franzoni Exp $
+// $Id: HFZeeVBTF.cc,v 1.20 2010/11/15 15:50:47 franzoni Exp $
 //
 //
-
 
 // system include files
 #include <memory>
@@ -26,7 +25,7 @@
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/FileBlock.h"
@@ -61,7 +60,7 @@ template <class T> const T& max ( const T& a, const T& b ) {
 
 
 
-class HFZeeVBTF : public edm::EDAnalyzer {
+class HFZeeVBTF : public edm::EDFilter {
 public:
   explicit HFZeeVBTF(const edm::ParameterSet&);
   ~HFZeeVBTF();
@@ -73,7 +72,7 @@ private:
   }
 
   virtual void beginJob() ;
-  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual bool filter(edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
   std::string ecalID_, currentFile_;
   bool dolog_;
@@ -84,6 +83,7 @@ private:
   std::vector<double> hfIdParams_;
   edm::InputTag hFElectrons_;
   selectElectron w;
+  std::string filterId_;
 
   // ----------member data ---------------------------
 
@@ -112,8 +112,8 @@ private:
     TH1* e9e25_nmo, *var2d_nmo, *eCOREe9_nmo, *eSeL_nmo;
     TH2* eSeL_vs_logEl;
   };
-std::vector<std::string> HLT_Names;
-bool init_;
+  std::vector<std::string> HLT_Names;
+  bool init_,skipTrigger_;
 
   // gf set of histo for all Z definitios in a stack
   struct HistStruct {
@@ -568,11 +568,14 @@ HFZeeVBTF::HFZeeVBTF(const edm::ParameterSet& iConfig)
   ecalID_              = iConfig.getParameter<std::string>("ECALid");
   dolog_               = iConfig.getParameter<bool>("DoLog");
   acceptedElectronIDs_ = iConfig.getParameter< std::vector<int> >("acceptedElectronIDs");
+  filterId_=iConfig.getUntrackedParameter<std::string>("FILTERid","");
   hfIdParams_          = iConfig.getParameter< std::vector<double> >("hFselParams");
   hFElectrons_         = iConfig.getParameter< edm::InputTag> ("hFElectrons");
   minEtECAL_           = iConfig.getParameter< double >("minEtECAL");
   minEtHF_             = iConfig.getParameter< double >("minEtHF");
   myName_              = iConfig.getParameter<std::string>("myName");
+  skipTrigger_         = iConfig.getParameter<bool>("skipTrigger");
+
   myName_+=std::string("    ");
   
   std::vector<int>::const_iterator it;
@@ -626,10 +629,11 @@ HFZeeVBTF::~HFZeeVBTF()
 //
 
 // ------------ method called to for each event  ------------
-void
-HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+bool
+HFZeeVBTF::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
+  bool filterOk=false;
 
   edm::Handle<reco::RecoEcalCandidateCollection> HFElectrons;
   edm::Handle<reco::SuperClusterCollection> SuperClusters;
@@ -654,7 +658,7 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   if ( ! patElectron.isValid()) {
     std::cout << "No electrons found in this event with tag " 
 	      << "patElectrons" << std::endl;
-    return ; // RETURN if no elecs in the event
+    return false; // RETURN if no elecs in the event
   }
 
   const pat::ElectronCollection& pElecs = *(patElectron.product());
@@ -776,33 +780,36 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		  << var2d << " "
 		  << std::endl;
 
-	std::cout << myName_  << "\n Triggers fired: ";
+	if (!skipTrigger_) {
+
+	  std::cout << myName_  << "\n Triggers fired: ";
 	
-	Handle<TriggerResults> hltResults ;
-	iEvent.getByLabel( edm::InputTag("TriggerResults","","HLT"), hltResults ) ;
+	  Handle<TriggerResults> hltResults ;
+	  iEvent.getByLabel( edm::InputTag("TriggerResults","","HLT"), hltResults ) ;
       
-	if (!init_) {
-	  init_=true;
-	  const edm::TriggerNames & triggerNames = iEvent.triggerNames(*hltResults);
-	  HLT_Names=triggerNames.triggerNames();
-	}
-	
-	int nf=0;
-	// checking against both size of names and of results: found events when they're diferent (someonelse's bug?)
-	for (unsigned int i=0; i<HLT_Names.size() && i<hltResults->size(); i++) {
-	  if ( hltResults->accept(i) ) {
-	    if ((nf % 5)==0) std::cout << myName_  << "\n    ";
-	    std::cout << myName_  << HLT_Names.at(i) << " ";
-	    nf++;
+	  if (!init_) {
+	    init_=true;
+	    const edm::TriggerNames & triggerNames = iEvent.triggerNames(*hltResults);
+	    HLT_Names=triggerNames.triggerNames();
 	  }
+	  
+	  int nf=0;
+	  // checking against both size of names and of results: found events when they're diferent (someonelse's bug?)
+	  for (unsigned int i=0; i<HLT_Names.size() && i<hltResults->size(); i++) {
+	    if ( hltResults->accept(i) ) {
+	      if ((nf % 5)==0) std::cout << myName_  << "\n    ";
+	      std::cout << myName_  << HLT_Names.at(i) << " ";
+	      nf++;
+	  }
+	  }
+	  std::cout << myName_  << std::endl;
 	}
-	std::cout << myName_  << std::endl;
-	
 	std::cout << myName_  << "======================================================" << std::endl;
       }// 4) here require electronId to have passed, for different working points
       //  5) and require HF eleID loose or tight
       //  preselections on HF isolation (0.9) and 2dvar (0.3) are already applied at clustering level.
       //  loosen as much as reasonable here
+
       hists.zMass.fill(ecalE,hfE,hfshape,true,robust90relIsoEleIDCutsV04_ps_,0,hfIdParams_);
       hists.mee90loose.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId90relIso")),robust90relIsoEleIDCutsV04_ps_,0,hfIdParams_);
       hists.mee80loose.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId80relIso")),robust80relIsoEleIDCutsV04_ps_,0,hfIdParams_);
@@ -813,10 +820,18 @@ HFZeeVBTF::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       hists.mee80tight.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId80relIso")),robust80relIsoEleIDCutsV04_ps_,1,hfIdParams_);
       hists.mee70tight.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId70relIso")),robust70relIsoEleIDCutsV04_ps_,1,hfIdParams_);
       hists.mee60tight.fill(ecalE,hfE,hfshape,w.doesElePass( ecalE->electronID("simpleEleId60relIso")),robust60relIsoEleIDCutsV04_ps_,1,hfIdParams_);
-      
+
+      if (!filterId_.empty()) {
+	filterOk=w.doesElePass( ecalE->electronID(filterId_) ) && var2d>hf_2d_loose;
+      } 
+
     }// if mass is in Z window
     
   }// if the is at least on ECAL and one HF candidate
+
+  if (filterId_.empty()) filterOk=true;
+
+  return filterOk;
   
 }
 

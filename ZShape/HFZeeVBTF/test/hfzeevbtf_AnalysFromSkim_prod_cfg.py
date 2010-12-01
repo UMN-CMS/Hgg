@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("hfzeevbtfAnalysFromSkim")
+process = cms.Process("Res2")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 2000
@@ -37,6 +37,7 @@ process.source = cms.Source("PoolSource",
 
 # see explanations in : https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideGoodLumiSectionsJSONFile#cmsRun
 # in 36x need tags: V01-00-02 FWCore/PythonUtilities     and      V00-04-00 PhysicsTools/PythonAnalysis
+
 import PhysicsTools.PythonAnalysis.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
 #myLumis = LumiList.LumiList(filename = '/home/hep/franzoni/cmssw/CMSSW_3_6_1_patch3_Z_HF_update7/src/ZShape/HFZeeVBTF/fileLists/').getCMSSWString().split(',')
@@ -97,6 +98,7 @@ process.IdIsoRej.DoLog               = cms.bool(True)
 
 # EWK analyzer: different Z definitions with one ECAL electron and one HF electron
 # ---> this is the instance to run AFTER the Wenu EWK filter
+
 process.IdIso                     = demo.clone()
 process.IdIso.myName              = cms.string('HFZeeVBTF-IdIso')
 process.IdIso.acceptedElectronIDs = cms.vint32( 3, 7 )
@@ -106,26 +108,21 @@ process.IdRej                     = demo.clone()
 process.IdRej.myName              = cms.string('HFZeeVBTF-IdRej')
 process.IdRej.acceptedElectronIDs = cms.vint32( 5, 7 )
 
-
 process.IsoRej                     = demo.clone()
 process.IsoRej.myName              = cms.string('HFZeeVBTF-IsoRej')
 process.IsoRej.acceptedElectronIDs = cms.vint32( 6, 7 )
-
 
 process.Id                     = demo.clone()
 process.Id.myName              = cms.string('HFZeeVBTF-Id')
 process.Id.acceptedElectronIDs = cms.vint32( 1, 3, 5, 7 )
 
-
 process.Iso                     = demo.clone()
 process.Iso.myName              = cms.string('HFZeeVBTF-Iso')
 process.Iso.acceptedElectronIDs = cms.vint32( 2, 3, 6, 7 )
 
-
 process.Rej                     = demo.clone()
 process.Rej.myName              = cms.string('HFZeeVBTF-pincoPonco-Rej')
 process.Rej.acceptedElectronIDs = cms.vint32( 4, 5, 6, 7 )
-
 
 from RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi import *
 process.hfRecoEcalCandidateLoose            = hfRecoEcalCandidate.clone()
@@ -140,7 +137,6 @@ process.IdIsoRejHFIsoOnly.acceptedElectronIDs = cms.vint32( 7 )
 process.IdIsoRejHFIsoOnly.hFselParams         = cms.vdouble(0.90, 0.94,      -9999, -9999,    0.7, 0.85,     9999, 9999)
 process.IdIsoRejHFIsoOnly.DoLog               = cms.bool(True)
 process.IdIsoRejHFIsoOnly.hFElectrons         = cms.InputTag("hfRecoEcalCandidateLoose","","hfzeevbtfAnalysFromSkim")
-
 
 #  this module is run at the beginning of the job sequence just to count the number of events
 #  the analysis has been running on
