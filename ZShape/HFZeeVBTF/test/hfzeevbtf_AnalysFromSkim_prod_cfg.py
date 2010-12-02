@@ -94,7 +94,8 @@ process.IdIsoRej                     = demo.clone()
 process.IdIsoRej.myName              = cms.string('HFZeeVBTF-IdIsoRej')
 process.IdIsoRej.acceptedElectronIDs = cms.vint32( 7 )
 process.IdIsoRej.DoLog               = cms.bool(True)
-
+#if I don't RErerun the clustering in this job, there will be a problem
+#process.IdIsoRej.hFElectrons         = cms.InputTag("hfRecoEcalCandidate","","hfzeevbtfAnalysFromSkim")
 
 # EWK analyzer: different Z definitions with one ECAL electron and one HF electron
 # ---> this is the instance to run AFTER the Wenu EWK filter
@@ -102,27 +103,37 @@ process.IdIsoRej.DoLog               = cms.bool(True)
 process.IdIso                     = demo.clone()
 process.IdIso.myName              = cms.string('HFZeeVBTF-IdIso')
 process.IdIso.acceptedElectronIDs = cms.vint32( 3, 7 )
-
+#if I don't RErerun the clustering in this job, there will be a problem
+#process.IdIso.hFElectrons         = cms.InputTag("hfRecoEcalCandidate","","hfzeevbtfAnalysFromSkim")
 
 process.IdRej                     = demo.clone()
 process.IdRej.myName              = cms.string('HFZeeVBTF-IdRej')
 process.IdRej.acceptedElectronIDs = cms.vint32( 5, 7 )
+#if I don't RErerun the clustering in this job, there will be a problem
+#process.IdRej.hFElectrons         = cms.InputTag("hfRecoEcalCandidate","","hfzeevbtfAnalysFromSkim")
 
 process.IsoRej                     = demo.clone()
 process.IsoRej.myName              = cms.string('HFZeeVBTF-IsoRej')
 process.IsoRej.acceptedElectronIDs = cms.vint32( 6, 7 )
+#if I don't RErerun the clustering in this job, there will be a problem
+#process.IsoRej.hFElectrons         = cms.InputTag("hfRecoEcalCandidate","","hfzeevbtfAnalysFromSkim")
 
 process.Id                     = demo.clone()
 process.Id.myName              = cms.string('HFZeeVBTF-Id')
 process.Id.acceptedElectronIDs = cms.vint32( 1, 3, 5, 7 )
+#if I don't RErerun the clustering in this job, there will be a problem
+#process.Id.hFElectrons         = cms.InputTag("hfRecoEcalCandidate","","hfzeevbtfAnalysFromSkim")
 
 process.Iso                     = demo.clone()
 process.Iso.myName              = cms.string('HFZeeVBTF-Iso')
 process.Iso.acceptedElectronIDs = cms.vint32( 2, 3, 6, 7 )
+#if I don't RErerun the clustering in this job, there will be a problem
+#process.Iso.hFElectrons         = cms.InputTag("hfRecoEcalCandidate","","hfzeevbtfAnalysFromSkim")
 
 process.Rej                     = demo.clone()
 process.Rej.myName              = cms.string('HFZeeVBTF-pincoPonco-Rej')
 process.Rej.acceptedElectronIDs = cms.vint32( 4, 5, 6, 7 )
+process.Rej.hFElectrons         = cms.InputTag("hfRecoEcalCandidate","","hfzeevbtfAnalysFromSkim")
 
 from RecoEgamma.EgammaHFProducers.hfRecoEcalCandidate_cfi import *
 process.hfRecoEcalCandidateLoose            = hfRecoEcalCandidate.clone()
@@ -145,7 +156,8 @@ process.demoBefCuts.myName              = cms.string('demoBefCuts')
 process.demoBefCuts.acceptedElectronIDs = cms.vint32( 7 )
 process.demoBefCuts.DoLog               = cms.bool(False)
 #process.demoBefCuts.hFElectrons         = cms.InputTag("hfRecoEcalCandidateLoose","","hfzeevbtfAnalysFromSkim")
-process.demoBefCuts.hFElectrons   = cms.InputTag("hfRecoEcalCandidate","","")
+#if I don't RErerun the clustering in this job, there will be a problem
+#process.demoBefCuts.hFElectrons   = cms.InputTag("hfRecoEcalCandidate","","")
 
 from ZShape.HFZeeVBTF.elewithmet_cfi import *
 #myDesiredMetCollection = "caloMET"
@@ -160,7 +172,8 @@ process.metEleIdIsoRej = cms.EDAnalyzer('EleWithMet',
                                  DoLog = cms.bool(True),
                                  ETCut = cms.double(20.),
                                  METCut = cms.double(25.),
-                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"",""),
+#                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
                                  )
 
 
@@ -172,7 +185,8 @@ process.metEleIdIso = cms.EDAnalyzer('EleWithMet',
                                  DoLog = cms.bool(True),
                                  ETCut = cms.double(20.),
                                  METCut = cms.double(25.),
-                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+#                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                  metCollectionTag = cms.InputTag(myDesiredMetCollection,"",""),
                                  )
 
 
@@ -184,7 +198,8 @@ process.metEleIdRej = cms.EDAnalyzer('EleWithMet',
                                  DoLog = cms.bool(True),
                                  ETCut = cms.double(20.),
                                  METCut = cms.double(25.),
-                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+#                                metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"",""),
                                  )
 
 
@@ -196,7 +211,8 @@ process.metEleIsoRej = cms.EDAnalyzer('EleWithMet',
                                  DoLog = cms.bool(True),
                                  ETCut = cms.double(20.),
                                  METCut = cms.double(25.),
-                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+#                                metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"",""),
                                  )
 
 
@@ -208,7 +224,8 @@ process.metEleId = cms.EDAnalyzer('EleWithMet',
                                  DoLog = cms.bool(True),
                                  ETCut = cms.double(20.),
                                  METCut = cms.double(25.),
-                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+#                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                  metCollectionTag = cms.InputTag(myDesiredMetCollection,"",""),
                                  )
 
 
@@ -220,7 +237,8 @@ process.metEleIso = cms.EDAnalyzer('EleWithMet',
                                  DoLog = cms.bool(True),
                                  ETCut = cms.double(20.),
                                  METCut = cms.double(25.),
-                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+#                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"",""),
                                  )
 
 
@@ -232,7 +250,8 @@ process.metEleRej = cms.EDAnalyzer('EleWithMet',
                                  DoLog = cms.bool(True),
                                  ETCut = cms.double(20.),
                                  METCut = cms.double(25.),
-                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+#                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"","PAT"),
+                                 metCollectionTag = cms.InputTag(myDesiredMetCollection,"",""),
                                  )
 
 
@@ -240,12 +259,13 @@ import FWCore.Modules.printContent_cfi
 process.dumpEv = FWCore.Modules.printContent_cfi.printContent.clone()
 
 process.p = cms.Path(
+    # process.EG_1e28 *
     # process.hfrecalib *
     # process.hfEMClusteringSequence * 
     process.hfRecoEcalCandidate *     # redo the candidates, with the locally defined HF id cuts
     process.hfRecoEcalCandidateLoose  # never remove this because a module will need its product (which are not originally present in RECO)
-    
     # * process.dumpEv
+    process.demoBefCuts # this one is just to count events (needed in MC!)
     * process.IdIso
     * process.IdRej
     * process.IsoRej
