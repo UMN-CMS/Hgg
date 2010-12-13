@@ -12,12 +12,13 @@ void EffHistos::Book(TFileDirectory& tdf) {
   // add here all extremes, tidily
   const float pi       = 3.141593;
   const float maxPt    = 400;
-  const float maxY     = 5.45;
+  const float maxY     = 5.5;
   const float yBinSize = 0.1;
   const float minZmass = 50;
   const float maxZmass = 150;
-  const int binsZmass  = 50;
-  const int yBinsTotal = int((maxY*2)/yBinSize+0.5);
+  const int   binsZmass  = 50;
+  const int   yBinsTotal = int((maxY*2)/yBinSize);
+  // const int yBinsTotal = int((maxY*2)/yBinSize+0.5); // this is if you want Y=0 in the middle of your central bin
 
 
   float detetaBins[104] = {-5., -4.9, -4.8, -4.7, -4.6, -4.5, -4.4, -4.3, -4.2, -4.1, -4., -3.9, -3.8, -3.7, -3.6,  //14

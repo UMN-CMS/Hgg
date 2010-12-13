@@ -404,9 +404,10 @@ ZEfficiencyCalculator::beginJob()
   TFileDirectory subDir=fs->mkdir("All");  
   allCase_.Book(subDir);
 
-  const float maxY=5.45;
+  const float maxY=5.5;
   const float yBinSize=0.10;
-  const int yBinsTotal = int((maxY*2)/yBinSize+0.5);
+  // const int   yBinsTotal = int((maxY*2)/yBinSize+0.5); // this is if you want Y=0 in the middle of your central bin
+  const int   yBinsTotal = int((maxY*2)/yBinSize);
 
 
   accHistos_.ecal_ecal=subDir.make<TH1F>("ECAL-ECAL","ECAL-ECAL", yBinsTotal, -maxY, maxY);
