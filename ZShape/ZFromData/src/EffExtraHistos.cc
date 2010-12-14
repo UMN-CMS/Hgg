@@ -1,4 +1,5 @@
 #include "ZShape/ZFromData/interface/EffExtraHistos.h"
+#include "ZShape/Base/interface/ZShapeBinning.h"
 
 typedef math::XYZTLorentzVector XYZTLorentzVector;
 
@@ -10,7 +11,6 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
   // add here all extremes, tidily
   float pi       = 3.141593;
   float maxPt    = 400;
-  float maxY     = 5.5;
   float minZmass = 50;
   float maxZmass = 140;
 
@@ -27,7 +27,7 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
  
  
   DmZ_  = tdf.make<TH1F>("Z0_mass_Delta","Z0_mass_Delta;Delta m_{Z0} (GeV/c^{2})", 50, -60, 60);  
-  DYZ_  = tdf.make<TH1F>("Z0_Y_Delta","Z0_Y_Delta;Y_{Z0}", int((maxY*2)*4), -maxY, maxY);  
+  DYZ_  = tdf.make<TH1F>("Z0_Y_Delta","Z0_Y_Delta;Y_{Z0}", int((zshape::y_max*2)*4), -zshape::y_max, zshape::y_max);  
   DptZ_ = tdf.make<TH1F>("Z0_Pt_Delta","Z0_Pt_Delta;p_{T,Z0}", 100, -50., 50.); 
   De1eta_ = tdf.make<TH1F>("e1_eta_Delta","e1_eta_Delta;detector #eta_{e1}", 50, -5, 5);  
   De2eta_ = tdf.make<TH1F>("e2_eta_Delta","e2_eta_Delta;detector #eta_{e2}", 50, -5, 5);
@@ -46,7 +46,7 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
 
 
   MCmZ_  = tdf.make<TH1F>("Z0_mass_MC","Z0_mass_MC;m_{Z0} (GeV/c^{2})", 60, 35., 150.);  
-  MCYZ_  = tdf.make<TH1F>("Z0_Y_MC","Z0_Y_MC;Y_{Z0}", int((maxY*2)*4), -maxY, maxY);  
+  MCYZ_  = tdf.make<TH1F>("Z0_Y_MC","Z0_Y_MC;Y_{Z0}", int((zshape::y_max*2)*4), -zshape::y_max, zshape::y_max);  
   MCptZ_ = tdf.make<TH1F>("Z0_Pt_MC","Z0_Pt_MC;p_{T,Z0}", 200, 0., maxPt); 
   MCe1eta_ = tdf.make<TH1F>("e1_eta_MC","e1_eta_MC;detector #eta_{e1}", 50, -5, 5);  
   MCe2eta_ = tdf.make<TH1F>("e2_eta_MC","e2_eta_MC;detector #eta_{e2}", 50, -5, 5);
