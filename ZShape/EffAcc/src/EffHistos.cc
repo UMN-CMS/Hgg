@@ -29,7 +29,7 @@ void EffHistos::Book(TFileDirectory& tdf) {
  
   mZ_  = tdf.make<TH1F>("Z0_mass","Z0_mass;m_{Z} (GeV/c^{2})", binsZmass, minZmass, maxZmass);
   YZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y;Y_{Z0}", zshape::y_bins, -zshape::y_max, zshape::y_max);
-  ptZ_  = tdf.make<TH1F>("Z0_Y","Z0_Y;Y_{Z0}", zshape::pt_bins, zshape::pt_binning);
+  ptZ_  = tdf.make<TH1F>("Z0_Pt","Z0_Pt;p_{T,Z0}", zshape::pt_bins, zshape::pt_binning);
   ptZmon_ = tdf.make<TH1F>("Z0_PtMon","Z0_PtMon;p_{T,Z0}", 200, 0, maxPt);
 
   mZTL_  = tdf.make<TH1F>("Z0_massTL","Z0_M Tree Level;m_{Z0} (GeV/c^{2})", 50, minZmass, maxZmass);
