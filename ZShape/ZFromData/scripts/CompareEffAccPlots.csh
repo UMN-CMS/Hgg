@@ -69,14 +69,15 @@ if ( mytype == 1  ) {std::cout << " Im Trying here 10 " << std::endl;std::cout <
 if ( mytype == 2 ) {zdefvec.push_back("ECAL80-ECAL80");}
 if ( mytype == 3 ){zdefvec.push_back("ECAL95EB-ECAL95EB");zdefvec.push_back("ECAL95EE-ECAL95EE");zdefvec.push_back("ECAL95EB-ECAL95EE");} 
 
-if ( $mytype == 4 ){zdefvec.push_back("ECAL95EB-ECAL95EB");zdefvec.push_back("ECAL95EE-ECAL95EE");zdefvec.push_back("ECAL95EB-ECAL95EE");}
+if ( $mytype == 4 ){zdefvec.push_back("ECAL80EB-ECAL80EB");zdefvec.push_back("ECAL80EE-ECAL80EE");zdefvec.push_back("ECAL80EB-ECAL80EE");}
 
-if ( $mytype == 14 ){zdefvec.push_back("ECAL95EB-ECAL95EB");zdefvec.push_back("ECAL95EE-ECAL95EE");zdefvec.push_back("ECAL95EB-ECAL95EE");zdefvec.push_back("ECAL80-HF");}
+if ( $mytype == 14 ){zdefvec.push_back("ECAL80EB-ECAL95EB");zdefvec.push_back("ECAL80EE-ECAL95EE");zdefvec.push_back("ECAL80EB-ECAL80EE");zdefvec.push_back("ECAL80-HF");}
 
- 
-if ( $mytype == 5 ){zdefvec.push_back("ECAL95-ECAL95");zdefvec.push_back("ECAL80-HFTight-20");}
+if ( $mytype == 114 ){zdefvec.push_back("ECAL80EB-ECAL95EB");zdefvec.push_back("ECAL80EE-ECAL95EE");zdefvec.push_back("ECAL80EB-ECAL80EE");}
 
-if ( $mytype == 6 ){zdefvec.push_back("ECAL95-ECAL95");zdefvec.push_back("ECAL80-HF");}
+if ( $mytype == 5 ){zdefvec.push_back("ECAL80-ECAL95");zdefvec.push_back("ECAL80-HFTight-20");}
+
+if ( $mytype == 6 ){zdefvec.push_back("ECAL80-ECAL95");zdefvec.push_back("ECAL80-HF");}
 
 if ( $mytype == 7 ){defvec.push_back("ECAL95-ECAL95");zdefvec.push_back("ECAL85-HFTight");}
 
@@ -114,8 +115,9 @@ gStyle->SetTitleAlign(22);
 //2932.5 for 17
 //2077.2 for 24
 //
-//EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeFromDataJeremyTEMPLATE/histoJason10_only1hlt_TRIAL_ZFULL.root","/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeMCFromDataJeremyTEMPLATE/MCZFD.root",zdefvec, 108.1259);
-EffAccHistos *myEffAccHistos = new EffAccHistos("/local/cms/user/haupt/Electrons/TNPTREE10/ZFD.4.0.NEW.root","/local/cms/user/haupt/Electrons/TNPTREE10/testProdZEfficiencySmeared_10MTEMPLATE/MCHist.root",zdefvec, 2960.0); //1935
+//EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeFromDataJeremyTEMPLATE/histoJason10_only1hlt_TRIAL_ZFULL.root","/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeMCFromDataJeremyTEMPLATE/ZFD.Dec7thNEW.root",zdefvec, 108.1259);
+EffAccHistos *myEffAccHistos = new EffAccHistos("/local/cms/user/haupt/Electrons/TNPTREE10/ZFD.DECRERECOFULL.root","/local/cms/user/haupt/Electrons/TNPTREE10/testProdZEfficiencySmeared_10MTEMPLATE/MCHist.root",zdefvec, 141.0); //1935 //1650
+//2960 for the 4 inv pb of Nov 2010
 //WAS 3724
 //2208 for 4.5
 //ZMC 1930 for 5.3

@@ -14,6 +14,8 @@
 #include "ZShape/Base/interface/EffTableLoader.h"
 #include "RooWorkspace.h"
 #include "RooRealVar.h"
+#include "RooAbsReal.h"
+#include "RooAbsPdf.h"
 
 
 EfficiencyStore::EfficiencyStore()
@@ -166,8 +168,50 @@ void EfficiencyStore::setRootFile(TFile * file){
 			  }
 			  values1D_.push_back( eff->getVal());
 			  denominator1D_.push_back( nS->getVal());
-			  systPlus1D_.push_back(errorHi);
-			  systMinus1D_.push_back(eff->getErrorLo());
+			  //systPlus1D_.push_back(errorHi);
+			  //systMinus1D_.push_back(eff->getErrorLo());
+
+			  //HERE I actually need to do a much better systematic treatment
+			  // Use eff = (Npass)/(Npass+Nfail)
+			  // Which we can write as....
+			  // eff = (Npasstotal- BPass)/(Ntotal - BPass - BFail)
+
+			  //MY PROBLEM HERE IS THAT I CALCULARE BPass and BFail for the entire 
+			  // MASS region. Thus, the numbers can vary but not affect the efficiency. 
+
+			  // The problem is that the subtraction is implicit but can vary based on numerics.
+			  // SO for the time being the systematic due to the efficiency background
+			  //    subtraction will be over estimated...
+			  //FIRST I NEED To DEFINE A RESTRICTED MASS RANGE
+			  
+			  w->var("mass")->setRange("tight",80,100); 
+			  //Here we assume 100% of the +- fails in this range can affect the efficiency systematically
+			  
+			  
+			  RooRealVar *numBackgroundPass = w->var("numBackgroundPass");
+			  Double_t NPScale =  w->pdf("backgroundPass")->createIntegral(*w->var("mass"),RooFit::NormSet(*w->var("mass")),RooFit::Range("tight"))->getVal();
+			  Double_t NBP   = numBackgroundPass->getVal();
+			  Double_t NBPLo = numBackgroundPass->getErrorLo()*NPScale;
+			  Double_t NBPHi = numBackgroundPass->getErrorHi()*NPScale;
+
+			  RooRealVar *numBackgroundFail = w->var("numBackgroundFail");
+			  Double_t NFScale =  w->pdf("backgroundFail")->createIntegral(*w->var("mass"),RooFit::NormSet(*w->var("mass")),RooFit::Range("tight"))->getVal();
+			  Double_t NBF   = numBackgroundFail->getVal();
+			  Double_t NBFLo = numBackgroundFail->getErrorLo()*NFScale;
+			  Double_t NBFHi = numBackgroundFail->getErrorHi()*NFScale;
+
+			  Double_t NSig = (nS->getVal());
+			  Double_t EFF =  eff->getVal();
+
+			  Double_t NT =  NSig;
+			  Double_t NP =  NSig*EFF;
+
+			  setEffSysts(EFF,NT,NP,NBPLo,NBPHi,NBFLo,NBFHi);
+			  systPlus1D_.push_back(effSystHi_);
+			  systMinus1D_.push_back(effSystLo_);
+
+
+
 			  // std::cout << " has a range " << et->hasRange() << std::endl; 
 			  //std::cout << " ave et is " << et->getVal() << std::endl;
 			  //std::cout << " numbins " << et->numBins() << std::endl;
@@ -272,6 +316,37 @@ void EfficiencyStore::produceTxtFile(std::string &textFileName){
 
 }
 
+//-----------------------------------------------------------------------------------//
+ void EfficiencyStore::setEffSysts(Double_t EFF, Double_t NT, Double_t NP, Double_t NBPLo, Double_t NBPHi, Double_t NBFLo, Double_t NBFHi){
+  //This function is designed to find the lowest and highest systematic changes to the efficiency
+  
+  Double_t EFFBPLo = (NT+NBPLo) > 0 ? (NP+NBPLo)/(NT+NBPLo) : EFF;
+  Double_t EFFBPHi = (NT+NBPHi) > 0 ? (NP+NBPHi)/(NT+NBPHi) : EFF;
+  Double_t EFFBFLo = (NT+NBFLo) > 0 ? (NP)/(NT+NBFLo) : EFF;
+  Double_t EFFBFHi = (NT+NBFHi) > 0 ? (NP)/(NT+NBFHi) : EFF;
+
+  Double_t EFFLO = EFF;
+  Double_t EFFHI = EFF;
+  
+  if ( EFFBPLo < EFFLO ) EFFLO = EFFBPLo ; 
+  else if ( EFFBPLo > EFFHI ) EFFHI = EFFBPLo ; 
+  
+  if ( EFFBPHi < EFFLO ) EFFLO = EFFBPHi ; 
+  else if ( EFFBPHi > EFFHI ) EFFHI = EFFBPHi ; 
+  
+  if ( EFFBFLo < EFFLO ) EFFLO = EFFBFLo ; 
+  else if ( EFFBFLo > EFFHI ) EFFHI = EFFBFLo ; 
+  
+  if ( EFFBFHi < EFFLO ) EFFLO = EFFBFHi ; 
+  else if ( EFFBFHi > EFFHI ) EFFHI = EFFBFHi ;
+
+  if ( EFFHI > 1.0 ) EFFHI = 1.0;
+  if ( EFFLO < 0.0 ) EFFLO = 0.0;
+  
+  eff_ = EFF;
+  effSystLo_ = EFFLO;
+  effSystHi_ = EFFHI;
+}    
 
   
 //-----------------------------------------------------------------------------------//
@@ -358,8 +433,8 @@ void EfficiencyStore::produceTxtFile1D(){
 	       << " " << std::setw(10)  <<  "EtaMax"
 	       << " " << std::setw(10)  << "NumParms"
 	       << " " << std::setw(10)  << "eff"
-	       << " " << std::setw(10) << "statp"
-	       << " " << std::setw(10) << "statm"
+	       << " " << std::setw(10) << "systp"
+	       << " " << std::setw(10) << "systm"
 	       << " " << std::setw(10) << "den"
 	       << "\n";
      

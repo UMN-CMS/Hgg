@@ -53,7 +53,7 @@ hfRecoEcalCandidateTight.intercept2DCut = 0.45
     ############################################# 
 
 HybridSuperClusters = cms.EDProducer("ConcreteEcalCandidateProducer",
-    src = cms.InputTag("correctedHybridSuperClusters","", "RECO"),
+    src = cms.InputTag("correctedHybridSuperClusters","", "reRECO"),
     particleType = cms.string('gamma')
 )
 EBSuperClusters = cms.EDFilter("CandViewSelector",
@@ -62,7 +62,7 @@ EBSuperClusters = cms.EDFilter("CandViewSelector",
 )
 
 EndcapSuperClusters = cms.EDProducer("ConcreteEcalCandidateProducer",
-    src = cms.InputTag("correctedMulti5x5SuperClustersWithPreshower","", "RECO"),
+    src = cms.InputTag("correctedMulti5x5SuperClustersWithPreshower","", "reRECO"),
     particleType = cms.string('gamma')
 )
 EESuperClusters = cms.EDFilter("CandViewSelector",
@@ -84,9 +84,9 @@ theHFSuperClusters = cms.EDFilter("CandViewSelector",
 
 
 #superClusters = cms.EDFilter("SuperClusterMerger",
-#   src = cms.VInputTag(cms.InputTag("correctedHybridSuperClusters","", "RECO"),
-#                       cms.InputTag("correctedMulti5x5SuperClustersWithPreshower","", "RECO")
- #                      #cms.InputTag("theHFSuperClusters","", "RECO")
+#   src = cms.VInputTag(cms.InputTag("correctedHybridSuperClusters","", "reRECO"),
+#                       cms.InputTag("correctedMulti5x5SuperClustersWithPreshower","", "reRECO")
+ #                      #cms.InputTag("theHFSuperClusters","", "reRECO")
 #                       ) 
 #)
 
@@ -368,17 +368,19 @@ theHLT = cms.EDProducer("trgMatchedGsfElectronProducer",
                 cms.InputTag("HLT_Ele17_SW_TightEleId_L1R","","HLT"),
                 cms.InputTag("HLT_Ele17_SW_LooseEleId_L1R","","HLT"),
                 cms.InputTag("HLT_Ele27_SW_TightCaloEleIdTrack_L1R ","","HLT"),
-                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R","","HLT"),
-                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1","","HLT"),
-                cms.InputTag("HLT_DoubleEle15_SW_L1R","","HLT"),
-                cms.InputTag("HLT_DoubleEle15_SW_L1R_v1","","HLT"),
+                #cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R","","HLT"),
+                #cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1","","HLT"),
+                #cms.InputTag("HLT_DoubleEle15_SW_L1R","","HLT"),
+                #cms.InputTag("HLT_DoubleEle15_SW_L1R_v1","","HLT"),
                 cms.InputTag("HLT_Ele22_SW_CaloEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TighterEleIdIsol_L1R_v1","","HLT"),
                 cms.InputTag("HLT_Ele17_SW_TighterEleIdIsol_L1R_v2","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TighterEleIdIsol_L1R_v3","","HLT"),
                 cms.InputTag("HLT_Ele22_SW_TighterEleId_L1R_v2","","HLT"),
                 cms.InputTag("HLT_Ele22_SW_TighterCaloIdIsol_L1R_v1","","HLT"),
-                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R","","HLT"),
-                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1","","HLT"),
-                cms.InputTag("HLT_DoubleEle17_SW_L1R","","HLT"),
+                #cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R","","HLT"),
+                #cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1","","HLT"),
+                #cms.InputTag("HLT_DoubleEle17_SW_L1R","","HLT"),
                 cms.InputTag("HLT_Ele32_SW_TighterEleId_L1R","","HLT")),
     triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
 )
@@ -394,17 +396,19 @@ theHLTGsf = cms.EDProducer("trgMatchedGsfElectronProducer",
                 cms.InputTag("HLT_Ele17_SW_TightEleId_L1R","","HLT"),
                 cms.InputTag("HLT_Ele17_SW_LooseEleId_L1R","","HLT"),
                 cms.InputTag("HLT_Ele27_SW_TightCaloEleIdTrack_L1R ","","HLT"),
-                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R","","HLT"),
-                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1","","HLT"),
-                cms.InputTag("HLT_DoubleEle15_SW_L1R","","HLT"),
-                cms.InputTag("HLT_DoubleEle15_SW_L1R_v1","","HLT"),
+                #cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R","","HLT"),
+                #cms.InputTag("HLT_Ele17_SW_TightCaloEleId_SC8HE_L1R_v1","","HLT"),
+                #cms.InputTag("HLT_DoubleEle15_SW_L1R","","HLT"),
+                #cms.InputTag("HLT_DoubleEle15_SW_L1R_v1","","HLT"),
                 cms.InputTag("HLT_Ele22_SW_CaloEleId_L1R","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TighterEleIdIsol_L1R_v1","","HLT"),
                 cms.InputTag("HLT_Ele17_SW_TighterEleIdIsol_L1R_v2","","HLT"),
+                cms.InputTag("HLT_Ele17_SW_TighterEleIdIsol_L1R_v3","","HLT"),
                 cms.InputTag("HLT_Ele22_SW_TighterEleId_L1R_v2","","HLT"),
                 cms.InputTag("HLT_Ele22_SW_TighterCaloIdIsol_L1R_v1","","HLT"),
-                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R","","HLT"),
-                cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1","","HLT"),
-                cms.InputTag("HLT_DoubleEle17_SW_L1R","","HLT"),
+                #cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R","","HLT"),
+                #cms.InputTag("HLT_Ele17_SW_TightCaloEleId_Ele8HE_L1R_v1","","HLT"),
+                #cms.InputTag("HLT_DoubleEle17_SW_L1R","","HLT"),
                 cms.InputTag("HLT_Ele32_SW_TighterEleId_L1R","","HLT")),                
     triggerEventTag = cms.untracked.InputTag("hltTriggerSummaryAOD","","HLT")
 )

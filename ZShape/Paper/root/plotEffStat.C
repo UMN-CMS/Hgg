@@ -26,8 +26,8 @@ void plotEffStat(TFile* f, TFile* of=0, const char* var="Z0_Y") {
   TLegend* tl=new TLegend(0.5,0.8,0.95,0.95);
 
 
-  TDirectory* ecec=defcont->Get("Tight-ECAL-Loose-ECAL");
-  TDirectory* echf=defcont->Get("Tight-ECAL-HF");
+  TDirectory* ecec=defcont->Get("ECAL95-ECAL95");
+  TDirectory* echf=defcont->Get("ECAL80-HF");
 
   if (ecec->GetListOfKeys()->GetSize()!=echf->GetListOfKeys()->GetSize()) {
     printf("Different numbers of Trials in ECAL/ECAL and HF/ECAL\n");

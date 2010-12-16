@@ -3,6 +3,6 @@
 #dimension: 1 
 
 
-     #PtMin      PtMax     EtaMin     EtaMax   NumParms        eff      statp      statm        den
-         20        120         -5         -3          4     0.7027    0.06244   -0.05756      208.4
-         20        120          3          5          4     0.8618     0.1382    -0.1019     153.56
+     #PtMin      PtMax     EtaMin     EtaMax   NumParms        eff      systp      systm        den
+         20        120         -5         -3          4     0.7019     0.7143     0.6899      850.9
+         20        120          3          5          4     0.7278     0.7409     0.7151     821.22

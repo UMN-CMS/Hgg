@@ -34,6 +34,8 @@ Implementation:
 #include "ZShape/EffAcc/interface/EffHistos.h"
 #include "ZShape/EffAcc/interface/EfficiencyStore.h"
 #include "ZShape/EffAcc/interface/EfficiencyCut.h"
+#include "ZShape/EffAcc/interface/WgtProducer.h"
+
 #include "ZShape/ZFromData/interface/EffExtraHistos.h"
 
 ///#include "AnalysisDataFormats/ElectronEfficiency/interface/EmObjectFwd.h"

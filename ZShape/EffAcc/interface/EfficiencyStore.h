@@ -43,7 +43,9 @@ class EfficiencyStore {
   //-----------------------------------------------------------------------------------//
   void setVarMinMax(double vmin, double vmax);
 
-  
+  //-----------------------------------------------------------------------------------//
+  void setEffSysts(Double_t EFF, Double_t NT, Double_t NP, Double_t NBPLo, Double_t NBPHi, Double_t NBFLo, Double_t NBFHi);
+
   TH1F* getValuesHisto1D()     {
     return values1DHisto_;
   };
@@ -89,6 +91,7 @@ class EfficiencyStore {
   std::string effName_;
   std::string effType_;
   double vmax_,vmin_;
+  Double_t eff_, effSystLo_, effSystHi_;
   bool isEta_;
   bool isBoth_;
   void produceTxtFile1D();

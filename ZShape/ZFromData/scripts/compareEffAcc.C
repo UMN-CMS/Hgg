@@ -700,7 +700,7 @@ myLegpl->AddEntry(MCHistos_.ZRapMC,"Pythia Z2","pl");
 
 
 myLegpl->Draw();
-     plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "4 pb^{-1}");
+     plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "35 pb^{-1}");
 tempCan->Print(Form("ZRapCOOL_Z0_Y.%s",ftype));
 MCHistos_.ZRapMC->Scale(1.0/scale_);
 

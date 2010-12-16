@@ -27,6 +27,9 @@ efficiencyRoot2Txt $TP/testEff_ISOToID80.root ElectronId80-PtEta$numb.txt Electr
 efficiencyRoot2Txt $TP/testEff_IDToHLT.root HLT-EtaDet$numb.txt HLT eta 20 120
 efficiencyRoot2Txt $TP/testEff_IDToHLT.root HLT-Pt$numb.txt HLT pt -2.5 2.5
 efficiencyRoot2Txt $TP/testEff_IDToHLT.root HLT-PtEta$numb.txt HLT pt_eta
+efficiencyRoot2Txt $TP/testEff_IDToHLT80.root HLT80-EtaDet$numb.txt HLT80 eta 20 120
+efficiencyRoot2Txt $TP/testEff_IDToHLT80.root HLT80-Pt$numb.txt HLT80 pt -2.5 2.5
+efficiencyRoot2Txt $TP/testEff_IDToHLT80.root HLT80-PtEta$numb.txt HLT80 pt_eta
 efficiencyRoot2Txt $TP/testEff_HFSCToEID.root HFEId-EtaDet$numb.txt HFEId eta 20 120
 efficiencyRoot2Txt $TP/testEff_HFSCToEID.root HFEId-Pt$numb.txt HFEId pt -5 5
 efficiencyRoot2Txt $TP/testEff_HFSCToEID.root HFEId-PtEta$numb.txt HFEId pt_eta
