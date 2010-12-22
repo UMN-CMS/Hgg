@@ -272,8 +272,11 @@ EfficiencyPlots::printSumHistos(const char *ftype)
                effgraphs_[b]->SetTitle(Form(";%s %s;Single Electron Efficiency",physTypeDom_.c_str() , physUnitsDom_.c_str()));
                double min = effgraphs_[b]->GetYaxis()->GetXmin();
                double max = effgraphs_[b]->GetYaxis()->GetXmax();
-               if (max > 0.98 || binsTable_->size() > 1 ) effgraphs_[b]->SetMaximum(1.02);
-               if (binsTable_->size() > 1) effgraphs_[b]->SetMinimum(min-0.15);
+	       double dmin = min-0.15;
+	       double dmax = 1.02;
+	       if ( max - min < 0.05 ) {dmin = min - 0.02; dmax = 1.01;}
+               if (max > 0.98 || binsTable_->size() > 1 ) effgraphs_[b]->SetMaximum(dmax);
+               if (binsTable_->size() > 1) effgraphs_[b]->SetMinimum(dmin);
                else if (min < 0.2) effgraphs_[b]->SetMinimum(0.70);
            }
            else effgraphs_[b]->Draw("P");

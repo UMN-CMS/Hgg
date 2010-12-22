@@ -26,7 +26,7 @@ class EffHistos {
   TH1 *mZ_,*YZ_, *ptZ_,*ptZmon_;
   TH1 *YZTL_,*ptZTLmon_,*mZTL_;
   bool booked_;
-  TH1 *e1eta_,*e2eta_,*e1phi_,*e2phi_,*e1pt_,*e2pt_;
+  TH1 *e1eta_,*e2eta_,*e1phi_,*e2phi_,*e1pt_,*e2pt_,*eeta_,*ephi_;
   TH2 *mZ_Y_,*mZ_pt_,*pt_Y_,*e1eta_YZ_,*e2eta_YZ_,*e1eta_ptZ_,*e2eta_ptZ_,*e1eta_e2eta_,*YZTL_YZ_,*YZTL_YZ_matrix_;
 
 }; 

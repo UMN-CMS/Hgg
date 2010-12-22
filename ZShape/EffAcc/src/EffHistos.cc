@@ -38,8 +38,10 @@ void EffHistos::Book(TFileDirectory& tdf) {
 
   e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta;detector #eta_{e1}", 50, -5, 5);
   e2eta_ = tdf.make<TH1F>("e2_eta","e2_eta;detector #eta_{e2}", 50, -5, 5);
+  eeta_ = tdf.make<TH1F>("e_eta","e_eta;detector #eta_{e}", 50, -5, 5);
   e1phi_ = tdf.make<TH1F>("e1_phi","e1_phi;#phi_{e1}", 50, -pi, pi);
   e2phi_ = tdf.make<TH1F>("e2_phi","e2_phi;#phi_{e2}", 50,  -pi, pi);
+  ephi_ = tdf.make<TH1F>("e_phi","e_phi;#phi_{e}", 50,  -pi, pi);
   e1pt_  = tdf.make<TH1F>("e1_P_t","e1_P_t;p_{T,e1}", 200, 0, maxPt);
   e2pt_  = tdf.make<TH1F>("e2_P_t","e2_P_t;p_{T,e2}", 200, 0, maxPt);
  
@@ -122,6 +124,12 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
   e2eta_ -> Fill(e2eta,wgt);
   e2pt_  -> Fill(e2Pt,wgt);
   e2phi_ -> Fill(e2phi,wgt);
+
+  eeta_ -> Fill(e1eta,wgt);
+  eeta_ -> Fill(e2eta,wgt);
+  ephi_ -> Fill(e1phi,wgt);
+  ephi_ -> Fill(e2phi,wgt);
+
   
   //Now Fill the 2-D Histograms
   mZ_Y_->Fill(zY,zMass,wgt);
