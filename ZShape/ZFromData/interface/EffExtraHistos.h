@@ -25,7 +25,7 @@ class EffExtraHistos {
 
   TH1 *MCmZ_,*MCYZ_, *MCptZ_,*atZ_,*alZ_ ,*ptZ_,*MCatZ_,*MCalZ_;
 
-  TH1 *MCe1eta_,*MCe2eta_,*MCe1phi_,*MCe2phi_,*MCe1pt_,*MCe2pt_;
+  TH1 *MCe1eta_,*MCe2eta_,*MCe1phi_,*MCe2phi_,*MCe1pt_,*MCe2pt_,*MCeeta_,*MCephi_;
   TH2 *wgt_;
   
 }; 

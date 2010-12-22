@@ -50,8 +50,10 @@ void EffExtraHistos::Book(TFileDirectory& tdf) {
   MCptZ_ = tdf.make<TH1F>("Z0_Pt_MC","Z0_Pt_MC;p_{T,Z0}", 200, 0., maxPt); 
   MCe1eta_ = tdf.make<TH1F>("e1_eta_MC","e1_eta_MC;detector #eta_{e1}", 50, -5, 5);  
   MCe2eta_ = tdf.make<TH1F>("e2_eta_MC","e2_eta_MC;detector #eta_{e2}", 50, -5, 5);
+  MCeeta_ = tdf.make<TH1F>("e_eta_MC","e_eta_MC;detector #eta_{e}", 50, -5, 5);  
   MCe1phi_ = tdf.make<TH1F>("e1_phi_MC","e1_phi_MC;#phi_{e1}", 50, -pi, pi);  
   MCe2phi_ = tdf.make<TH1F>("e2_phi_MC","e2_phi_MC;#phi_{e2}", 50,  -pi, pi);  
+  MCephi_ = tdf.make<TH1F>("e_phi_MC","e_phi_MC;#phi_{e}", 50,  -pi, pi);  
   MCe1pt_  = tdf.make<TH1F>("e1_P_t_MC","e1_P_t_MC;p_{T,e1}", 200, 0., maxPt);  
   MCe2pt_  = tdf.make<TH1F>("e2_P_t_MC","e2_P_t_MC;p_{T,e2}", 200, 0., maxPt);
 }
@@ -153,6 +155,10 @@ void EffExtraHistos::Fill(const ZShapeElectron& e1, const ZShapeElectron& e2, co
       MCe2pt_  -> Fill(em2Pt,wgt);
       MCe2phi_ -> Fill(em2phi,wgt);
 
+      MCeeta_ -> Fill(em1eta,wgt);
+      MCeeta_ -> Fill(em2eta,wgt);
+      MCephi_ -> Fill(em1phi,wgt);
+      MCephi_ -> Fill(em2phi,wgt);
  
       MCatZ_->Fill(atm,wgt); 
       MCalZ_->Fill(alm,wgt);

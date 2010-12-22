@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <TArrayD.h>
 #include <TDatime.h>
+#include <TMath.h>
 
 // This is my personal class I have used to write the efficiency times acceptance histograms
 // This is essentionally a class that acts like a ROOT Macro
@@ -373,8 +374,8 @@ std::cout << " divide the first 50 " << std::endl;
      FinalHistos_.ZRapAfter.push_back(tempHist);
   }
 std::cout << " divide the first 60 " << std::endl;
-  FinalHistos_.ZRapTotal    = new TH1F("ZRapTotal","Z Rapidity;Y_{Z0};Events/0.25 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
-  FinalHistos_.ZMCRapTotal  = new TH1F("ZMCRapTotal","Z Rapidity;Y_{Z0};Events/0.25 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
+  FinalHistos_.ZRapTotal    = new TH1F("ZRapTotal","Z Rapidity;Y_{Z0};Events/0.1 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
+  FinalHistos_.ZMCRapTotal  = new TH1F("ZMCRapTotal","Z Rapidity;Y_{Z0};Events/0.1 units of rapidity",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
   FinalHistos_.ZEffAccTotal = new TH1F("EffAccTotal","EffxAcc Total;Y_{Z0};EffxAcc",MCHistos_.ZRapMC->GetNbinsX(),-5.5,5.5);
   FinalHistos_.ZRapTotSk = new THStack();
   FinalHistos_.ZEffAccTotSk= new THStack();
@@ -547,15 +548,19 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
            (*zfdvhit)->SetLineWidth(2);
            if (strstr((*zmcvhit)->GetName(),"eta")) 
            {
-              int electron = 2;
+              int electron = 0;
               if (strstr((*zmcvhit)->GetName(),"e1")) electron = 1;
-              (*zmcvhit)->GetXaxis()->SetTitle(Form("#eta_{d,e%d}",electron));
+              if (strstr((*zmcvhit)->GetName(),"e2")) electron = 2;
+              if (electron > 0 ) (*zmcvhit)->GetXaxis()->SetTitle(Form("#eta_{d,e%d}",electron));
+	      else (*zmcvhit)->GetXaxis()->SetTitle("#eta_{d,e}");
            }
            if (strstr((*zfdvhit)->GetName(),"eta")) 
            {
-              int electron = 2;
+              int electron = 0;
               if (strstr((*zfdvhit)->GetName(),"e1")) electron = 1;
-              (*zfdvhit)->GetXaxis()->SetTitle(Form("#eta_{d,e%d}",electron));
+	      if (strstr((*zfdvhit)->GetName(),"e2")) electron = 2;
+              if ( electron > 0 ) (*zfdvhit)->GetXaxis()->SetTitle(Form("#eta_{d,e%d}",electron));
+	      else (*zfdvhit)->GetXaxis()->SetTitle("#eta_{d,e}");
            }
            if (placement ==0 )  { plabel -> DrawText(xlab_, ylabp_, "CMS  PRELIMINARY");   }//  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));}
            else  if (placement == 1 )  { plabel -> DrawText(xlabc_, ylabpc_, "CMS PRELIMINARY");    }// tlabel -> DrawText(xlabc_, ylabtc_, Form("%s",time_));}
@@ -702,14 +707,142 @@ myLegpl->AddEntry(MCHistos_.ZRapMC,"Pythia Z2","pl");
 myLegpl->Draw();
      plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "35 pb^{-1}");
 tempCan->Print(Form("ZRapCOOL_Z0_Y.%s",ftype));
-MCHistos_.ZRapMC->Scale(1.0/scale_);
 
+
+//NOW I need to make the folded and the stat error distributions
+Double_t mybins[200];
+Double_t myerrs[200];
+Double_t total = 0;
+ 
+TH1F *myhc  = (TH1F* )FinalHistos_.ZResult->Clone("daresult");
+TH1F *myhce = (TH1F*) FinalHistos_.ZResult->Clone("daresulte");
+Int_t numBins = myhc->GetNbinsX();
+
+TH1F *myhmc =  (TH1F*) MCHistos_.ZRapMC->Clone("daMC");
+myhmc->SetLineColor(kRed);
+myhmc->SetLineWidth(2);
+myhmc->Scale(2./myhmc->Integral());
+
+ for (Int_t bin = 0 ; bin < numBins/2+1 ; ++bin)
+  {
+    mybins[bin]=0; //simple emptying of the arrays.
+    myerrs[bin]=0;
+  }
+  
+
+ for (Int_t bin = 1 ; bin < numBins +1; ++bin)
+   {
+     //std::cout << " oh boy " << std::endl;
+     Int_t mybin = bin - (numBins/2 +1) ;
+     if (mybin >= 0 ) {mybin++;}
+     if (mybin < 0 ) {mybin = TMath::Abs(mybin);}
+     //std::cout << " oh boy 20  " << std::endl;
+     
+     Double_t myval = (Double_t ) myhc->GetBinContent(bin);
+     Double_t mybe = myhc->GetBinError(bin);
+     //std::cout << " oh boy 30 " << std::endl;
+     
+      if (mybe > 0 ) 
+	{
+	  mybins[mybin] += myval/(mybe*mybe);
+	  myerrs[mybin] += 1./(mybe*mybe);
+	  total += myval/2.;
+	  //std::cout << " oh boy 35 " << std::endl;
+	  std::cout << " mybin " << mybin << " myval " << myval << std::endl;
+	  
+	}  
+      //std::cout << " oh boy 40 " << std::endl;
+      
+   }
+
+ //here i need to scale TOTAL
+  total = 11620;
+
+  for (Int_t bin = 1 ; bin < numBins/2+1 ; ++bin)
+    {
+      if ( myerrs[bin] > 0 ) {
+	Double_t daerr = TMath::Power(myerrs[bin],-0.5);
+	
+	Double_t dabin = mybins[bin]/myerrs[bin];
+
+	std::cout << " da errorr " << daerr << " dabin " << dabin << " total " << total << std::endl;
+
+	myhc->SetBinContent(bin + numBins/2 , dabin/total); //+ numBins/2 -1; because I don't make new hists
+
+	myhc->SetBinError(bin + numBins/2 , daerr/total);
+
+	myhce->SetBinContent(bin + numBins/2 , daerr/dabin);
+	myhce->SetBinError(bin + numBins/2 , 0 );
+
+      }
+      else
+	{
+	  myhc->SetBinContent(bin, 0);
+	  myhc->SetBinError(bin, 0);
+	  myhce->SetBinContent(bin, 0);
+	  //std::cout << " oh boy 59.2 " << std::endl;
+
+	}
+      //std::cout << " oh boy 59.5 " << std::endl;
+
+    }
+
+
+  myhc->SetMarkerStyle(kFullCircle);
+  myhc->SetMarkerSize(1.1);
+
+  //myhc->GetXaxis()->SetRange(10,35);
+  myhc->GetYaxis()->SetTitle("1/#sigma (d#sigma/dY) / 0.1 Units of Rapdity");
+  myhc->GetXaxis()->SetTitle("|Y_{Z0}|");
+  myhc->GetXaxis()->SetRange(numBins/2+1,numBins);
+  myhc->GetXaxis()->SetRangeUser(0,3.7);
+  myhc->GetYaxis()->SetTitleOffset(1.3);
+
+  myhc->Draw("pe");
+  myhmc->Draw("same hist");
+  myhc->Draw("same,pe");
+
+  TLegend *legh = new TLegend(.72,.82,.98,.95);
+  legh->AddEntry(myhc,"35 pb^{-1} Data ","p");
+  legh->AddEntry(myhmc,"Pythia Z2","l");
+  legh->SetFillColor(kWhite);
+  legh->Draw();
+
+  plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "35 pb^{-1}");
+  tempCan->Print(Form("ZRapFOLD_Z0_Y.%s",ftype));
+  
+  //new plot
+  myhce->SetMarkerStyle(kFullCircle);
+  myhce->SetMarkerSize(1.1);
+  myhce->Draw("p");
+  tempCan->SetLogy(1);
+  myhce->GetXaxis()->SetRangeUser(0,3.7);
+  myhce->GetXaxis()->SetTitle("|Y_{Z0}|");
+  myhce->GetYaxis()->SetRangeUser(0.01,1.);
+  myhce->GetYaxis()->SetTitle("Stat Error Fraction / 0.1 Units of Y");
+  myhce->GetYaxis()->SetTitleOffset(1.2);
+
+  //pt = new TPaveText(0,0.7,2,1.0,"br");
+  //pt->SetFillColor(19);
+  //text = pt->AddText("35 pb^{-1} Data Statistical Error");
+  //pt->SetFillColor(kWhite);
+  //pt->Draw();
+
+ plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "35 pb^{-1}");
+  tempCan->Print(Form("ZRapFOLDSTAT_Z0_Y.%s",ftype));
+
+
+//settting things back the way they were a few plots ago
+MCHistos_.ZRapMC->Scale(1.0/scale_);
+  tempCan->SetLogy(0);
 
 
  /*  
    for (int itype = 0; itype < PHYSVARS; ++itype)
    {
-      TCanvas *tempCan = new TCanvas("tempcan","tempcan");
+      TCanvas *tempCan = new TCanvas("
+
+tempcan","tempcan");
       TLegend *myLeg = new TLegend(.75,.25,.97,.55);
       for (iteffstr it = Effs_.begin(); it != Effs_.end(); it++)
       {
