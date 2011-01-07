@@ -32,10 +32,12 @@ void EffHistos::Book(TFileDirectory& tdf) {
   ptZ_  = tdf.make<TH1F>("Z0_Pt","Z0_Pt;p_{T,Z0}", zshape::pt_bins, zshape::pt_binning);
   ptZmon_ = tdf.make<TH1F>("Z0_PtMon","Z0_PtMon;p_{T,Z0}", 200, 0, maxPt);
 
+  
   mZTL_  = tdf.make<TH1F>("Z0_massTL","Z0_M Tree Level;m_{Z0} (GeV/c^{2})", 50, minZmass, maxZmass);
   YZTL_  = tdf.make<TH1F>("Z0_YTL","Z0_Y Tree Level;Y_{Z0}", zshape::y_bins, -zshape::y_max, zshape::y_max);
+  ptZTL_  = tdf.make<TH1F>("Z0_PtTL","Z0_PtTL;p_{T,Z0}", zshape::pt_bins, zshape::pt_binning); 
   ptZTLmon_ = tdf.make<TH1F>("Z0_PtTLMon","Z0_Pt Tree Level Mon;p_{T,Z0}", 200, 0, maxPt);
-
+  
   e1eta_ = tdf.make<TH1F>("e1_eta","e1_eta;detector #eta_{e1}", 50, -5, 5);
   e2eta_ = tdf.make<TH1F>("e2_eta","e2_eta;detector #eta_{e2}", 50, -5, 5);
   eeta_ = tdf.make<TH1F>("e_eta","e_eta;detector #eta_{e}", 50, -5, 5);
@@ -59,6 +61,9 @@ void EffHistos::Book(TFileDirectory& tdf) {
  
   YZTL_YZ_       = tdf.make<TH2F>("YZTL_vs_YZ","YZTL_vs_YZ;Y_{Z};Y_{ZtreeLevel}",zshape::y_bins,-zshape::y_max,zshape::y_max,zshape::y_bins,-zshape::y_max,zshape::y_max); 
   YZTL_YZ_matrix_= tdf.make<TH2F>("YZTL_vs_YZ_matrix","YZTL_vs_YZ_matrix;Y_{Z};Y_{ZtreeLevel}",zshape::y_bins,-zshape::y_max,zshape::y_max,zshape::y_bins,-zshape::y_max,zshape::y_max); 
+
+
+  ptZTL_ptZ_       = tdf.make<TH2F>("PtTL_vs_PtZ","PtZTL_vs_PtZ;Pt_{Z};Pt_{ZtreeLevel}",zshape::pt_bins, zshape::pt_binning,zshape::pt_bins, zshape::pt_binning); 
 
 } 
 
@@ -115,7 +120,9 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
     {
       mZTL_  -> Fill(zTLMass,wgt);
       YZTL_  -> Fill(zTLY,wgt);
+      ptZTL_-> Fill(zTLPt,wgt);
       ptZTLmon_ -> Fill(zTLPt,wgt);
+   
     }
   e1eta_ -> Fill(e1eta,wgt);
   e1pt_  -> Fill(e1Pt,wgt);
@@ -144,7 +151,10 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
   e1eta_e2eta_ -> Fill(e1eta,e2eta,wgt);
 
   // tree level rapidity VS fast reco-ed rapidity 
-  if (doMC) YZTL_YZ_ -> Fill(zY,zTLY,wgt); 
+  if (doMC){
+    YZTL_YZ_ -> Fill(zY,zTLY,wgt); 
+    ptZTL_ptZ_  -> Fill(zPt,zTLPt,wgt); 
+  }
 }
 
 
