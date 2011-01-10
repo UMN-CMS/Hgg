@@ -76,12 +76,25 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   
 
   //
-  // setting up systematic variations 
+  // setting up systematic variations on efficiencies
   targetEffSys_  =iConfig.getUntrackedParameter<std::string>("esys_eff","");
   targetZDefSys_ =iConfig.getUntrackedParameter<std::string>("esys_zdef","");
   edm::LogInfo("ZShape") << "esys_eff: " << targetEffSys_ << "   while esys_zdef: "<< targetZDefSys_;  
 
   createAlternateZDefs(targetZDefSys_,targetEffSys_);
+
+  // setting up other systematic variations
+  systematicVariation_ = iConfig.getUntrackedParameter<std::string>("systematic","");
+
+  if (systematicVariation_=="EnergyScale+") {
+    m_systematics.energyScale=new zshape::EnergyScale(true);
+    edm::LogInfo("ZShape") << "Performing positive energy scale variation";
+    std::cout << "Performing positive energy scale variation\n";
+  } else if (systematicVariation_=="EnergyScale-") {
+     m_systematics.energyScale=new zshape::EnergyScale(false);
+    edm::LogInfo("ZShape") << "Performing negative energy scale variation";
+    std::cout << "Performing negative energy scale variation\n";
+  } else m_systematics.energyScale=0;
 
 }
 
@@ -333,6 +346,12 @@ void ZEfficiencyCalculator::fillEvent(const reco::GenParticleCollection* ZeePart
       //      edm::LogWarning("ZEfficiencyCalculator") << " we need two electrons (pid: " << myPid << " ) while we have: " << ne;
       return;
     }
+
+  // energy scale systematics
+  if (m_systematics.energyScale!=0) {
+    m_systematics.energyScale->rescale(evt_.elec(0));
+    m_systematics.energyScale->rescale(evt_.elec(1));
+  }
 
 
   evt_.elec(0).detEta_=evt_.elec(0).detectorEta(evt_.vtx_);

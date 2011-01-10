@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.17 2009/08/25 14:46:30 haupt Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.18 2009/09/15 17:36:40 haupt Exp $
 //
 //
 
@@ -34,14 +34,13 @@ Implementation:
 
 #include "DataFormats/Common/interface/Handle.h"
 
-#include <CLHEP/Vector/LorentzVector.h>
-
 #include "ZShape/Base/interface/ZShapeEvent.h"
 #include "ZShape/Base/interface/ZShapeZDef.h"
 #include "ZShape/Base/interface/ZShapeStandardCuts.h"
 #include "ZShape/EffAcc/interface/EffHistos.h"
 #include "ZShape/EffAcc/interface/EfficiencyStore.h"
 #include "ZShape/EffAcc/interface/EfficiencyCut.h"
+#include "ZShape/Base/interface/Systematics.h"
 
 #include "TRandom3.h"
 #include "TFile.h"
@@ -102,6 +101,12 @@ private:
   
   // targets for systematic variations
   std::string targetEffSys_, targetZDefSys_;
+
+  // other systematics
+  std::string systematicVariation_;
+  struct SystematicsBlock {
+    zshape::EnergyScale* energyScale;
+  } m_systematics;
 
   // Z Plots:
 
