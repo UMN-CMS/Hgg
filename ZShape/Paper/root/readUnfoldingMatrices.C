@@ -36,9 +36,9 @@ int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string 
 
     // now pull up a test ECAL-ECAL histogram 
     std::string prefix("mcEff/");
-    std::string definition("ECAL80-ECAL80");   // FIX this definition to ECAL80-ECAL95
+    std::string definition("ECAL80-ECAL95");
     std::string cut("C08-m(70,110)");
-    std::string plot("Z0_Y");            // bin migration histogram
+    std::string plot("Z0_Y");                  // bin migration histogram
     std::string plotName = prefix + definition;
     plotName = plotName + std::string("/");    plotName = plotName + cut;
     plotName = plotName + std::string("/");    plotName = plotName + plot;
@@ -69,13 +69,14 @@ int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string 
 
 
 
-  Double_t arrayRapiditySmeared[110]; // this needs be hardcoded...
-  for(int bin=1; bin<=110; bin++)
+   //Double_t arrayRapiditySmeared[110]; // this needs be hardcoded...
+  Double_t arrayRapiditySmeared[100]; // this needs be hardcoded...
+  for(int bin=1; bin<=100; bin++)
   {
    arrayRapiditySmeared[bin-1]=h_fullTest_smeared->GetBinContent(bin);
   }
 
-  TVectorD vectorRapiditySmeared; vectorRapiditySmeared.Use(110,arrayRapiditySmeared);
+  TVectorD vectorRapiditySmeared; vectorRapiditySmeared.Use(100,arrayRapiditySmeared);
 
   // this is the multiplication for clusure test
   TVectorD vectorRapidityUNSmeared = (*theUnfoldingMatrix) * vectorRapiditySmeared;
@@ -87,7 +88,7 @@ int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string 
 		h_smearedRapidityECALHF->GetXaxis()->GetXmax());
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // turning the unsmeared vector into a histogram
-  for(int bin=1; bin<=110; bin++)
+  for(int bin=1; bin<=100; bin++)
   {
    h_RapidityUNSmeared->SetBinContent(bin,vectorRapidityUNSmeared[bin-1]);
    //std::cout << vectorRapidityUNSmeared[bin-1]<<std::endl;

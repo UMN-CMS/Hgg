@@ -5,6 +5,7 @@
 // produce an unsmearing matrix and save it to a file (for usage with readUnfoldingMatrices.C)
 
 // to execute this example
+//     root -l
 //root [0] .L makeUnfoldingMatrices.C 
 //root [1] makeUnfoldingMatrices("effAccSource.root","unfoldingMatrix_theOutPut.root")
 
@@ -32,7 +33,7 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
 
     // get hold of ECAL-ECAL 2d plot 
     std::string prefix("mcEff/");
-    std::string definition("ECAL80-ECAL80");   // FIX this definition to ECAL80-ECAL95
+    std::string definition("ECAL80-ECAL95");   
     std::string cut("C08-m(70,110)");
     std::string plot("YZTL_vs_YZ");            // bin migration histogram
     std::string plotName = prefix + definition;
@@ -180,7 +181,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
 
    int counter(0);
    //   double migration[1936];//array reordering histoMatrix, to construct TMatrix
-   double migration[12100];    //array reordering histoMatrix, to construct TMatrix
+   // double migration[12100];    //array reordering histoMatrix, to construct TMatrix
+   double migration[10000];    //array reordering histoMatrix, to construct TMatrix
                                // this has to be hard-coded
       for (int u=0; u<histoMatrix->GetNbinsX(); u++){//rows
      for (int v=0; v<histoMatrix->GetNbinsX(); v++){//col
@@ -228,7 +230,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
   //h_RapidityTreeLevel
   //h_RapiditySmeared
 
-  Double_t arrayRapiditySmeared[110]; // this needs be hardcoded...
+  //Double_t arrayRapiditySmeared[110]; // this needs be hardcoded...
+  Double_t arrayRapiditySmeared[100]; // this needs be hardcoded...
   //  for(int bin=1; bin<=44; bin++)  // was hard-coded, but this is not necessary
   for(int bin=1; bin<=binsXMatrixEcalEcal; bin++)
   {
