@@ -32,7 +32,9 @@ void EffHistos::Book(TFileDirectory& tdf) {
   ptZ_  = tdf.make<TH1F>("Z0_Pt","Z0_Pt;p_{T,Z0}", zshape::pt_bins, zshape::pt_binning);
   ptZmon_ = tdf.make<TH1F>("Z0_PtMon","Z0_PtMon;p_{T,Z0}", 200, 0, maxPt);
 
-  
+  YZmasscut_  = tdf.make<TH1F>("Z0_Y_masscut","Z0_Y_masscut;Y_{Z0}", zshape::y_bins, -zshape::y_max, zshape::y_max);
+  ptZmasscut_  = tdf.make<TH1F>("Z0_Pt_masscut","Z0_Pt_masscut;p_{T,Z0}", zshape::pt_bins, zshape::pt_binning);
+
   mZTL_  = tdf.make<TH1F>("Z0_massTL","Z0_M Tree Level;m_{Z0} (GeV/c^{2})", 50, minZmass, maxZmass);
   YZTL_  = tdf.make<TH1F>("Z0_YTL","Z0_Y Tree Level;Y_{Z0}", zshape::y_bins, -zshape::y_max, zshape::y_max);
   ptZTL_  = tdf.make<TH1F>("Z0_PtTL","Z0_PtTL;p_{T,Z0}", zshape::pt_bins, zshape::pt_binning); 
@@ -114,6 +116,12 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
   mZ_  -> Fill(zMass,wgt);
   YZ_  -> Fill(zY,wgt);
   ptZ_ -> Fill(zPt,wgt);
+  
+  if (zMass >= massWindowLow_ && zMass < massWindowHigh_) {
+    YZmasscut_  -> Fill(zY,wgt);
+    ptZmasscut_ -> Fill(zPt,wgt);    
+  }
+
   ptZmon_ -> Fill(zPt,wgt);
 
   if (doMC) 

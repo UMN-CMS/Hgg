@@ -422,6 +422,7 @@ ZEfficiencyCalculator::beginJob()
   // one directory for histos of event before any selection
   TFileDirectory subDir=fs->mkdir("All");  
   allCase_.Book(subDir);
+  allCase_.setupMassWindow(massLow_,massHigh_);
 
   const float maxY=5.5;
   const float yBinSize=0.10;
@@ -453,7 +454,7 @@ ZEfficiencyCalculator::beginJob()
 
     TFileDirectory td = sd.mkdir("Acceptance");
     zplots->acceptance_.Book(td);
-
+    zplots->acceptance_.setupMassWindow(massLow_,massHigh_);
 
     // looping over cuts foreseen in given Z definition (for E1 and E2 simultaneously)
     for (int i=1; i<q->second->criteriaCount(ZShapeZDef::crit_E1); ++i) {
@@ -471,6 +472,7 @@ ZEfficiencyCalculator::beginJob()
       // one sub-dir for each step of selection
       td = sd.mkdir(dirname);
       zplots->postCut_[i-1].Book(td);
+      zplots->postCut_[i-1].setupMassWindow(massLow_,massHigh_);
     }
     int iOffset=q->second->criteriaCount(ZShapeZDef::crit_E1);
     for (int i=0; i<q->second->criteriaCount(ZShapeZDef::crit_Z); ++i) {
@@ -482,6 +484,7 @@ ZEfficiencyCalculator::beginJob()
       // one sub-dir for each step of selection
       td = sd.mkdir(dirname);
       zplots->zCut_[i].Book(td);
+      zplots->zCut_[i].setupMassWindow(massLow_,massHigh_);
     }    
 
     zplots_[q->first]=zplots;
@@ -513,6 +516,7 @@ ZEfficiencyCalculator::beginJob()
 	sprintf(dirname,"Trial%d",j+1);      
 	TFileDirectory td = dd.mkdir(dirname);      
 	statsBox_.hists[defs->first][j].Book(td);
+	statsBox_.hists[defs->first][j].setupMassWindow(massLow_,massHigh_);
       }
     }
   }

@@ -19,11 +19,13 @@ class EffHistos {
             const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2, double wgt=1.0, bool doMC=true); 
   void WrapUp(void);
 
-  EffHistos() { booked_=false; }
+  void setupMassWindow(double low, double high) { massWindowLow_=low; massWindowHigh_=high; }
+  EffHistos() { booked_=false; massWindowLow_=0; massWindowHigh_=1000;}
  private:
-
+  double massWindowLow_,massWindowHigh_;
 
   TH1 *mZ_,*YZ_, *ptZ_,*ptZmon_;
+  TH1 *YZmasscut_,*ptZmasscut_;
   TH1 *YZTL_,*ptZTLmon_,*mZTL_,*ptZTL_;
   bool booked_;
   TH1 *e1eta_,*e2eta_,*e1phi_,*e2phi_,*e1pt_,*e2pt_,*eeta_,*ephi_;
