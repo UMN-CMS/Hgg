@@ -20,13 +20,13 @@ void plotAcc(TFile* f, const char* var="Z0_Y") {
 
   TH1* base=((TDirectory*)basedir->Get("All"))->Get(var);
 
-  TDirectory* zdir=basedir->Get("Tight-ECAL-Loose-ECAL");
-  TDirectory* zdir2=basedir->Get("Tight-ECAL-HF");
+  //  TDirectory* zdir=basedir->Get("Tight-ECAL-Loose-ECAL");
+  // TDirectory* zdir2=basedir->Get("Tight-ECAL-HF");
 
   TCanvas* c1=new TCanvas("c1","c1",700,600);
   
   TLegend* tl;
-  tl=new TLegend(0.35,0.15,0.70,0.35,"Pythia 6.409");
+  tl=new TLegend(0.35,0.15,0.70,0.35,"Pythia 6.422");
 
   c1->SetTopMargin(0.05);
   c1->SetRightMargin(0.05);
@@ -34,8 +34,8 @@ void plotAcc(TFile* f, const char* var="Z0_Y") {
   TH1* final=0;
 
   int n=0;
-  TH1* stage1=((TDirectory*)zdir->Get("Acceptance"))->Get(var);
-  TH1* stage2=((TDirectory*)zdir2->Get("Acceptance"))->Get(var);
+  TH1* stage1=((TDirectory*)basedir->Get("All"))->Get("ECAL-ECAL");
+  TH1* stage2=((TDirectory*)basedir->Get("All"))->Get("ECAL-HF");
 	       
   TH1* work=stage1->Clone();
   work->Add(stage2);
@@ -53,7 +53,7 @@ void plotAcc(TFile* f, const char* var="Z0_Y") {
   work->Divide(work,base);
   work->SetLineColor(colorFor(n));
   work->SetLineWidth(2);
-  work->GetYaxis()->SetTitle("Acceptance");
+  work->GetYaxis()->SetTitle("Geometrical Acceptance");
   work->GetYaxis()->SetTitleOffset(1.2);
   work->SetTitle(0);
   work->SetStats(false);

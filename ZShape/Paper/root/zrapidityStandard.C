@@ -2,7 +2,7 @@
 #include "TLatex.h"
 #include "TDatime.h"
 
-static bool dotime=false;
+static bool dotime=true;
 
 void zrap_Prelim(double px, double py, double tx=-1, double ty=-1) {
   const char* time_;
@@ -19,7 +19,7 @@ void zrap_Prelim(double px, double py, double tx=-1, double ty=-1) {
 
   
   //Then for each plot, pick a nice spot and draw
-  plabel -> DrawText(px, py, "CMS PRELIMINARY");
+  plabel -> DrawText(px, py, "CMS 2010 PRELIMINARY");
   if (tx>=0 && ty>=0 && dotime) {
     TText *tlabel = new TText();
     tlabel-> SetNDC();

@@ -18,9 +18,9 @@ const char* labelFor(int i) {
   case(1) : return "Supercluster";
   case(2) : return "P_{T}>20 GeV";
   case(3) : return "GSF Track Match";
-  case(4) : return "Isolation";
-  case(5) : return "Electron ID/HF Electron Id";
-  case(6) : return "HLT";
+  case(4) : return "Electron Id";
+  case(5) : return "HLT";
+    //  case(6) : return "HLT";
   default : return "Huh?";
   }
 }
@@ -28,14 +28,14 @@ const char* labelFor(int i) {
 #include "tdrstyle.C"
 #include "zrapidityStandard.C"
 
-void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
+void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y_masscut") {
   TDirectory* basedir=f->Get("mcEff");
 
-  TH1* base=((TDirectory*)basedir->Get("All"))->Get(var);
+  TH1* base=((TDirectory*)basedir->Get("All"))->Get("Z0_Y");
 
 
-  TDirectory* zdir=basedir->Get("Tight-ECAL-Loose-ECAL");
-  TDirectory* zdir2=basedir->Get("Tight-ECAL-HF");
+  TDirectory* zdir=basedir->Get("ECAL80-ECAL95");
+  TDirectory* zdir2=basedir->Get("ECAL80-HF");
 
   TList* cutz=zdir->GetListOfKeys();
   TList* cutz2=zdir2->GetListOfKeys();
@@ -64,6 +64,7 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
     TH1* stage=((TDirectory*)zdir->Get(cutz->At(i)->GetName()))->Get(var);
     TH1* stage2=((TDirectory*)zdir2->Get(cutz2->At(i)->GetName()))->Get(var);
     char cleanname[256];
+    char* fullname=cutz->At(i)->GetName();
     char* pt=strchr(cutz->At(i)->GetName(),'-');
     if (pt!=0) strcpy(cleanname,pt+1);
     else strcpy(cleanname,cutz->At(i)->GetName());
@@ -71,8 +72,10 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
     pt=strchr(cleanname,'-'); if (pt!=0) *pt=0;
 
     if (!strcmp(cleanname,"PT10")) continue;
+    if (!strcmp(fullname,"C05-PT20")) continue;
+    if (strstr(fullname,"-m(")!=0) continue;
     // if (!strcmp(cleanname,"PT20")) continue;
-    printf("%s %s %p %p\n",cutz->At(i)->GetName(),cleanname,stage,pt);
+    printf("%d %s %s %p %p\n",n,fullname,cleanname,stage,pt);
     TH1* work=stage->Clone();
     final=(TH1*)(stage->Clone());
     final->Divide(final,base);
@@ -101,7 +104,7 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
       work->GetYaxis()->SetTitleOffset(1.2);
       work->SetTitle(0);
       work->SetStats(false);
-      work->SetMaximum(1.0);
+      work->SetMaximum(1.2);
       work->SetMinimum(0.0);
       if (strstr(var,"Y")!=0) {
 	work->GetXaxis()->SetRangeUser(-4.5,4.5);
@@ -114,7 +117,7 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
     }
     else work->Draw("SAMEHIST");
 
-    if (n<4) 
+    if (n<3) 
       tl->AddEntry(work,labelFor(n));
     else
       tl2->AddEntry(work,labelFor(n));
@@ -152,7 +155,7 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y") {
   final->GetYaxis()->SetTitleOffset(1.2);
   final->SetTitle(0);
   final->SetStats(false);
-  final->SetMaximum(0.65);
+  final->SetMaximum(0.85);
   final->SetMinimum(0.0);
   if (strstr(var,"Y")!=0) {
     final->GetXaxis()->SetRangeUser(-4.5,4.5);
