@@ -86,14 +86,22 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   // setting up other systematic variations
   systematicVariation_ = iConfig.getUntrackedParameter<std::string>("systematic","");
 
-  if (systematicVariation_=="EnergyScale+") {
-    m_systematics.energyScale=new zshape::EnergyScale(true);
-    edm::LogInfo("ZShape") << "Performing positive energy scale variation";
-    std::cout << "Performing positive energy scale variation\n";
-  } else if (systematicVariation_=="EnergyScale-") {
-     m_systematics.energyScale=new zshape::EnergyScale(false);
-    edm::LogInfo("ZShape") << "Performing negative energy scale variation";
-    std::cout << "Performing negative energy scale variation\n";
+  if (systematicVariation_=="ECALScale+") {
+    m_systematics.energyScale=new zshape::EnergyScale(1,0);
+    edm::LogInfo("ZShape") << "Performing positive ECAL energy scale variation";
+    std::cout << "Performing positive ECAL energy scale variation\n";
+  } else if (systematicVariation_=="ECALScale-") {
+    m_systematics.energyScale=new zshape::EnergyScale(-1,0);
+    edm::LogInfo("ZShape") << "Performing negative ECAL energy scale variation";
+    std::cout << "Performing negative ECAL energy scale variation\n";
+  } else if (systematicVariation_=="HFScale-") {
+    m_systematics.energyScale=new zshape::EnergyScale(0,1);
+    edm::LogInfo("ZShape") << "Performing positive HF energy scale variation";
+    std::cout << "Performing positive HF energy scale variation\n";
+  } else if (systematicVariation_=="HFScale-") {
+    m_systematics.energyScale=new zshape::EnergyScale(0,-1);
+    edm::LogInfo("ZShape") << "Performing negative HF energy scale variation";
+    std::cout << "Performing negative HF energy scale variation\n";
   } else m_systematics.energyScale=0;
 
 }
