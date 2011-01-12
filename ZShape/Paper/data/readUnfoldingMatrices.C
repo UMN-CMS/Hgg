@@ -6,6 +6,8 @@
 // and apply to a rapidity distribution you get from an effAcc file (effAccSource.root)
 
 // to execute this example
+//      wget http://homepages.spa.umn.edu/~franzoni/reps/11/jan12/effAccSource.root
+//      (getting this file is only needed to run the example)
 //      pb-d-128-141-34-30:2011-01-12-migMatrixReleaseFRESH franzoni$ root -l 
 //      root [0] .L readUnfoldingMatrices.C                                                  
 //      root [1] readUnfoldingMatrices("unfoldingMatrix_theOutPut.root","effAccSource.root")
