@@ -54,8 +54,14 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y_masscut") {
 
   TLegend* tl2=new TLegend(0.50,0.8,0.92,0.92);
   tl2->SetFillStyle(0);
-  c1->SetTopMargin(0.05);
-  c1->SetRightMargin(0.05);
+  c1->SetTopMargin(0.02);
+  c1->SetRightMargin(0.02);
+  c1->SetLeftMargin(0.10);
+  c1->SetBottomMargin(0.10);
+  c2->SetTopMargin(0.02);
+  c2->SetRightMargin(0.02);
+  c2->SetLeftMargin(0.10);
+  c2->SetBottomMargin(0.10);
 
   TH1* final=0,*final2=0,*finalt=0;
 
@@ -77,6 +83,7 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y_masscut") {
     // if (!strcmp(cleanname,"PT20")) continue;
     printf("%d %s %s %p %p\n",n,fullname,cleanname,stage,pt);
     TH1* work=stage->Clone();
+    work->Sumw2();
     final=(TH1*)(stage->Clone());
     final->Divide(final,base);
 
@@ -191,10 +198,10 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y_masscut") {
 
   TDatime now;
 
-  fprintf(stats,"#Bin Y_min Y_max Eff*Acc %s\n",now.AsString());
+  fprintf(stats,"#Bin Y_min Y_max Eff*Acc MCErr#  %s\n",now.AsString());
 
   for (int i=1; i<=finalt->GetNbinsX(); i++) {
-    fprintf(stats," %2d %5.2f %5.2f %.5f\n",i,finalt->GetBinLowEdge(i),finalt->GetBinWidth(i)+finalt->GetBinLowEdge(i),finalt->GetBinContent(i)); 
+    fprintf(stats," %2d %5.2f %5.2f %7.5f %7.5f\n",i,finalt->GetBinLowEdge(i),finalt->GetBinWidth(i)+finalt->GetBinLowEdge(i),finalt->GetBinContent(i),finalt->GetBinError(i)); 
   }
   fclose(stats);
 

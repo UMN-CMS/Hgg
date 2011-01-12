@@ -13,9 +13,43 @@
 //      root [1] readUnfoldingMatrices("unfoldingMatrix_theOutPut.root","effAccSource.root")
 
 
+TH1* unfold(const TH1* source, const char* unfoldingMatrixIF)  {
+  // load the matrix...
+
+  TFile theunfoldingMatrixInputFile(unfoldingMatrixIF,"read");
+
+  TMatrixD * theUnfoldingMatrix = theunfoldingMatrixInputFile.Get("unsmearMatrices/unfoldingMatrixTotal");
+
+  Double_t arrayRapiditySmeared[100]; // this needs be hardcoded...
+  for(int bin=1; bin<=100; bin++)
+    {
+      arrayRapiditySmeared[bin-1]=source->GetBinContent(bin);
+    }
+
+  TVectorD vectorRapiditySmeared; vectorRapiditySmeared.Use(100,arrayRapiditySmeared);
+
+  // this is the multiplication for clusure test
+  TVectorD vectorRapidityUNSmeared = (*theUnfoldingMatrix) * vectorRapiditySmeared;
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  char name[1024];
+  sprintf(name,"%s_unfolded",source->GetName());
+  TH1 * h_RapidityUNSmeared = (TH1*)(source->Clone(name));
+  h_RapidityUNSmeared->SetDirectory(0);
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // turning the unsmeared vector into a histogram
+  for(int bin=1; bin<=100; bin++)
+  {
+   h_RapidityUNSmeared->SetBinContent(bin,vectorRapidityUNSmeared[bin-1]);
+   h_RapidityUNSmeared->SetBinError(bin,vectorRapidityUNSmeared[bin-1]/vectorRapiditySmeared[bin-1]*source->GetBinError(bin));
+  }
+  return h_RapidityUNSmeared;
+}
 
 
 int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string effAccFileForTest) 
+
 {
 
     gStyle->SetOptStat(110011);
