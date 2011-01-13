@@ -126,6 +126,9 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   HFParams_.stocastic=ps.getParameter<double>("stocastic");
   HFParams_.constant=ps.getParameter<double>("constant");
   HFParams_.mean=ps.getParameter<double>("mean");
+  std::cout << "++ HF smearing parameters: \tstocastic: " << HFParams_.stocastic
+	    << "\tconstant: " << HFParams_.constant
+	    << "\tmean: " << HFParams_.mean << std::endl;
 
   //Get EB Smearing Parameters
   ps=iConfig.getParameter<edm::ParameterSet>("EB");
@@ -136,6 +139,14 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   EBPrams_.alpha=ps.getParameter<double>("alpha");
   EBPrams_.mean=ps.getParameter<double>("mean");
   EBPrams_.N=ps.getParameter<double>("n");
+  std::cout << "++ EB smearing parameters: \tp0: " << EBPrams_.sigma[0]
+	    << "\tp1: " << EBPrams_.sigma[1]
+	    << "\tp2: " << EBPrams_.sigma[2] 
+	    << "\tp3: " << EBPrams_.sigma[3] 
+	    << "\tpalpha: " << EBPrams_.alpha 
+	    << "\tmean: " << EBPrams_.mean
+	    << "\tn: " << EBPrams_.N
+	    << std::endl;
 
   //Get EE Smearing Parameters
   ps=iConfig.getParameter<edm::ParameterSet>("EE");
@@ -145,6 +156,13 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   EEPrams_.alpha=ps.getParameter<double>("alpha");
   EEPrams_.mean=ps.getParameter<double>("mean");
   EEPrams_.N=ps.getParameter<double>("n");
+  std::cout << "++ EE smearing parameters: \tp0: " << EEPrams_.sigma[0]
+	    << "\tp1: " << EEPrams_.sigma[1]
+	    << "\tp2: " << EEPrams_.sigma[2] 
+	    << "\tpalpha: " << EEPrams_.alpha 
+	    << "\tmean: " << EEPrams_.mean
+    	    << "\tn: " << EEPrams_.N
+  	    << std::endl;
 
   //register my product
   produces<GenParticleCollection>("ZEventParticles");
