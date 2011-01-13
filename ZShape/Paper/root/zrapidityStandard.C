@@ -4,6 +4,19 @@
 
 static bool dotime=true;
 
+void zrap_colors() {
+  const Int_t NRGBs = 2;
+  const Int_t NCont = 30;
+  
+  Double_t stops[NRGBs] = { 0.00, 1.0 };
+  Double_t red[NRGBs]   = { 1.00, 0.0 };
+  Double_t green[NRGBs] = { 1.00, 0.0 };
+  Double_t blue[NRGBs]  = { 1.00, 0.00 };
+  TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+  gStyle->SetNumberContours(NCont);
+}
+
+
 void zrap_Prelim(double px, double py, double tx=-1, double ty=-1) {
   const char* time_;
   TDatime mytime;
