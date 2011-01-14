@@ -1,32 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("Zefficiency")
-process.TimerService = cms.Service("TimerService")
-process.load('FWCore.MessageService.MessageLogger_cfi')
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
-process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(True)
-)
-
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
-    )
-
-process.dumpEv = cms.EDAnalyzer("EventContentAnalyzer")
-
-process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("" )
-)
-
-process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('histo_10M_partBUILDINGTTEST.root')
-)
-
-process.load("ZShape.EffAcc.SmearedElectronsProducer_cfi")
-
-process.mcEff = cms.EDAnalyzer("ZEfficiencyCalculator",
-    Effs = cms.untracked.VPSet(
+mcEff = cms.EDAnalyzer("ZEfficiencyCalculator",
+     Effs = cms.untracked.VPSet(
         cms.PSet(
             effFile = cms.FileInPath('ZShape/EffAcc/data/HLT80-PtEta.txt'),
             name = cms.untracked.string('HLT-EtaDet')
@@ -109,7 +85,9 @@ process.mcEff = cms.EDAnalyzer("ZEfficiencyCalculator",
     zElectronsCollection = cms.untracked.InputTag("SmearedElectronsProducer","ZEventParticles"),
     zTreeLevelElectronsCollection = cms.untracked.InputTag("ZIntoElectronsEventProducer","ZEventEle3"), quiet = cms.untracked.bool(True),
     zElectronsCone = cms.double(0.00),
-    acceptanceMassWindow = cms.vdouble(70.0,110.0),                               
+    acceptanceMassWindow = cms.vdouble(70.0,110.0),
+    # options include : ECALScale+,ECALScale-,HFScale+,HFScale-
+    systematic = cms.untracked.string(""),                  
     ZDefs = cms.untracked.VPSet( cms.PSet(
             name = cms.untracked.string('AllInRange'),
             Z = cms.untracked.vstring('m(70,110)'),
@@ -353,9 +331,3 @@ process.mcEff = cms.EDAnalyzer("ZEfficiencyCalculator",
                 'PT10')
         ))
 )
-
-process.p = cms.Path(process.SmearedElectronsProducer
-                     + process.mcEff
-                     #+ process.dumpEv
-                     )
-  
