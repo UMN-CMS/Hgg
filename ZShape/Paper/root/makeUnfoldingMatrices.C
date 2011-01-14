@@ -306,23 +306,30 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
     c3->cd(2);    histoMigrationEcalHFhighStat->Draw("colz");
     c3->Print( (definition + std::string("--") + cut + std::string(".png") ).c_str() );
 
-
-    TCanvas * c3bos = new TCanvas("c3bos","c3bos",1040,740);
+    TCanvas * c3bos = new TCanvas("stat error on migration matrix","stat error on migration matrix",1040,740);
     c3bos->Divide(2);
-    c3bos->cd(1);
+    TPad *p1 = c3bos->cd(1);      p1->SetLogz();
     histoMigrationEcalEcalError->SetStats(0);
     histoMigrationEcalEcalError->SetTitle("ECAL-ECAL: stat error");
+    p1->SetTopMargin(0.02);
+    p1->SetRightMargin(0.14);
+    p1->SetLeftMargin(0.11);   
+    p1->SetBottomMargin(0.125);
     histoMigrationEcalEcalError->Draw("colz");
     histoMigrationEcalEcalError->GetXaxis()->SetTitle("Y_{Z,reco}");
     histoMigrationEcalEcalError->GetYaxis()->SetTitle("Y_{Z,true}");
-    c3bos->cd(2);
+    TPad *p2 = c3bos->cd(2);      p2->SetLogz();
+    p2->SetTopMargin(0.02);
+    p2->SetRightMargin(0.14);
+    p2->SetLeftMargin(0.11);   
+    p2->SetBottomMargin(0.125);
     histoMigrationEcalHFError->GetXaxis()->SetTitle("Y_{Z,reco}");
     histoMigrationEcalHFError->GetYaxis()->SetTitle("Y_{Z,true}");
     histoMigrationEcalHFError->SetStats(0);
     histoMigrationEcalHFError->SetTitle("ECAL-HF: stat error");
     histoMigrationEcalHFError->Draw("colz");
-   c3bos->Print( (std::string("migration-stat-error") + std::string(".png") ).c_str() );
-   // http://ultrahigh.org/2007/08/20/making-pretty-root-color-palettes/
+    c3bos->Print( (std::string("migration-stat-error") + std::string(".png") ).c_str() );
+    // http://ultrahigh.org/2007/08/20/making-pretty-root-color-palettes/
 
    TCanvas * c4 = new TCanvas("c4","c4",1050,750);
    c4->cd(1);  c4->SetLogz();     
@@ -337,7 +344,7 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    h_effect->SetLineColor(2);
    h_effect->Draw();
 
-   TCanvas * c5 = new TCanvas("c5","c5",1050,750);
+   TCanvas * c5 = new TCanvas("migration matrix","migration matrix",1050,750);
    c5->SetTopMargin(0.02);
    c5->SetRightMargin(0.14);
    c5->SetLeftMargin(0.11);   
@@ -357,7 +364,7 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    c5->Print("migrationMatrix.eps");
 
 
-   TCanvas * c7pre = new TCanvas("c7pre","c7pre",1050,750);
+   TCanvas * c7pre = new TCanvas("closure test","closure test",1050,750);
    c7pre->cd();
    h_RapidityTreeLevel->SetLineWidth(2);//this is black for now
    h_RapidityTreeLevel->GetYaxis()->SetTitle("events");
