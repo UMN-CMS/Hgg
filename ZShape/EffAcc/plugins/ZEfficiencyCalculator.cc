@@ -87,19 +87,27 @@ ZEfficiencyCalculator::ZEfficiencyCalculator(const edm::ParameterSet& iConfig) :
   systematicVariation_ = iConfig.getUntrackedParameter<std::string>("systematic","");
 
   if (systematicVariation_=="ECALScale+") {
-    m_systematics.energyScale=new zshape::EnergyScale(1,0);
+    m_systematics.energyScale=new zshape::EnergyScale(1,0,false);
     edm::LogInfo("ZShape") << "Performing positive ECAL energy scale variation";
     std::cout << "Performing positive ECAL energy scale variation\n";
   } else if (systematicVariation_=="ECALScale-") {
-    m_systematics.energyScale=new zshape::EnergyScale(-1,0);
+    m_systematics.energyScale=new zshape::EnergyScale(-1,0,false);
     edm::LogInfo("ZShape") << "Performing negative ECAL energy scale variation";
     std::cout << "Performing negative ECAL energy scale variation\n";
+  } else if (systematicVariation_=="ECALTransp+") {
+    m_systematics.energyScale=new zshape::EnergyScale(1,0,true);
+    edm::LogInfo("ZShape") << "Performing negative ECAL transparency variation";
+    std::cout << "Performing negative ECAL energy transparency variation\n";
+  } else if (systematicVariation_=="ECALTransp-") {
+    m_systematics.energyScale=new zshape::EnergyScale(-1,0,true);
+    edm::LogInfo("ZShape") << "Performing negative ECAL transparency scale variation";
+    std::cout << "Performing negative ECAL energy scale variation\n";
   } else if (systematicVariation_=="HFScale-") {
-    m_systematics.energyScale=new zshape::EnergyScale(0,1);
+    m_systematics.energyScale=new zshape::EnergyScale(0,1,false);
     edm::LogInfo("ZShape") << "Performing positive HF energy scale variation";
     std::cout << "Performing positive HF energy scale variation\n";
   } else if (systematicVariation_=="HFScale-") {
-    m_systematics.energyScale=new zshape::EnergyScale(0,-1);
+    m_systematics.energyScale=new zshape::EnergyScale(0,-1,false);
     edm::LogInfo("ZShape") << "Performing negative HF energy scale variation";
     std::cout << "Performing negative HF energy scale variation\n";
   } else m_systematics.energyScale=0;
