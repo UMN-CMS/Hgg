@@ -64,8 +64,15 @@ void EffHistos::Book(TFileDirectory& tdf) {
   YZTL_YZ_       = tdf.make<TH2F>("YZTL_vs_YZ","YZTL_vs_YZ;Y_{Z};Y_{ZtreeLevel}",zshape::y_bins,-zshape::y_max,zshape::y_max,zshape::y_bins,-zshape::y_max,zshape::y_max); 
   YZTL_YZ_matrix_= tdf.make<TH2F>("YZTL_vs_YZ_matrix","YZTL_vs_YZ_matrix;Y_{Z};Y_{ZtreeLevel}",zshape::y_bins,-zshape::y_max,zshape::y_max,zshape::y_bins,-zshape::y_max,zshape::y_max); 
 
-
   ptZTL_ptZ_       = tdf.make<TH2F>("PtTL_vs_PtZ","PtZTL_vs_PtZ;Pt_{Z};Pt_{ZtreeLevel}",zshape::pt_bins, zshape::pt_binning,zshape::pt_bins, zshape::pt_binning); 
+
+  //Now mkae some Event histograms
+  evt_PVz_ =  tdf.make<TH1F>("evt_PVz","PV_z;PV_{z}", 50, -20,20);
+  evt_BSz_ =  tdf.make<TH1F>("evt_BSz","BS_z;PBS{z}", 50, -1.5,3);
+  evt_MET_ =  tdf.make<TH1F>("evt_MET","Calo MET;MET", 50, 0,100);
+  evt_TCMET_ =  tdf.make<TH1F>("evt_TCMET","tcMET;tcMET", 50, 0,100);
+  evt_PFMET_ =  tdf.make<TH1F>("evt_PFMET","pfMET;pfMET", 50, 0,100);
+
 
 } 
 
@@ -198,3 +205,18 @@ void EffHistos::WrapUp(){
   //        << " " << YZTL_YZ_matrix_->GetEntries() << std::endl; 
   
 } 
+
+void EffHistos::FillEvt(const  ZShapeEvent& zevt) { 
+
+  if (!booked_) {
+    std::cerr << "Attempt to fill without booking!\n";
+    return;
+  }
+  
+  evt_PVz_->Fill(zevt.EvtPVz()); 
+  evt_BSz_->Fill(zevt.EvtBSz()); 
+  evt_MET_->Fill(zevt.EvtMET()); 
+  evt_TCMET_->Fill(zevt.EvtTCMET());    
+  evt_PFMET_->Fill(zevt.EvtPFMET());  
+
+}

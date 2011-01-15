@@ -22,3 +22,30 @@
   <use name=ZShape/EffAcc>
 </bin>
 
+<bin file=effFitRoot2Txt.cpp>
+  <use name=root>
+  <use name=rootcore>
+  <use name=ZShape/EffAcc>
+</bin>
+
+<bin file=effFitConfig.cpp>
+  <use name=root>
+  <use name=rootcore>
+  <use name=ZShape/EffAcc>
+</bin>
+
+<bin file=replaceFileParameterWithFileContent.cpp>
+  <use name=root>
+  <use name=rootcore>
+  <use name=ZShape/EffAcc>
+</bin>
+
+<bin file=extractSignalBackground.cpp>
+  <use name=root>
+  <use name=rootcore>
+  <use name=ZShape/EffAcc>
+</bin>
+
+
+
+

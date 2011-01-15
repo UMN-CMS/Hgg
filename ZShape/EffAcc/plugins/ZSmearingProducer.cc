@@ -322,7 +322,7 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   }
   else if (fabs(deteta) < 5.0)
   {
-    double mysig = HFParams_.stocastic/sqrt(std::max(e,1.0))+HFParams_.constant;
+    double mysig = TMath::Power(TMath::Power(HFParams_.stocastic/sqrt(std::max(e,1.0)),2)+HFParams_.constant*HFParams_.constant,0.5);
     double  etaFact=sinh(eta)/sinh(deteta);
     Efrac = randomNum_->Gaus(HFParams_.mean,mysig);
     double newEta=deteta;
