@@ -11,8 +11,8 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
     randomSeed = cms.int32(134),
     SmearTable = cms.FileInPath('ZShape/EffAcc/data/CBBinsFile.txt'),
     HF = cms.PSet(
-       stocastic = cms.double(3.5),
-       constant = cms.double(0.085),
+       stocastic = cms.double(3.45626),
+       constant = cms.double(0.08651),
        mean = cms.double(1.04346)
         #tuned by kevin on 04-16-09, mean added by J. Mans 05-22-09
     ),
