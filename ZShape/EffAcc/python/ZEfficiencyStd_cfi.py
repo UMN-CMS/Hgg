@@ -57,11 +57,11 @@ mcEff = cms.EDAnalyzer("ZEfficiencyCalculator",
         ),
         cms.PSet(
             effFile = cms.FileInPath('ZShape/EffAcc/data/NTEId-EtaDet.txt'),
-            name = cms.untracked.string('NTLooseElectronId')
+            name = cms.untracked.string('NTLooseElectronId-EtaDet')
         ),
         cms.PSet(
             effFile = cms.FileInPath('ZShape/EffAcc/data/NTEIdT-EtaDet.txt'),
-            name = cms.untracked.string('NTTightElectronId')
+            name = cms.untracked.string('NTTightElectronId-EtaDet')
         ),
         cms.PSet(
             effFile = cms.FileInPath('ZShape/EffAcc/data/WP95-PtEta.txt'),
