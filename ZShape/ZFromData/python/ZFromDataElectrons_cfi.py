@@ -19,6 +19,7 @@ from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositTk_cff import *
 from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositEcalFromHits_cff import *
 from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositHcalFromTowers_cff import *
 
+hfEMClusters.correctionType = cms.int32(1)
 hfRecoEcalCandidate.Correct = True
 #hfRecoEcalCandidate.e9e25Cut = 0
 hfRecoEcalCandidate.intercept2DCut = 0.32
@@ -42,7 +43,8 @@ hfRecoEcalCandidateTight.intercept2DCut = 0.45
 
 ELECTRON_ET_CUT_MIN = 20.0
 HLTPath = "HLT_Ele17_SW_TightEleId_L1R"
-RECO_NAME = "reRECO"
+RECO_NAME = "RECO"
+#RECO_NAME = "reRECO"
 
 
 
@@ -57,7 +59,7 @@ RECO_NAME = "reRECO"
     ############################################# 
 
 HybridSuperClusters = cms.EDProducer("ConcreteEcalCandidateProducer",
-    src = cms.InputTag("correctedHybridSuperClusters","", "reRECO"),
+    src = cms.InputTag("correctedHybridSuperClusters","", RECO_NAME),
     particleType = cms.string('gamma')
 )
 EBSuperClusters = cms.EDFilter("CandViewSelector",
@@ -66,7 +68,7 @@ EBSuperClusters = cms.EDFilter("CandViewSelector",
 )
 
 EndcapSuperClusters = cms.EDProducer("ConcreteEcalCandidateProducer",
-    src = cms.InputTag("correctedMulti5x5SuperClustersWithPreshower","", "reRECO"),
+    src = cms.InputTag("correctedMulti5x5SuperClustersWithPreshower","", RECO_NAME),
     particleType = cms.string('gamma')
 )
 EESuperClusters = cms.EDFilter("CandViewSelector",
@@ -88,9 +90,9 @@ theHFSuperClusters = cms.EDFilter("CandViewSelector",
 
 
 #superClusters = cms.EDFilter("SuperClusterMerger",
-#   src = cms.VInputTag(cms.InputTag("correctedHybridSuperClusters","", "reRECO"),
-#                       cms.InputTag("correctedMulti5x5SuperClustersWithPreshower","", "reRECO")
- #                      #cms.InputTag("theHFSuperClusters","", "reRECO")
+#   src = cms.VInputTag(cms.InputTag("correctedHybridSuperClusters","", RECO_NAME),
+#                       cms.InputTag("correctedMulti5x5SuperClustersWithPreshower","", RECO_NAME)
+ #                      #cms.InputTag("theHFSuperClusters","", RECO_NAME)
 #                       ) 
 #)
 

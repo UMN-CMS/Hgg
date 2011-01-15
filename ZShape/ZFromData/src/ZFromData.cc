@@ -175,6 +175,9 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
   //evt_.findDataZ(iEvent);
   evt_.clear();
+
+  //This just stores the event information
+  evt_.initEvent(iEvent,iSetup);
    
   //First set the number of Gsf Electrons above 20 GeV
   edm::Handle< reco::CandidateView> electronHandle;
@@ -282,13 +285,20 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   if ( evt_.elec(0).p4_.Pt() < evt_.elec(1).p4_.Pt() ) {std::swap( evt_.elec(0), evt_.elec(1));}    
   evtMC_.afterLoad();
   double wgt= 1.0;
-  if (doMC_) wgt = wclass.wgt((evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Pt(),(evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Rapidity());
-  if (doMC_) if (evtMC_.m() > 70 && evtMC_.m() < 110) allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,wgt,doMC_);
+  if (doMC_) 
+    {
+      wgt = wclass.wgt((evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Pt(),(evtMC_.elec(0).p4_+evtMC_.elec(1).p4_).Rapidity());
+      if (evtMC_.m() > 70 && evtMC_.m() < 110) {
+	allCaseFirst_.Fill(evtMC_.elec(0), evtMC_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,wgt,doMC_);
+	allCaseFirst_.FillEvt(evt_);
+      }
+      
+    }
   if (evt_.n_elec!=2) return; // need 2 and only 2
   evt_.afterLoad(); //added to be consistent 
   //
   // fill histograms for before any selection
-
+  allCase_.FillEvt(evt_);
   allCase_.Fill(evt_.elec(0), evt_.elec(1),evtMC_.elec(0).p4_, evtMC_.elec(1).p4_,wgt,doMC_);
   if (extraHistos_) allCaseExtra_.Fill(evt_.elec(0), evt_.elec(1), evtMC_.elec(0), evtMC_.elec(1),wgt,doMC_);
 
@@ -363,6 +373,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	int e2n = e2;
         if (pairing) {std::swap(e1n,e2n); }
         // fill standard histograms after acceptance
+	plots->acceptance_.FillEvt(evt_);
 	plots->acceptance_.Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt,doMC_);
 	if (extraHistos_) plots->acceptanceExtra_.Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n),wgt,doMC_);
 	
@@ -375,7 +386,8 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (pairing) {std::swap(e1n,e2n); }
 	  if (ok)
           {
-	    if ( j == q->second->criteriaCount(ZShapeZDef::crit_E1)-1)   spitoutE = true;   
+	    if ( j == q->second->criteriaCount(ZShapeZDef::crit_E1)-1)   spitoutE = true;  
+	    plots->postCut_[j-1].FillEvt(evt_);
 	    plots->postCut_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt,doMC_);
             if (extraHistos_) plots->postCutExtra_[j-1].Fill(evt_.elec(e1n), evt_.elec(e2n), evtMC_.elec(e1n), evtMC_.elec(e2n),wgt,doMC_);
 	  }
@@ -388,6 +400,7 @@ void ZFromData::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (ok) 
           {
 	    if ( j == q->second->criteriaCount(ZShapeZDef::crit_Z)-1)  spitoutZ = true;
+	    plots->zCut_[j].FillEvt(evt_);
             plots->zCut_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n).p4_, evtMC_.elec(e2n).p4_,wgt,doMC_);
             if (extraHistos_) plots->zCutExtra_[j].Fill(evt_.elec(e1n), evt_.elec(e2n),evtMC_.elec(e1n), evtMC_.elec(e2n),wgt,doMC_);
           }	
