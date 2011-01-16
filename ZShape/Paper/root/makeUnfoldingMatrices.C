@@ -19,8 +19,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
   setTDRStyle();
   zrap_colors();
 
-   gStyle->SetPalette(1);
-   gStyle->SetPaintTextFormat(".2f");
+  // gStyle->SetPalette(1);
+  gStyle->SetPaintTextFormat(".2f");
 
    std::cout << "\n\n\tGetting migration matrices from: " << effAccFileInputFile          << std::endl;
    std::cout << "\tCreating unfolding matrices in:  "     << unfoldingMatrixOutPutFile <<"\n\n"<< std::endl;
