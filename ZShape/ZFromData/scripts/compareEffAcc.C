@@ -701,7 +701,7 @@ MCHistos_.ZRapMC->SetLineWidth(2);
 MCHistos_.ZRapMC->Draw("histsame");
 FinalHistos_.ZResult->Draw("same");
 myLegpl->AddEntry(FinalHistos_.ZResult,"Corrected Data","pl");
-myLegpl->AddEntry(MCHistos_.ZRapMC,"Pythia Z2","pl");
+myLegpl->AddEntry(MCHistos_.ZRapMC,"POWHEG","pl");
 
 
 myLegpl->Draw();
@@ -756,7 +756,7 @@ myhmc->Scale(2./myhmc->Integral());
    }
 
  //here i need to scale TOTAL
-  total = 11620;
+  total = 12816;
 
   for (Int_t bin = 1 ; bin < numBins/2+1 ; ++bin)
     {
@@ -804,7 +804,7 @@ myhmc->Scale(2./myhmc->Integral());
 
   TLegend *legh = new TLegend(.72,.82,.98,.95);
   legh->AddEntry(myhc,"35 pb^{-1} Data ","p");
-  legh->AddEntry(myhmc,"Pythia Z2","l");
+  legh->AddEntry(myhmc,"POWHEG","l");
   legh->SetFillColor(kWhite);
   legh->Draw();
 
