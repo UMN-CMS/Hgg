@@ -90,8 +90,11 @@ private:
 
   struct {
     double stocastic;
-    double constant;
-    double mean;
+    double constantp;
+    double constantm;
+    double meanp;
+    double meanm;
+
   } HFParams_;
   
   struct {
@@ -124,11 +127,16 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   //Get HF Smearing Parameters
   edm::ParameterSet ps=iConfig.getParameter<edm::ParameterSet>("HF");
   HFParams_.stocastic=ps.getParameter<double>("stocastic");
-  HFParams_.constant=ps.getParameter<double>("constant");
-  HFParams_.mean=ps.getParameter<double>("mean");
+  HFParams_.constantp=ps.getParameter<double>("constantp");
+  HFParams_.constantm=ps.getParameter<double>("constantm");
+  HFParams_.meanp=ps.getParameter<double>("meanp");
+  HFParams_.meanm=ps.getParameter<double>("meanm");
+
   std::cout << "++ HF smearing parameters: \tstocastic: " << HFParams_.stocastic
-	    << "\tconstant: " << HFParams_.constant
-	    << "\tmean: " << HFParams_.mean << std::endl;
+	    << "\t+constant: " << HFParams_.constantp
+	    << "\t-constant: " << HFParams_.constantm
+	    << "\t+mean: " << HFParams_.meanp
+	    << "\t-mean: " << HFParams_.meanm << std::endl;
 
   //Get EB Smearing Parameters
   ps=iConfig.getParameter<edm::ParameterSet>("EB");
@@ -322,9 +330,11 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   }
   else if (fabs(deteta) < 5.0)
   {
-    double mysig = TMath::Power(TMath::Power(HFParams_.stocastic/sqrt(std::max(e,1.0)),2)+HFParams_.constant*HFParams_.constant,0.5);
+    double myconst = ( deteta > 0 ) ? HFParams_.constantp : HFParams_.constantm;
+    double mymean = ( deteta > 0 ) ? HFParams_.meanp : HFParams_.meanm;
+    double mysig = TMath::Power(TMath::Power(HFParams_.stocastic/sqrt(std::max(e,1.0)),2)+myconst*myconst,0.5);
     double  etaFact=sinh(eta)/sinh(deteta);
-    Efrac = randomNum_->Gaus(HFParams_.mean,mysig);
+    Efrac = randomNum_->Gaus(mymean,mysig);
     double newEta=deteta;
     double perc = randomNum_->Uniform(100);
     double unif = randomNum_->Uniform(0.64,0.9);

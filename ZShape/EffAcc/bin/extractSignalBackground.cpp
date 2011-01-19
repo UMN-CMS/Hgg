@@ -78,7 +78,7 @@ int main( int argc, char **argv ) {
   
   
   // created with root file in constructor
-  SignalBackgroundExtraction Root2TxtObject(effFile, eff,bins,sig,bkg);
+  SignalBackgroundExtraction Root2TxtObject(effFile, eff,bins,sig,bkg,true,70,110);
 
   //std::string textFileName(effTxtFileName.c_str());
   Root2TxtObject.setVarMinMax(min,max); //I should only do this is there are actually 7 args....
