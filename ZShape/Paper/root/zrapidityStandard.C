@@ -4,6 +4,19 @@
 
 static bool dotime=true;
 
+TH1* zpt_rebinForPlot(TH1* original) {
+  char name[125];
+  sprintf(name,"%s_4plot",original->GetName());
+  int    pt_bins=19;
+  double pt_binning[]={ 0.7, 2.5, 5, 7.5, 10, 12.5, 15, 17.5, 20, 30, 40, 50, 70, 90, 110, 150, 190, 250, 600, 3500 };
+  TH1* rebinned=new TH1F(name,name,pt_bins,pt_binning);
+
+  for(int i=1;i<=pt_bins;i++){
+    rebinned->SetBinContent(i,original->GetBinContent(i));
+  }
+  return rebinned;
+}
+
 void zrap_colors() {
   const Int_t NRGBs = 2;
   const Int_t NCont = 30;
