@@ -1,10 +1,11 @@
 #include "TStyle.h"
+#include "TColor.h"
 
 // tdrGrid: Turns the grid lines on (true) or off (false)
 
 void tdrGrid(bool gridOn) {
-  tdrStyle->SetPadGridX(gridOn);
-  tdrStyle->SetPadGridY(gridOn);
+  gStyle->SetPadGridX(gridOn);
+  gStyle->SetPadGridY(gridOn);
 }
 
 // fixOverlay: Redraws the axis

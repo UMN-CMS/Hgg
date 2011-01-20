@@ -5,24 +5,35 @@
 #include "TGraphErrors.h"
 #include "TLegend.h"
 #include "TH2.h"
+#include "readUnfoldingMatrices.C"
 
+static const int BINCOUNT=100;
+static const double xlow=-5.0;
+static const double xhigh=5.0;
 
 struct DataSeries {
+
   DataSeries() {
     clear();
   }
   void clear() {
-    for (int i=0; i<44; i++) {
-      xave[i]=0;
-      xwidth[i]=0;
+    for (int i=0; i<BINCOUNT; i++) {
+      xave[i]=xlow+(xhigh-xlow)/BINCOUNT*(i+0.5);
+      xwidth[i]=(xhigh-xlow)/BINCOUNT;
+      y[i]=0;
+      ey[i]=0;
+    }
+  }
+  void clearContent() {
+    for (int i=0; i<BINCOUNT; i++) {
       y[i]=0;
       ey[i]=0;
     }
   }
   DataSeries(const DataSeries& ds) {
-    for (int i=0; i<44; i++) {
-      xave[i]=ds.xave[i];
-      xwidth[i]=ds.xwidth[i];
+    for (int i=0; i<BINCOUNT; i++) {
+      xave[i]=xlow+(xhigh-xlow)/BINCOUNT*(i+0.5);
+      xwidth[i]=(xhigh-xlow)/BINCOUNT/2;
       y[i]=ds.y[i];
       ey[i]=ds.ey[i];
     }
@@ -42,7 +53,7 @@ struct DataSeries {
     for (int i=1; i<=bins; i++) {
       hist->SetBinContent(i,y[startFrom+i-1]);
       hist->SetBinError(i,ey[startFrom+i-1]);
-      printf("%s %d %f %f \n",name,i+startFrom,y[startFrom+i-1],ey[startFrom+i-1]);
+      //      printf("%s %d %f %f \n",name,i+startFrom,y[startFrom+i-1],ey[startFrom+i-1]);
     }
     hist->SetDirectory(0);
     return hist;
@@ -50,10 +61,10 @@ struct DataSeries {
 
   void create(const char* file, int iy);
 
-  double xave[44];
-  double xwidth[44];
-  double y[44];
-  double ey[44];
+  double xave[BINCOUNT];
+  double xwidth[BINCOUNT];
+  double y[BINCOUNT];
+  double ey[BINCOUNT];
 };  
 
 
@@ -94,75 +105,93 @@ void DataSeries::create(const char* file, int iy) {
       atetotal+=ate;
     }
     if (found!=1) continue;
-    if (i<1 || i>44) continue;
-    xave[i-1]=(b+a)/2;
-    xwidth[i-1]=(b-a)/2;
+    if (i<1 || i>BINCOUNT) continue;
     y[i-1]=q[iy];
   }
   fclose(f);
 }
 
-void plotFinal(int lumi=100) {
+void plotFinal(TFile* mctruth) {
+  int lumi=30;
   setTDRStyle();
-  TFile mctruth("zshape_30M.root");
 
-  TH1* truth=(TH1*)(mctruth.Get("mcEff/All/Z0_Y")->Clone("truth"));
+  TH1* truth=(TH1*)(mctruth->Get("mcEff/All/Z0_Y_masscut")->Clone("truth"));
   truth->SetDirectory(0);
   
-  DataSeries data_ee(lumi,"Tight-ECAL-Loose-ECAL_%d.txt"), data_ef(lumi,"Tight-ECAL-HF_%d.txt"), data_all;
+  DataSeries data_ee("ECAL80-ECAL95_RAW.csv");
+  DataSeries data_ef("ECAL80-HF_RAW.csv"), data_all;
+  DataSeries data_bkgd(data_all);
   
-  DataSeries effAcc("effacc.txt"), ea_statErr(lumi,"StatError_%dpb.txt");
-  DataSeries binMig("BinMigrationEffect.txt");
-  DataSeries binMigPos(binMig);
+  DataSeries effAcc("effAcc_combined.csv"), ea_statErr("effStatError.csv");
 
-  const int firsti=8;
-  const int lasti=37;
+  const int firsti=15;
+  const int lasti=84;
   const int npoint=lasti-firsti+1;
 
   double tt=0, td=0;
  
-  for (int i=0; i<44; i++) {
-    data_all.xave[i]=data_ef.xave[i];
-    data_all.xwidth[i]=data_ef.xwidth[i];
-    data_all.y[i]=data_ef.y[i]+data_ee.y[i];
-    binMigPos.y[i]=fabs(binMig.y[i]);
+  for (int i=0; i<BINCOUNT; i++) {
+    data_bkgd.y[i]=data_ef.y[i]+data_ee.y[i];
   }
 
 
   DataSeries dataStatError(data_all);
 
+  DataSeries backgroundEE("backgroundBkgFinalFixVals.txt",0);
+  DataSeries backgroundHF("backgroundBkgFinalHFFixVals.txt",0);
 
-  DataSeries backgroundExp(lumi,"background_%d.txt",0);
-  DataSeries backgroundAct(lumi,"background_%d.txt",2);
-  DataSeries backgroundExpErr(lumi,"background_%d.txt",1);
-  DataSeries backgroundUncFrac(data_all);
+  DataSeries backgroundEEUnc("backgroundBkgFinalFixVals.txt",1);
+  DataSeries backgroundHFUnc("backgroundBkgFinalHFFixVals.txt",1);
 
-  DataSeries pdfPos("pdfErrsPos.txt");
-  DataSeries pdfNeg("pdfErrsNeg.txt");
-  DataSeries pdfTotal(data_all);
-  DataSeries pdfFrac(data_all);
-
-  DataSeries pdfSens25("relativeSensitivity_cteq65_vector_25.txt");
-  //  DataSeries pdfSens16("relativeSensitivity_cteq65_vector_16.txt");
+  DataSeries backgroundAll(backgroundEE), backgroundAllUnc(backgroundEEUnc),
+    backgroundUncFrac(backgroundEEUnc);
 
 
-  //  TRandom workRand(50);
+  for (int i=0; i<BINCOUNT; i++) {  
+    backgroundAll.y[i]=backgroundEE.y[i]+backgroundHF.y[i];
+    backgroundAllUnc.y[i]=sqrt(pow(backgroundEEUnc.y[i],2)+pow(backgroundHFUnc.y[i],2));
 
-  //  backgroundExp.y[8-1]=workRand.Poisson(backgroundExp.y[9-1]);
-  //  backgroundExp.y[9-1]=workRand.Poisson(backgroundExp.y[10-1]);
-  //  backgroundExp.y[36-1]=workRand.Poisson(backgroundExp.y[35-1]);
-  //  backgroundExp.y[37-1]=workRand.Poisson(backgroundExp.y[36-1]); 
+    data_all.y[i]=data_bkgd.y[i]-backgroundAll.y[i];    
+    data_all.ey[i]=data_bkgd.ey[i];
+  }    
+
+
+  // unsmear
+  /*  
+  TH1* data_all_smeared=data_all.makeTH1("data_all_smeared",100,0);
+  TH1* data_all_unsmeared=unfold(data_all_smeared,"../scripts/unfoldingMatrix_theOutPut.root");
+
+  for (int i=0; i<BINCOUNT; i++) {  
+    data_all.y[i]=data_all_unsmeared->GetBinContent(i+1);
+    //    data_all.ey[i]=sqrt(data_all.y[i]);
+  }
+  */
+  //  DataSeries pdfPos("pdfErrsPos.txt");
+  //  DataSeries pdfNeg("pdfErrsNeg.txt");
+  //DataSeries pdfTotal(data_all);
+  //DataSeries pdfFrac(data_all);
+
+  DataSeries energyScale("energyScaleError.csv");
+
+  DataSeries effSystGSF("effSystGSFError.csv");
+  DataSeries effSystWP80("effSystWP80Error.csv");
+  DataSeries effSystWP95("effSystWP95Error.csv");
+  DataSeries effSystHFEID("effSystHFEIDError.csv");
+  DataSeries effSystHLT("effSystHLTError.csv");
+
+  DataSeries effSystErr;
 
   for (int i=firsti-1; i<lasti; i++) {
-    backgroundExpErr.y[i]=std::max(backgroundExpErr.y[i],0.003*data_all.y[i]);
-  }
-  //    backgroundDelta.y[i]=workRand.Poisson(backgroundDelta.y[i])-backgroundDelta.y[i];
-  //  }
+    effSystErr.y[i]=sqrt(pow(effSystGSF.y[i],2)+
+			 pow(effSystWP80.y[i],2)+
+			 pow(effSystWP95.y[i],2)+
+			 pow(effSystHFEID.y[i],2)+
+			 pow(effSystHLT.y[i],2));
+  }  
 
   DataSeries corrData(data_all);
   DataSeries corrDataSyst(data_all);
   DataSeries corrDataBkgd(data_all);
-  DataSeries data_bkgd(data_all);
   DataSeries totalSyst(data_all);
 
   double sumtotal=0;
@@ -180,46 +209,46 @@ void plotFinal(int lumi=100) {
     tt+=truth->GetBinContent(i+1);
     td+=corrData.y[i];
 
-    data_bkgd.y[i]+=backgroundExp.y[i];
+    backgroundUncFrac.y[i]=backgroundAllUnc.y[i]/std::max(1.0,data_bkgd.y[i]);
 
-    backgroundUncFrac.y[i]=backgroundExpErr.y[i]/std::max(1.0,data_bkgd.y[i]);
-
-    corrDataBkgd.y[i]+=backgroundAct.y[i]-backgroundExp.y[i];
     corrDataBkgd.y[i]/=effAcc.y[i];
-    corrDataBkgd.ey[i]=sqrt(data_all.y[i]+backgroundExp.y[i])/effAcc.y[i];
+    corrDataBkgd.ey[i]=sqrt(data_all.y[i]+backgroundAll.y[i])/effAcc.y[i];
 
     dataStatError.y[i]= corrDataBkgd.ey[i]/std::max(1.0,corrDataBkgd.y[i]);
 
     corrDataSyst.y[i]/=effAcc.y[i];
 
+    /*
     pdfTotal.y[i]=(pdfPos.y[i]+(-pdfNeg.y[i]))/2*corrDataBkgd.y[i];
     pdfFrac.y[i]=(pdfPos.y[i]+(-pdfNeg.y[i]))/2;
-
-    double errmig=fabs(binMig.y[i])*corrDataBkgd.y[i];
-
-    printf("%d %f %f %f %f\n",i,corrData.ey[i],corrData.y[i]*ea_statErr.y[i],errmig,pdfTotal.y[i]);
+    */
+    printf("%d %f %f %f %f\n",i,corrData.ey[i],corrData.y[i]*ea_statErr.y[i]);
     corrDataSyst.ey[i]=sqrt(pow(corrDataBkgd.ey[i],2)+
 			    pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
-			    pow(backgroundExpErr.y[i]/effAcc.y[i],2)+
-			    pow(errmig,2)+
-			    pow(pdfTotal.y[i],2)
+			    pow(backgroundAllUnc.y[i]/effAcc.y[i],2)+
+			    pow(energyScale.y[i]*data_all.y[i],2)+
+			    pow(effSystErr.y[i]*data_all.y[i],2)+
+			    0
+			    //			    pow(pdfTotal.y[i],2)
 			    );
 
     totalSyst.ey[i]=sqrt( pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
-			  pow(errmig,2)+
-			  pow(backgroundExpErr.y[i]/effAcc.y[i],2)+
-			  pow(pdfTotal.y[i],2)
+			  pow(backgroundAllUnc.y[i]/effAcc.y[i],2)+
+			  pow(energyScale.y[i]*data_all.y[i],2)+
+			  pow(effSystErr.y[i]*data_all.y[i],2)+
+			  0
+			  //			  pow(pdfTotal.y[i],2)
 			  );
 
     totalSyst.y[i]=totalSyst.ey[i]/std::max(1.0,corrDataBkgd.y[i]);
 
     sumtotal+=corrDataSyst.y[i];
   }
+  char fnamework[1024];
 
-
+  
   DataSeries corrDataFold(corrData),corrDataSystFold(corrData);
 
-  char fnamework[1024];
   sprintf(fnamework,"ZRapidity_final_fold_table-%d.tex",lumi);
 
   FILE* ftable=fopen(fnamework,"w");
@@ -227,8 +256,8 @@ void plotFinal(int lumi=100) {
   fprintf(ftable,"\\begin{tabular}{|c|c||c|c|c|}\n\\hline\n");
   fprintf(ftable,"$|Y_{min}|$ & $|Y_{max}|$ & Measurement & Statistical Error & Systematic Error \\\\ \\hline\n");
   
-  const int izero=23;
-  const double binwidth=0.25;
+  const int izero=51;
+  const double binwidth=0.1;
   //  double binwidth=1.0;
   for (int i=0; i<=(lasti-firsti)/2; i++) {
     int j=izero+i-1;
@@ -240,17 +269,20 @@ void plotFinal(int lumi=100) {
 
     double ea_Ave=(effAcc.y[j]+effAcc.y[jadd])/2;
 
-    double errmig=(fabs(binMig.y[j])*corrData.y[j]+fabs(binMig.y[jadd])*corrData.y[jadd])/sumtotal;
-    double pdferr=(pdfFrac.y[j]+pdfFrac.y[jadd])/2*corrDataFold.y[j]/sumtotal;
-    double bkgderr=sqrt(pow(backgroundExpErr.y[j],2)+pow(backgroundExpErr.y[jadd],2))/ea_Ave/sumtotal;
+    //    double errmig=(fabs(binMig.y[j])*corrData.y[j]+fabs(binMig.y[jadd])*corrData.y[jadd])/sumtotal;
+    //    double pdferr=(pdfFrac.y[j]+pdfFrac.y[jadd])/2*corrDataFold.y[j]/sumtotal;
+    double bkgderr=sqrt(pow(backgroundAllUnc.y[j],2)+pow(backgroundAllUnc.y[jadd],2))/ea_Ave/sumtotal;
+    double energyerr=(energyScale.y[j]+energyScale.y[jadd])/2/ea_Ave/sumtotal;
 
-    corrDataFold.ey[j]=sqrt(data_all.y[j]+data_all.y[jadd]+backgroundExp.y[j]+backgroundExp.y[jadd])/ea_Ave/sumtotal;
+
+    corrDataFold.ey[j]=sqrt(data_all.y[j]+data_all.y[jadd]+backgroundAll.y[j]+backgroundAll.y[jadd])/ea_Ave/sumtotal;
 
     corrDataSystFold.y[j]=corrDataFold.y[j];
     corrDataSystFold.ey[j]=sqrt(pow(corrDataFold.ey[j],2)+
 				pow(corrDataFold.y[j]*(ea_statErr.y[j]+ea_statErr.y[jadd])/2,2)+
-				pow(errmig,2)+
-				pow(pdferr,2)+
+				pow(corrDataFold.y[j]*(effSystErr.y[j]+effSystErr.y[jadd])/2,2)+
+				//				pow(pdferr,2)+
+				pow(energyerr,2)+
 				pow(bkgderr,2)
 				);
 
@@ -260,7 +292,7 @@ void plotFinal(int lumi=100) {
     corrDataSystFold.ey[j]/=binwidth;
 
 
-    fprintf(ftable,"%7.2f & %7.2f & %7.5f & %7.5f & %7.5f \\\\ \n",
+    fprintf(ftable,"%7.2f & %7.2f & %7.4f & %7.4f & %7.4f \\\\ \n",
 	    corrDataFold.xave[j]-corrDataFold.xwidth[j],
 	    corrDataFold.xave[j]+corrDataFold.xwidth[j],
 	    corrDataFold.y[j],
@@ -271,9 +303,9 @@ void plotFinal(int lumi=100) {
 
   fprintf(ftable,"\\hline\n\\end{tabular}");
   fclose(ftable);
-
+ 
   truth->Scale(td/tt*1.0);
-
+ 
   TGraph* rawd=data_all.makeTG(npoint,firsti-1);
   TGraph* rawdb=data_bkgd.makeTG(npoint,firsti-1);
   TGraph* corrd=corrData.makeTGE(npoint,firsti-1);
@@ -282,9 +314,9 @@ void plotFinal(int lumi=100) {
   // this is special
   TGraph* corrdsysb=new TGraphErrors(npoint,corrDataBkgd.xave+firsti-1,corrDataBkgd.y+firsti-1,corrDataSyst.xwidth+firsti-1,corrDataSyst.ey+firsti-1);
 
-  TH2* dummy=new TH2F("dummy","dummy",20,-3.75,3.75,30,0,5800*lumi/100);
+  TH2* dummy=new TH2F("dummy","dummy",20,-3.5,3.5,30,0,600);
 
-  dummy->GetYaxis()->SetTitle("Events/0.25 Units of Rapidity");
+  dummy->GetYaxis()->SetTitle("Events/0.1 Units of Rapidity");
   dummy->GetXaxis()->SetTitle("Y_{Z}");
   
   TCanvas* c1=new TCanvas("finalZRap","finalZRap",800,600);
@@ -315,7 +347,7 @@ void plotFinal(int lumi=100) {
   tl->AddEntry(corrd,"Corrected Data","P");
   tl->AddEntry(rawdb,"Raw Data","P");
   tl->AddEntry(rawd,"Background-Subtracted Data","P");
-  tl->AddEntry(truth,"CTEQ6.1 Prediction","l");
+  tl->AddEntry(truth,"POWHEG+CT10 Prediction","l");
   tl->Draw();
 
   zrap_Prelim(0.85,0.90,0.85,0.85);
@@ -326,8 +358,9 @@ void plotFinal(int lumi=100) {
   sprintf(fnamework,"ZRapidity_final-%d.png",lumi);
   c1->Print(fnamework);
 
+
   TCanvas* c2=new TCanvas("finalZRapFold","finalZRapFold",800,600);
-  TH2* dummy2=new TH2F("dummy2","dummy2",10,0.0,3.75,30,0,0.4);
+  TH2* dummy2=new TH2F("dummy2","dummy2",10,0.0,3.5,30,0,0.4);
   dummy2->SetDirectory(0);
 
   TH1* truth2=(TH1*)(truth->Clone("truth2"));
@@ -338,16 +371,23 @@ void plotFinal(int lumi=100) {
   double chi2_0=0;
   double chi2_1=0;
   double fudge=1.00;
-  for (int i=izero; i<=lasti; i++) {
-    truth2->SetBinContent(i,(truth2->GetBinContent(i)+truth2->GetBinContent(44-i+1))/sumtotal/binwidth*fudge);
-    double factor=1+(pdfSens25.y[i-1]+pdfSens25.y[44-i])/2.0;
+
+  for (int i=0; i<=(lasti-firsti)/2+2; i++) {
+
+    int j=izero+i-1;
+    int jadd=izero-i-2;
+
+    truth2->SetBinContent(j+1,(truth2->GetBinContent(j+1)+truth2->GetBinContent(jadd+1))/sumtotal/binwidth*fudge);
+    /*
+    double factor=1+(pdfSens25.y[i-1]+pdfSens25.y[BINCOUNT-i])/2.0;
     truthalt->SetBinContent(i,truth2->GetBinContent(i)*factor);
     if (corrDataSystFold.ey[i-1]<=0) continue;
     printf("AltUniv: %d %f %f\n",i,factor,truthalt->GetBinContent(i));
     chi2_0+=pow(truth2->GetBinContent(i)-corrDataFold.y[i-1],2)/pow(corrDataSystFold.ey[i-1],2);
     chi2_1+=pow(truthalt->GetBinContent(i)-corrDataFold.y[i-1],2)/pow(corrDataSystFold.ey[i-1],2);
+    */
   }
-
+  
 
   c2->cd();
   dummy2->GetYaxis()->SetTitle("1/#sigma d#sigma/dY");
@@ -376,7 +416,7 @@ void plotFinal(int lumi=100) {
   c2->Print(fnamework);
 
   TCanvas* c3=new TCanvas("finalZRapErrors","finalZRapErrors",800,600);
-  TH1* dummy3=new TH1F("dummy3","dummy3",10,-3.76,3.75);
+  TH1* dummy3=new TH1F("dummy3","dummy3",10,-3.5,3.5);
   dummy3->SetDirectory(0);
   c3->SetLogy();
   dummy3->SetMaximum(1.0);
@@ -386,19 +426,24 @@ void plotFinal(int lumi=100) {
 
 
   
-  TH1* binmiggr=binMigPos.makeTH1("bin migration",npoint,firsti-1);
+  //  TH1* binmiggr=binMigPos.makeTH1("bin migration",npoint,firsti-1);
   TH1* effacc_stat_gr=ea_statErr.makeTH1("eff stat",npoint,firsti-1);
+  TH1* effacc_syst_gr=effSystErr.makeTH1("eff syst",npoint,firsti-1);
   TH1* gr_dataStatError=dataStatError.makeTH1("data stats err",npoint,firsti-1);
   TH1* gr_bkgd_unc=backgroundUncFrac.makeTH1("bkgd unc",npoint,firsti-1);
-  TH1* gr_pdf=pdfFrac.makeTH1("pdf_err",npoint,firsti-1);
+  //  TH1* gr_pdf=pdfFrac.makeTH1("pdf_err",npoint,firsti-1);
+  TH1* gr_energyscale=energyScale.makeTH1("es_unc",npoint,firsti-1);
   TH1* gr_systotal=totalSyst.makeTH1("total_syst",npoint,firsti-1);
   dummy3->Draw();
 
-  binmiggr->SetLineWidth(2);
-  binmiggr->SetLineColor(kBlue);
+  //  binmiggr->SetLineWidth(2);
+  //  binmiggr->SetLineColor(kBlue);
 
   effacc_stat_gr->SetLineWidth(2);
   effacc_stat_gr->SetLineColor(kGreen+2);
+
+  effacc_syst_gr->SetLineWidth(2);
+  effacc_syst_gr->SetLineColor(kGreen-5);
 
   gr_dataStatError->SetLineWidth(2);
   gr_dataStatError->SetLineColor(kBlack);
@@ -407,26 +452,33 @@ void plotFinal(int lumi=100) {
   gr_bkgd_unc->SetLineWidth(2);
   gr_bkgd_unc->SetLineColor(kRed-4);
 
-  gr_pdf->SetLineWidth(2);
-  gr_pdf->SetLineColor(kViolet-5);
+  gr_energyscale->SetLineWidth(2);
+  gr_energyscale->SetLineColor(kBlue);
+
+  //  gr_pdf->SetLineWidth(2);
+  //  gr_pdf->SetLineColor(kViolet-5);
 
   gr_systotal->SetLineWidth(2);
   
 
-  binmiggr->Draw("HSAME");
+  //  binmiggr->Draw("HSAME");
   effacc_stat_gr->Draw("HSAME");
+  effacc_syst_gr->Draw("HSAME");
   gr_dataStatError->Draw("HSAME");
   gr_bkgd_unc->Draw("HSAME");
-  gr_pdf->Draw("HSAME");
+  gr_energyscale->Draw("HSAME");
+  //  gr_pdf->Draw("HSAME");
   gr_systotal->Draw("HISTSAME");
 
    tl=new TLegend(0.35,0.70,0.75,0.94,"Error Source Contributions");
-  tl->AddEntry(binmiggr,"Bin Migration","L");
-  tl->AddEntry(effacc_stat_gr,"Efficiency Statistics","L");
-  tl->AddEntry(gr_pdf,"PDF (#epsilon #times A) Uncertainty","L");
-  tl->AddEntry(gr_bkgd_unc,"Background Uncertainty","L");
-  tl->AddEntry(gr_systotal,"Total Systematic Error","L");
+   //  tl->AddEntry(binmiggr,"Bin Migration","L");
   tl->AddEntry(gr_dataStatError,"Data Statistics","L");
+  tl->AddEntry(gr_systotal,"Total Systematic Error","L");
+  tl->AddEntry(gr_bkgd_unc,"Background Uncertainty","L");
+  tl->AddEntry(effacc_stat_gr,"Efficiency Statistics","L");
+  //  tl->AddEntry(gr_pdf,"PDF (#epsilon #times A) Uncertainty","L");
+  tl->AddEntry(gr_energyscale,"Energy Scale Uncertainty","L");
+  tl->AddEntry(effacc_syst_gr,"Efficiency Systematics","L");
   tl->Draw();
   
   zrap_Prelim(0.3,0.24,0.3,0.2);
@@ -437,6 +489,44 @@ void plotFinal(int lumi=100) {
   sprintf(fnamework,"ZRapidity_final_errors-%d.png",lumi);
   c3->Print(fnamework);
 
-  printf(" Two models: %f %f \n",chi2_0,chi2_1);
+sprintf(fnamework,"ZRapidity_final_fold_errtable-%d.tex",lumi);
+  ftable=fopen(fnamework,"w");
+
+  for (int i=0; i<=(lasti-firsti)/2; i++) {
+    int j=izero+i-1;
+    int jadd=izero-i-2;
+
+    double ea_Ave=(effAcc.y[j]+effAcc.y[jadd])/2;
+
+    //    double errmig=(fabs(binMig.y[j])*corrData.y[j]+fabs(binMig.y[jadd])*corrData.y[jadd])/sumtotal;
+    //    double pdferr=(pdfFrac.y[j]+pdfFrac.y[jadd])/2;//*corrDataFold.y[j]*binwidth/sumtotal;
+    double bkgderr=sqrt(pow(backgroundAllUnc.y[j],2)+pow(backgroundAllUnc.y[jadd],2))/ea_Ave/sumtotal;
+    double staterr=(ea_statErr.y[j]+ea_statErr.y[jadd])/2;
+    double systerr=(effSystErr.y[j]+effSystErr.y[jadd])/2;
+    double energyerr=(energyScale.y[j]+energyScale.y[jadd])/2;
+
+    //    errmig/=binwidth*corrDataFold.y[j];
+    //    pdferr/=binwidth*corrDataFold.y[j];
+    bkgderr/=binwidth*corrDataFold.y[j];
+    //    staterr/=binwidth*corrDataFold.y[j];
+    //    systerr/=binwidth*corrDataFold.y[j];
+
+
+    if (i==0) {
+      fprintf(ftable,"\\begin{tabular}{|c|c||c|c|c|c|}\\hline\n");
+      fprintf(ftable,"            &             & Efficiency &   Bin     & Energy Scale  & Background \\\\ \n");
+      fprintf(ftable,"$|Y_{min}|$ & $|Y_{max}|$ & Statistics & Migration & Uncertainty & Estimation \\\\ \\hline \n");
+    }
+      fprintf(ftable," %7.2f & %7.2f & %.4f & %.4f & %.4f & %.4f \\\\ \n",
+             corrDataFold.xave[j]-corrDataFold.xwidth[j],
+             corrDataFold.xave[j]+corrDataFold.xwidth[j],
+             staterr,systerr,energyerr,bkgderr);
+    
+  }
+  fprintf(ftable,"\\hline\n\\end{tabular}\n");
+  fclose(ftable);
+
+
+  //  printf(" Two models: %f %f \n",chi2_0,chi2_1);
 
 }

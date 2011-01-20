@@ -18,8 +18,8 @@ const char* labelFor(int i) {
   case(1) : return "Supercluster";
   case(2) : return "P_{T}>20 GeV";
   case(3) : return "GSF Track Match";
-  case(4) : return "Electron Id";
-  case(5) : return "HLT";
+  case(5) : return "Electron Id";
+  case(6) : return "HLT";
     //  case(6) : return "HLT";
   default : return "Huh?";
   }
@@ -31,8 +31,11 @@ const char* labelFor(int i) {
 void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y_masscut") {
   TDirectory* basedir=f->Get("mcEff");
 
-  TH1* base=((TDirectory*)basedir->Get("All"))->Get("Z0_Y");
-
+  TH1* base;
+  if (strstr(var,"Y")!=0) base=(TH1*)((TDirectory*)basedir->Get("All"))->Get("Z0_Y");
+  if (strstr(var,"Pt")!=0) {
+    base=(TH1*)((TDirectory*)basedir->Get("All"))->Get("Z0_Pt");
+  }
 
   TDirectory* zdir=basedir->Get("ECAL80-ECAL95");
   TDirectory* zdir2=basedir->Get("ECAL80-HF");
@@ -116,19 +119,19 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y_masscut") {
       if (strstr(var,"Y")!=0) {
 	work->GetXaxis()->SetRangeUser(-4.5,4.5);
       } else {
-	work->GetXaxis()->SetRangeUser(0.0,120.0);
+	work->GetXaxis()->SetRangeUser(0.0,150.0);
       }
       work->GetXaxis()->CenterTitle(true);
       work->GetYaxis()->CenterTitle(true);
       work->Draw("HIST");
-    }
-    else work->Draw("SAMEHIST");
+    } else if (n!=4) work->Draw("SAMEHIST");
 
-    if (n<3) 
-      tl->AddEntry(work,labelFor(n));
-    else
-      tl2->AddEntry(work,labelFor(n));
-    
+    if (n!=4) {
+      if (n<3) 
+	tl->AddEntry(work,labelFor(n));
+      else
+	tl2->AddEntry(work,labelFor(n));
+    }
     n++;
     finalt=(TH1*)(work->Clone());
   }

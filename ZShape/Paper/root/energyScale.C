@@ -5,8 +5,8 @@ TH1* extractDistribution(const char* name, TFile* f) {
 
   TH1* effAcc=readStandardFile("effAcc","../data/effAcc_combined.csv");
   
-  const char* h1name="mcEff/ECAL80-ECAL95/C08-m(70,110)/Z0_Y";
-  const char* h2name="mcEff/ECAL80-HF/C08-m(70,110)/Z0_Y";
+  const char* h1name="mcEff/ECAL80-ECAL95/C08-m(60,120)/Z0_Y";
+  const char* h2name="mcEff/ECAL80-HF/C08-m(60,120)/Z0_Y";
 
   TH1* sig1=f->Get(h1name)->Clone(name);
   TH1* sig2=f->Get(h2name);
@@ -23,7 +23,10 @@ TH1* extractDistribution(const char* name, TFile* f) {
 #include "tdrstyle.C"
 #include "zrapidityStandard.C"
 
-void energyScale(TFile* base, TFile* vpe, TFile* vme,  TFile* vpf, TFile* vmf, const char* errfilename=0 ) {
+void energyScale(TFile* base, TFile* vpe, TFile* vme,  
+		 TFile* vpf, TFile* vmf, 
+		 TFile* vpv, TFile* vmv, 
+		 const char* errfilename=0 ) {
 
   FILE* errfile=0;
   if (errfilename!=0) {
@@ -41,6 +44,8 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,  TFile* vpf, TFile* vmf, c
   TH1* valem=extractDistribution("vme",vme);
   TH1* valfp=extractDistribution("vpf",vpf);
   TH1* valfm=extractDistribution("vmf",vmf);
+  TH1* valvp=extractDistribution("vpv",vpv);
+  TH1* valvm=extractDistribution("vmv",vmv);
   
   valep->Scale(hb->Integral(15,86)/valep->Integral(15,86));
   valem->Scale(hb->Integral(15,86)/valem->Integral(15,86));
@@ -48,11 +53,16 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,  TFile* vpf, TFile* vmf, c
   valfp->Scale(hb->Integral(15,86)/valfp->Integral(15,86));
   valfm->Scale(hb->Integral(15,86)/valfm->Integral(15,86));
 
+  valvp->Scale(hb->Integral(15,86)/valvp->Integral(15,86));
+  valvm->Scale(hb->Integral(15,86)/valvm->Integral(15,86));
+
   hb=unfold(hb,"unfoldingMatrix_theOutPut.root");
   valep=unfold(valep,"unfoldingMatrix_theOutPut.root");
   valem=unfold(valem,"unfoldingMatrix_theOutPut.root");
   valfp=unfold(valfp,"unfoldingMatrix_theOutPut.root");
   valfm=unfold(valfm,"unfoldingMatrix_theOutPut.root");
+  valvp=unfold(valvp,"unfoldingMatrix_theOutPut.root");
+  valvm=unfold(valvm,"unfoldingMatrix_theOutPut.root");
   
   valep->Add(hb,-1);
   valem->Add(hb,-1);
@@ -66,15 +76,23 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,  TFile* vpf, TFile* vmf, c
   valfp->Divide(hb);
   valfm->Divide(hb);
 
+  valvp->Add(hb,-1);
+  valvm->Add(hb,-1);
+  
+  valvp->Divide(hb);
+  valvm->Divide(hb);
+
   TH1* valm=valem->Clone("valm");
   TH1* valp=valep->Clone("valp");
   TH1* valave=valep->Clone("valave");
 
   for (int i=1; i<=valep->GetXaxis()->GetNbins(); i++) {
     valm->SetBinContent(i,sqrt(pow(valem->GetBinContent(i),2)+
-			      pow(valfm->GetBinContent(i),2)));
+			       pow(valvm->GetBinContent(i),2)+
+			       pow(valfm->GetBinContent(i),2)));
     valp->SetBinContent(i,sqrt(pow(valep->GetBinContent(i),2)+
-			      pow(valfp->GetBinContent(i),2)));
+			       pow(valvp->GetBinContent(i),2)+
+			       pow(valfp->GetBinContent(i),2)));
     valave->SetBinContent(i,0.5*(
 				 valm->GetBinContent(i)+
 				 valp->GetBinContent(i)
@@ -129,3 +147,5 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,  TFile* vpf, TFile* vmf, c
   if (errfile!=0) fclose(errfile);
 
 }
+
+

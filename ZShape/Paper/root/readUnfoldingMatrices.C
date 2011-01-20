@@ -1,6 +1,9 @@
-//#include <iostream.h> 
+#include <iostream> 
 //#include <stdlib.h>
-
+#include "TH1.h"
+#include "TMatrixD.h"
+#include "TVectorD.h"
+#include "TStyle.h"
 
 // In this example, you pick up an unfolding matrix (made with makeUnfoldingMatrices.C) from a file (unfoldingMatrix_theOutPut.root)
 // and apply to a rapidity distribution you get from an effAcc file (effAccSource.root)
@@ -18,7 +21,7 @@ TH1* unfold(const TH1* source, const char* unfoldingMatrixIF)  {
 
   TFile theunfoldingMatrixInputFile(unfoldingMatrixIF,"read");
 
-  TMatrixD * theUnfoldingMatrix = theunfoldingMatrixInputFile.Get("unsmearMatrices/unfoldingMatrixTotal");
+  TMatrixD * theUnfoldingMatrix = (TMatrixD*)theunfoldingMatrixInputFile.Get("unsmearMatrices/unfoldingMatrixTotal");
 
   Double_t arrayRapiditySmeared[100]; // this needs be hardcoded...
   for(int bin=1; bin<=100; bin++)
@@ -65,7 +68,7 @@ int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string 
     std::cout << "The file: " << theunfoldingMatrixInputFile->GetName() << " has been opened"<< std::endl;
     
     // this is the matrix you want to use for to unfold
-    TMatrixD * theUnfoldingMatrix = theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotal");
+    TMatrixD * theUnfoldingMatrix = (TMatrixD*)theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotal");
     
 
     // now pull up a test ECAL-ECAL histogram 
@@ -83,7 +86,6 @@ int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string 
 
     // now pull up a test ECAL-HF histogram 
     definition=std::string("ECAL80-HF");
-    std::string cut("C08-m(70,110)");
     plot=std::string("Z0_Y"); // bin migration histogram
     plotName = prefix + definition;
     plotName = plotName + std::string("/");    plotName = plotName + cut;
