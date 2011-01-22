@@ -1,0 +1,8 @@
+<bin file=HistToText.cpp>
+  <use name=root>
+  <use name=rootcore>
+</bin>
+
+
+
+
