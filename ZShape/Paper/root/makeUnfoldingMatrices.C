@@ -15,21 +15,21 @@
 #include "zrapidityStandard.C"
 int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfoldingMatrixOutPutFile) 
 {
-
+  
   setTDRStyle();
   zrap_colors();
-
-  // gStyle->SetPalette(1);
+  
+  //gStyle->SetPalette(1);
   gStyle->SetPaintTextFormat(".2f");
-
-   std::cout << "\n\n\tGetting migration matrices from: " << effAccFileInputFile          << std::endl;
-   std::cout << "\tCreating unfolding matrices in:  "     << unfoldingMatrixOutPutFile <<"\n\n"<< std::endl;
-
-    TFile *theEffAccInpuntFile = new TFile(effAccFileInputFile.c_str());
-    //theEffAccInpuntFile->ls();
-
-    TFile *theunfoldingMatrixOutpuFile = new TFile(unfoldingMatrixOutPutFile.c_str(),"recreate");
-    theunfoldingMatrixOutpuFile ->cd();
+  
+  std::cout << "\n\n\tGetting migration matrices from: " << effAccFileInputFile          << std::endl;
+  std::cout << "\tCreating unfolding matrices in:  "     << unfoldingMatrixOutPutFile <<"\n\n"<< std::endl;
+  
+  TFile *theEffAccInpuntFile = new TFile(effAccFileInputFile.c_str());
+  //theEffAccInpuntFile->ls();
+  
+  TFile *theunfoldingMatrixOutpuFile = new TFile(unfoldingMatrixOutPutFile.c_str(),"recreate");
+  theunfoldingMatrixOutpuFile ->cd();
 
   // directory where one saves the original histograms (from EffAcc calculator) the unfolding matrices have been obtained from
   TDirectory *originalHistograms = theunfoldingMatrixOutpuFile->mkdir("originalHistograms");
@@ -37,113 +37,32 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
 
     gStyle->SetOptStat(110011);
 
-    // now pick up the migration matrix
-    // open file
-    // TFile * _file1 = new TFile("smearingMtx.root ");
-
-    // get hold of ECAL-ECAL 2d plot 
+    //////////////////////////////////////////////////////
+    // to be consistent with the definitions 
+    // of AN-10-367 one needs to use the YZTL_vs_YZ before Eff and Acc
+    // are applied ==> move to the "All" folder
+    // get hold of ECAL-HF 2d plot 
     std::string prefix("mcEff/");
-    std::string definition("ECAL80-ECAL95");   
-    std::string cut("C08-m(70,110)");
-    std::string plot("YZTL_vs_YZ");            // bin migration histogram
+    std::string definition=std::string("All");
+    std::string cut("");
+    plot=std::string("YZTL_vs_YZ"); // bin migration histogram
     std::string plotName = prefix + definition;
     plotName = plotName + std::string("/");    plotName = plotName + cut;
     plotName = plotName + std::string("/");    plotName = plotName + plot;
-    std::cout << "\n\n\tUnsing ECAL-ECAL plot : "<< plotName << endl;
+    std::cout << "\tUsing directly the total plot:     "<< plotName << endl;
+    TH2F * histoMigration  = (TH2F*) theEffAccInpuntFile->Get(plotName.c_str());
 
-    TH2F* histoMigrationEcalEcalhighStat = (TH2F*) theEffAccInpuntFile->Get(plotName.c_str());
-    int normEcalEcal = histoMigrationEcalEcalhighStat -> Integral();
-    histoMigrationEcalEcalhighStat ->GetXaxis()->SetTitle("Y_{ZtreeLevel}");
-    histoMigrationEcalEcalhighStat ->GetYaxis()->SetTitle("Y_{ZtreeLevel}");
-
-    TH2F * histoMigrationEcalEcal_toBeSaved = histoMigrationEcalEcalhighStat->Clone();
-    histoMigrationEcalEcal_toBeSaved->Write("originalHistoMigrationEcalEcal");
-
-    // get hold of ECAL-HF 2d plot 
-    definition=std::string("ECAL80-HF");
-    std::string cut("C08-m(70,110)");
-    plot=std::string("YZTL_vs_YZ"); // bin migration histogram
-    plotName = prefix + definition;
-    plotName = plotName + std::string("/");    plotName = plotName + cut;
-    plotName = plotName + std::string("/");    plotName = plotName + plot;
-    std::cout << "\tUsing ECAL-HF plot:     "<< plotName << endl;
-    
-    TH2F* histoMigrationEcalHFhighStat = (TH2F*) theEffAccInpuntFile->Get(plotName.c_str());
-    int normEcalHF = histoMigrationEcalHFhighStat -> Integral();
-    histoMigrationEcalHFhighStat ->GetXaxis()->SetTitle("Y_{ZtreeLevel}");
-    histoMigrationEcalHFhighStat ->GetYaxis()->SetTitle("Y_{ZtreeLevel}");
-   
-    TH2F * histoMigrationEcalHF_toBeSaved = histoMigrationEcalHFhighStat->Clone();
-    histoMigrationEcalHF_toBeSaved->Write("originalHistoMigrationEcalHF");
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // evaluating statistical error of migration matrix for ECAL-ECAL
-    TH2F * histoMigrationEcalEcalError = new TH2F("histoMigrationEcalEcalError", "histoMigrationEcalEcalError", 
-	histoMigrationEcalEcalhighStat->GetNbinsX(), histoMigrationEcalEcalhighStat->GetXaxis()->GetXmin(), histoMigrationEcalEcalhighStat->GetXaxis()->GetXmax(),
-	histoMigrationEcalEcalhighStat->GetNbinsY(), histoMigrationEcalEcalhighStat->GetYaxis()->GetXmin(), histoMigrationEcalEcalhighStat->GetYaxis()->GetXmax());
-	
-   for(int xi=0; xi<histoMigrationEcalEcalhighStat->GetNbinsX(); xi++){
-   for(int yi=0; yi<histoMigrationEcalEcalhighStat->GetNbinsY(); yi++){
-	double value = histoMigrationEcalEcalhighStat->GetBinContent(xi,yi);
-        if (fabs(value)>0.000001) histoMigrationEcalEcalError->SetBinContent(xi,yi,1/sqrt(value));
-  } }
+   int binsXMatrixEcalEcal = histoMigration->GetNbinsX();
+   int binsYMatrixEcalEcal = histoMigration->GetNbinsY();
+   float xminEcalEcal = histoMigration->GetXaxis()->GetXmin();
+   float xmaxEcalEcal = histoMigration->GetXaxis()->GetXmax();
+   float yMinEcalEcal = histoMigration->GetYaxis()->GetXmin();
+   float yMaxEcalEcal = histoMigration->GetYaxis()->GetXmax();
 
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // evaluating statistical error of migration matrix for ECAL-HF
-    TH2F * histoMigrationEcalHFError = new TH2F("histoMigrationEcalHFError", "histoMigrationEcalHFError", 
-	histoMigrationEcalHFhighStat->GetNbinsX(), histoMigrationEcalHFhighStat->GetXaxis()->GetXmin(), histoMigrationEcalHFhighStat->GetXaxis()->GetXmax(),
-	histoMigrationEcalHFhighStat->GetNbinsY(), histoMigrationEcalHFhighStat->GetYaxis()->GetXmin(), histoMigrationEcalHFhighStat->GetYaxis()->GetXmax());
-	
-
-   for(int xi=0; xi<histoMigrationEcalHFhighStat->GetNbinsX(); xi++){
-   for(int yi=0; yi<histoMigrationEcalHFhighStat->GetNbinsY(); yi++){
-	double value = histoMigrationEcalHFhighStat->GetBinContent(xi,yi);
-        if (fabs(value)>0.000001) histoMigrationEcalHFError->SetBinContent(xi,yi,1/sqrt(value));
-  } }
-
-
-   /////////////////////////////////////////////////////////////////////////////////////////
-   // checking that sizes and bins are consistent between the ECAL-ECAL and the ECAL-HF case
-
-   int binsXMatrixEcalEcal = histoMigrationEcalEcalhighStat->GetNbinsX();
-   int binsYMatrixEcalEcal = histoMigrationEcalEcalhighStat->GetNbinsY();
-   float xminEcalEcal = histoMigrationEcalEcalhighStat->GetXaxis()->GetXmin();
-   float xmaxEcalEcal = histoMigrationEcalEcalhighStat->GetXaxis()->GetXmax();
-   float yMinEcalEcal = histoMigrationEcalEcalhighStat->GetYaxis()->GetXmin();
-   float yMaxEcalEcal = histoMigrationEcalEcalhighStat->GetYaxis()->GetXmax();
-     
-   int binsXMatrixEcalHF = histoMigrationEcalHFhighStat->GetNbinsX();
-   int binsYMatrixEcalHF = histoMigrationEcalHFhighStat->GetNbinsY();
-   float xminEcalHF = histoMigrationEcalHFhighStat->GetXaxis()->GetXmin();
-   float xmaxEcalHF = histoMigrationEcalHFhighStat->GetXaxis()->GetXmax();
-   float yMinEcalHF = histoMigrationEcalHFhighStat->GetYaxis()->GetXmin();
-   float yMaxEcalHF = histoMigrationEcalHFhighStat->GetYaxis()->GetXmax();
-     
-     if (
-	binsXMatrixEcalEcal ==binsYMatrixEcalEcal && yMinEcalEcal==xminEcalEcal && xmaxEcalEcal==yMaxEcalEcal &&
-	binsXMatrixEcalHF   ==binsYMatrixEcalHF &&   yMinEcalHF==xminEcalHF && xmaxEcalHF==yMaxEcalHF &&
-	binsXMatrixEcalEcal ==binsXMatrixEcalHF &&   yMinEcalEcal==yMinEcalHF && xmaxEcalEcal==xmaxEcalHF)
-       {std::cout<< "\nbin migration histogram are square (" << binsXMatrixEcalEcal << "X" << binsYMatrixEcalEcal << ") and the same for EcalEcal/EcalHF, as it should\n" << std::endl; 	}
-     else
-       {std::cout<< "\nbin migration histogram are not square or not the same for EcalEcal/EcalHF, returning.\n" << std::endl;
-	 return;}
-
-
-    // keep the option of using the whole statistcs as available in MC
-    TH2F * histoMigrationEcalEcal = histoMigrationEcalEcalhighStat->Clone();
-    TH2F * histoMigrationEcalHF = histoMigrationEcalHFhighStat->Clone();
-
-   // building total migration histogram, summing the  ECAL-ECAL and the ECAL-HF histograms
-   TH2F * histoMigration  = new TH2F("histoMigration","histoMigration",
-	binsXMatrixEcalEcal,xminEcalEcal,xmaxEcalEcal,
-	binsYMatrixEcalEcal,yMinEcalEcal,yMaxEcalEcal
-	);
-	
-   histoMigration->Add(histoMigrationEcalEcalhighStat, histoMigrationEcalHFhighStat);
    histoMigration->GetXaxis()->SetTitle("Y_{ZtreeLevel}");
    histoMigration->GetYaxis()->SetTitle("Y_{ZtreeLevel}");
-
+   
    TH2F * histoMigrationTotal_toBeSaved = histoMigration->Clone();
    histoMigrationTotal_toBeSaved->Write("originalHistoMigrationTotal");
 
@@ -204,11 +123,12 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
      for (int v=0; v<histoMatrix->GetNbinsX(); v++){//col
 
        migration[counter]=histoMatrix->GetBinContent(u+1,v+1);
-       if(0)  std::cout << u << " " << v << " " << migration[counter] <<std::endl;
 
        // for matrix to be invertible, no diagonal elements can be 0
        // for now set, in all rows which are empty, the diagonal element to 1
        if(u==v && histoMatrix->GetBinContent(u+1,v+1)==0) migration[counter]=1;
+       if(1 &&  migration[counter]!=0)  std::cout << u << " " << v << " " << migration[counter] <<std::endl;
+
        counter++;
 
        }	
@@ -234,8 +154,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
   fprintf(texTable,"\\begin{tabular}{|cc|ccccc|} \\hline \n");
   fprintf(texTable,"$min(Y^\\mathrm{true}_i)$ & $max(Y^\\mathrm{true}_i)$ & $Y^\\mathrm{reco}_{i-2}$ & $Y^\\mathrm{reco}_{i-1}$ & $Y^\\mathrm{reco}_i$ & $Y^\\mathrm{reco}_{i+1}$ & $Y^\\mathrm{reco}_{i+2}$ \\\\ \\hline \n");
   for (int i=0; i<100; i++) {
-    double lv=histoMigrationEcalHFhighStat->GetXaxis()->GetBinLowEdge(i+1);
-    double lh=histoMigrationEcalHFhighStat->GetXaxis()->GetBinUpEdge(i+1);
+    double lv=histoMigration->GetXaxis()->GetBinLowEdge(i+1);
+    double lh=histoMigration->GetXaxis()->GetBinUpEdge(i+1);
 
     if (fabs(lv)>3.8 || fabs(lh)>3.8) continue;
 
@@ -304,45 +224,9 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
 
 
 
-
-
-    TCanvas * c3 = new TCanvas("c3","c3",1050,750);
-    c3->Divide(2);
-    histoMigrationEcalEcalhighStat->GetXaxis()->SetTitle("Y_{Z,reco}");
-    histoMigrationEcalEcalhighStat->GetYaxis()->SetTitle("Y_{Z,true}");
-    histoMigrationEcalEcalhighStat->SetTitle("ECAL-ECAL: migration");
-    c3->cd(1);    histoMigrationEcalEcalhighStat->Draw("colz");
-    histoMigrationEcalHFhighStat->GetXaxis()->SetTitle("Y_{Z,reco}");
-    histoMigrationEcalHFhighStat->GetYaxis()->SetTitle("Y_{Z,true}");
-    histoMigrationEcalHFhighStat->SetTitle("ECAL-HF: migration");
-    c3->cd(2);    histoMigrationEcalHFhighStat->Draw("colz");
-    c3->Print( (definition + std::string("--") + cut + std::string(".png") ).c_str() );
-
-    TCanvas * c3bos = new TCanvas("stat error on migration matrix","stat error on migration matrix",1040,740);
-    c3bos->Divide(2);
-    TPad *p1 = c3bos->cd(1);      p1->SetLogz();
-    histoMigrationEcalEcalError->SetStats(0);
-    histoMigrationEcalEcalError->SetTitle("ECAL-ECAL: stat error");
-    histoMigrationEcalEcalError->SetMaximum(1);
-    p1->SetTopMargin(0.02);
-    p1->SetRightMargin(0.15);
-    p1->SetLeftMargin(0.15);   
-    p1->SetBottomMargin(0.125);
-    histoMigrationEcalEcalError->Draw("colz");
-    histoMigrationEcalEcalError->GetXaxis()->SetTitle("Y_{Z,reco}");
-    histoMigrationEcalEcalError->GetYaxis()->SetTitle("Y_{Z,true}");
-    TPad *p2 = c3bos->cd(2);      p2->SetLogz();
-    p2->SetTopMargin(0.02);
-    p2->SetRightMargin(0.15);
-    p2->SetLeftMargin(0.15);   
-    p2->SetBottomMargin(0.125);
-    histoMigrationEcalHFError->GetXaxis()->SetTitle("Y_{Z,reco}");
-    histoMigrationEcalHFError->GetYaxis()->SetTitle("Y_{Z,true}");
-    histoMigrationEcalHFError->SetStats(0);
-    histoMigrationEcalHFError->SetTitle("ECAL-HF: stat error");
-    histoMigrationEcalHFError->SetMaximum(1);
-    histoMigrationEcalHFError->Draw("colz");
-    c3bos->Print( (std::string("migration-stat-error") + std::string(".png") ).c_str() );
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  if(1){
+    
     // http://ultrahigh.org/2007/08/20/making-pretty-root-color-palettes/
 
    TCanvas * c4 = new TCanvas("Migration histogram","Migration histogram",1050,750);
@@ -399,6 +283,7 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    //histoMatrix->SetTitle("Migration matrix (normalized)");
    c5->Print("migrationMatrix.png");
    c5->Print("migrationMatrix.eps");
+   c5->Print("migrationMatrix.pdf");
 
 
    TCanvas * c7pre = new TCanvas("closure test","closure test",1050,750);
@@ -433,19 +318,39 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
 
    TLegend* leg = new TLegend(0.1,0.7,0.30,0.9);
    leg->SetHeader("Z Rapidity");
-   leg->AddEntry(h_RapidityTreeLevel,"Y_{Z} treeLevel","l");
    leg->AddEntry(h_RapiditySmeared,"Y_{Z} smeared","p");
-   leg->AddEntry(h_RapidityUNSmeared,"Y_{Z} unsmeared","p");
+   leg->AddEntry(h_RapidityTreeLevel,"Y_{Z} treeLevel","l");
+   leg->AddEntry(h_RapidityUNSmeared,"Y_{Z} unsmeared (overlap?)","p");
    leg->Draw();
 
    ///////////////////////////////////////////////////////
    c7pre->Print("rapdity-Tree-Smear-Unsmear-Closure.png");
    ///////////////////////////////////////////////////////
 
-   TH1D * h_effectUnsmearing = new TH1D("Y unsmearing","Y unsmearing",binsXMatrixEcalEcal,xminEcalEcal,xmaxEcalEcal); 
+  }// end of switch on/off plotting of many canvases
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+   TH1D * h_effectUnsmearing       = new TH1D("Y unsmearing","Y unsmearing",binsXMatrixEcalEcal,xminEcalEcal,xmaxEcalEcal); 
+   TH1D * h_effectUnsmearingByHand = new TH1D("Y unsmearing BH","Y unsmearing BH",binsXMatrixEcalEcal,xminEcalEcal,xmaxEcalEcal); 
    h_effectUnsmearing->Add(h_RapidityUNSmeared, h_RapidityTreeLevel, 1, -1);
    h_effectUnsmearing->Divide(h_RapidityTreeLevel);
-   
+   h_effectUnsmearing->SetTitle(0);
+   for(int a=1; a<=binsXMatrixEcalEcal; a++){
+     if(h_RapidityTreeLevel->GetBinContent(a)>1){
+     h_effectUnsmearingByHand->SetBinContent(a,(h_RapidityUNSmeared->GetBinContent(a)-h_RapidityTreeLevel->GetBinContent(a))/h_RapidityTreeLevel->GetBinContent(a));
+     }
+   }
+   if(1){
+     TCanvas * c8 = new TCanvas("closure test: (UNsmeared-true)/true","closure test: (UNsmeared-true)/true",1050,750);
+     c8->cd();
+     //h_effectUnsmearing->Draw();
+     h_effectUnsmearingByHand->Draw();
+     int i;
+   }
+   c8->Print("UNsmeared-true-over-true-Closure.png");
+   std::cout << "\tFile: "<< effAccFileInputFile << "   : ";
+   std::cin >> i;
    //theunfoldingMatrixOutpuFile->Write();
 
    return 0;
