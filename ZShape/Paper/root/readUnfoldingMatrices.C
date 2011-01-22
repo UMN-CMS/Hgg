@@ -80,65 +80,12 @@ int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string 
     // this is the matrix you want to use for to unfold
     TMatrixD * theUnfoldingMatrix = (TMatrixD*)theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotal");
 
-    /*
-    //////////GFfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    // now pull up a test ECAL-ECAL histogram 
-    std::string prefix("mcEff/");
-    std::string definition("ECAL80-ECAL95");
-    std::string cut("C08-m(70,110)");
-    std::string plot("Z0_Y");                  // bin migration histogram
-    std::string plotName = prefix + definition;
-    plotName = plotName + std::string("/");    plotName = plotName + cut;
-    plotName = plotName + std::string("/");    plotName = plotName + plot;
-    std::cout << "\n\n\tUnsing ECAL-ECAL plot : "<< plotName << endl;
-    TH1F* h_smearedRapidityECALECAL = (TH1F*) theEffAccInpuntFile->Get(plotName.c_str());
-    std::cout << "\tname h_smearedRapidityECALECAL: " << h_smearedRapidityECALECAL->GetName() << std::endl;
-    plot=std::string("Z0_YTL");                  // tree level histogram
-    plotName = prefix + definition + std::string("/") +  cut + std::string("/") + plot;
-    TH1F* h_treeLevelRapidityECALECAL = (TH1F*) theEffAccInpuntFile->Get(plotName.c_str());
-
-    std::cout <<  plotName << "    " << h_treeLevelRapidityECALECAL << std::endl;
-
-    // now pull up a test ECAL-HF histogram 
-    definition=std::string("ECAL80-HF");
-    plot=std::string("Z0_Y"); // bin migration histogram
-    plotName = prefix + definition;
-    plotName = plotName + std::string("/");    plotName = plotName + cut;
-    plotName = plotName + std::string("/");    plotName = plotName + plot;
-    std::cout << "\tUsing ECAL-HF plot:     "<< plotName << endl;
-    TH1F* h_smearedRapidityECALHF = (TH1F*) theEffAccInpuntFile->Get(plotName.c_str());
-    std::cout << "\tname h_smearedRapidityECALHF: " <<  h_smearedRapidityECALHF->GetName() <<  std::endl;
-    plot=std::string("Z0_YTL");                  // tree level histogram
-    plotName = prefix + definition + std::string("/") +  cut + std::string("/") + plot;
-    TH1F* h_treeLevelRapidityECALHF = (TH1F*) theEffAccInpuntFile->Get(plotName.c_str());
-
-   // building total migration histogram, summing the  ECAL-ECAL and the ECAL-HF histograms
-   TH1F * h_fullTest_smeared  = new TH1F("h_fullTest_smeared","h_fullTest_smeared", 
-		h_smearedRapidityECALHF->GetNbinsX(),
-		h_smearedRapidityECALHF->GetXaxis()->GetXmin(),
-		h_smearedRapidityECALHF->GetXaxis()->GetXmax());
-	
-   h_fullTest_smeared->Add(h_smearedRapidityECALHF,h_smearedRapidityECALECAL);
-   h_fullTest_smeared->GetXaxis()->SetTitle("Y_{RECO} for test");
-
-
-   // building total tree level histogram, summing the  ECAL-ECAL and the ECAL-HF histograms
-   TH1F * h_fullTest_treeLevel  = new TH1F("h_fullTest_TL","h_fullTest_TL", 
-		h_smearedRapidityECALHF->GetNbinsX(),
-		h_smearedRapidityECALHF->GetXaxis()->GetXmin(),
-		h_smearedRapidityECALHF->GetXaxis()->GetXmax());
-   
-   h_fullTest_treeLevel->Add(h_treeLevelRapidityECALHF,h_treeLevelRapidityECALECAL);
-   h_fullTest_treeLevel->GetXaxis()->SetTitle("Y_{RECO} for test");
-
-   //////////GFfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    */
 
     //////////////////////////////////////////////////////
-    // ... but to be consistent with the definitions 
+    // to be consistent with the definitions 
     // of AN-10-367 one needs to use the YZTL_vs_YZ before Eff and Acc
     // are applied ==> move to the "All" folder
-    // get hold of ECAL-HF 2d plot 
+
     std::string prefix("mcEff/");
     std::string definition=std::string("All");
     std::string cut("");
