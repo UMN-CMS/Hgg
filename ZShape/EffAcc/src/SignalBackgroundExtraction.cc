@@ -456,7 +456,7 @@ void SignalBackgroundExtraction::produceTxtFile1D(std::string sbtype){
 	      if ( !doem) if ((!doBkg_) || (!(sbtype == "background"))) continue;
 	      double myval = ((doem) ? values1D_[r] :  denominator1D_[r]);
 	      //std::vector<std::pair<float, float> > EffInfo = efftable_->GetCellInfo(r);
-	      the1DEffFile << " " << std::setw(10) << std::setprecision(4) <<  ((isRap_) ? rapbin_[r] : ptbin_[r])
+	      the1DEffFile << " " << std::setw(10) << std::setprecision(4) <<  ((isRap_) ? rapbin_[r]+1 : ptbin_[r]+1)
 			   << " " << std::setw(10) << std::setprecision(4) <<  ((isRap_) ? bin1Min_[r] :bin2Min_[r] )  
 			   << " " << std::setw(10) << std::setprecision(4) <<  ((isRap_) ? bin1Max_[r] :bin2Max_[r] )
 			   << " " << std::setw(10) << std::setprecision(4) <<  myval

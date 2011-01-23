@@ -46,6 +46,8 @@ EfficiencyFit::EfficiencyFit(TFile * file, std::string EffName, std::string EffT
   isEta_ = strstr(EffType.c_str(),"eta");
   isBoth_ = (bool (strstr(EffType.c_str(),"eta")) && bool (strstr(EffType.c_str(),"pt")));
   isRap_ = strstr(EffType.c_str(),"rap");
+  isZpt_ = strstr(EffType.c_str(),"zpt");
+  if (isZpt_ ) effType_ = "pt";
   setRootFile(file);
   sigtextFileName_="";
   bkgtextFileName_="";
@@ -115,13 +117,13 @@ void EfficiencyFit::setRootFile(TFile * file){
     
   
   // looping on objects in the file aiming at the 4 needed histograms 
-    
   while((key=((TKey*) next()) )){
     if (strcmp(key->GetClassName(),"TDirectoryFile")==0)
       {
 	TDirectory *mdir = (TDirectory*) theFile_->Get(key->GetName());
 	TIter next1(mdir->GetListOfKeys());
-	TKey * key1;
+	TKey * key1;  
+
 	while((key1=((TKey*) next1())) ){
 	  //at this step I need to check if I want eta or pt or whatever...
 	  //std::cout << " key1 " << key1->GetName() << " type " << key1->GetClassName() << std::endl;
@@ -130,7 +132,7 @@ void EfficiencyFit::setRootFile(TFile * file){
 	      TDirectory *mdir1 = (TDirectory*) mdir->Get(key1->GetName());
 	      TIter next2(mdir1->GetListOfKeys());
 	      TKey * key2;
-	      
+
 	      while((key2=((TKey*) next2())) ){
 		//std::cout << " key2 " << key2->GetName() << " type " << key2->GetClassName() << std::endl;
 		if (strcmp(key2->GetClassName(),"TDirectoryFile")==0 && strstr(key2->GetName(),"bin") )
@@ -138,13 +140,14 @@ void EfficiencyFit::setRootFile(TFile * file){
 		    TDirectory *mdir2 = (TDirectory*) mdir1->Get(key2->GetName());
 		    TIter next3(mdir2->GetListOfKeys());
 		    TKey * key3;
-		    
+
 		    while((key3=((TKey*) next3())) ){
 		      //std::cout << " key3 " << key3->GetName() << " type " << key3->GetClassName() << std::endl;
 		      //here is where I get the w's!!!
 		      if ( strcmp(key3->GetName(), "w")==0 )
 			{
 			  std::cout << " Found " << key3->GetName() << " in " << key2->GetName() << " in "<< key1->GetName() << " in "<< key->GetName() << std::endl;
+
 			  std::string dirname = key2->GetName();
 			  std::replace(dirname.begin(),dirname.end(),'_',' ');
 			  char myvartype[1000];
@@ -154,7 +157,7 @@ void EfficiencyFit::setRootFile(TFile * file){
 			  int firstgood = sscanf(dirname.c_str(), "probe sc %s bin%d %s",myvartype,  &binval, restofinfo);
 			  if (!firstgood) sscanf(dirname.c_str(), "pair %s bin%d %s",myvartype,  &binval, restofinfo);
 			  //std::cout << " bin " << binval << " vartype " << myvartype << " rest " << restofinfo << std::endl;
-			  if (isRap_) {std::swap(binval,rbinval); }
+			  if (isRap_ || isZpt_) {std::swap(binval,rbinval); }
 			  char nrestofinfo[1000];
 			  std::string newstr = Form("probe_sc_%s_bin%d_%%s",myvartype,binval);
 	 
@@ -178,7 +181,7 @@ void EfficiencyFit::setRootFile(TFile * file){
 			  
  			  RooWorkspace* w = (RooWorkspace*) mdir2->Get(key3->GetName());
 			  //w->Print();
-			  RooRealVar *et  = (isRap_) ? w->var("pair_rapidity") :((isEta_ && !isBoth_) ? w->var("probe_sc_eta"): w->var("probe_sc_et")) ; //dear anyone reading this, it is EITHER et or eta!!
+			  RooRealVar *et  = (isRap_) ? w->var("pair_rapidity") :((isZpt_) ?  w->var("pair_pt") :((isEta_ && !isBoth_) ? w->var("probe_sc_eta"): w->var("probe_sc_et"))) ; //dear anyone reading this, it is EITHER et or eta!!
 			  RooRealVar *eta = isBoth_ ? w->var("probe_sc_eta"): 0 ;
 			  //Here I will one day need to do 'two-D'... that is why I have the bin1 and bin2
 			  RooRealVar *eff = w->var("efficiency");
@@ -214,9 +217,10 @@ void EfficiencyFit::setRootFile(TFile * file){
 			  values1D_.push_back( eff->getVal());
 			  denominator1D_.push_back( nS->getVal());
 
-			  ptbin_.push_back(binval);
+			  if (isZpt_ )ptbin_.push_back(rbinval);  else ptbin_.push_back(binval); //simple hack until a ZPT bin vector is around.
 			  etabin_.push_back(obinval);
-			  rapbin_.push_back(rbinval);
+			  rapbin_.push_back(rbinval); //oen day Iwill need to add Zpt stuff here, so I can do 2D rap_zpt... for not it will hold either the rap bin or the pt bin for simplicity of code. 
+
 
 			  int mappos =  values1D_.size()-1;
 			  //systPlus1D_.push_back(errorHi);
@@ -485,14 +489,14 @@ void EfficiencyFit::produceTxtFile1D(std::string sbtype){
   the1DEffFile << "\n";
 
   the1DEffFile << "#dimension: 1 \n\n\n";
-  the1DEffFile << " " << std::setw(10) << "#PtMin"
+  the1DEffFile << "# " << std::setw(10) << "PtMin"
 	       << " " << std::setw(10) << "PtMax"
 	       << " " << std::setw(10)  << "EtaMin"
 	       << " " << std::setw(10)  <<  "EtaMax"
 	       << " " << std::setw(10)  << "NumParms"
 	       << " " << std::setw(10) << "ptbin"
 	       << " " << std::setw(10) << "etabin"
-	       << " " << std::setw(10) << "rapbin"
+	       << " " << std::setw(10) << "rapbin" //one day I will add the zpt bin here as well... in the future
     //<< " " << std::setw(10)  << "parname"
 	       << " " << std::setw(10) << "parval"
 	       << " " << std::setw(10) << "parplus"
@@ -514,7 +518,7 @@ void EfficiencyFit::produceTxtFile1D(std::string sbtype){
 		       << " " << std::setw(10) << std::setprecision(4) <<  totalvars
 		       << " " << std::setw(10) << std::setprecision(4) <<  ptbin_[r]
 		       << " " << std::setw(10) << std::setprecision(4) <<  etabin_[r]
-	               << " " << std::setw(10) << std::setprecision(4) <<  rapbin_[r];
+	               << " " << std::setw(10) << std::setprecision(4) <<  rapbin_[r]; //one day I will add the zpt bin here as well... in the future
 
 	    for ( varit myit = MyVars_[r].begin(); myit != MyVars_[r].end(); ++myit)
 	      {
@@ -661,12 +665,15 @@ void EfficiencyFit::produceConfig(std::string myconfig, std::string mytemplate,s
       if (ptbin_[r] > -1 ) ptstr=Form("pt%d",ptbin_[r]);  
       if (etabin_[r] > -1 ) etastr=Form("eta%d",etabin_[r]);
       if (rapbin_[r] > -1 ) rapstr=Form("rap%d",rapbin_[r]);
+      if (rapbin_[r] > -1 &&ptbin_[r] > -1 ){ rapstr=""; ptstr=Form("zpt%d",ptbin_[r]); }//another temp fix until the zpt binning is available.
+
       bincomb=ptstr+etastr+rapstr;
 
       std::string metastr="", mptstr="",mbincomb="";
       if (ptbin_[r] > -1 ) mptstr=Form("et_bin%d",ptbin_[r]);   
       if (etabin_[r] > -1 ) metastr=Form("eta_bin%d",etabin_[r]);
       if (rapbin_[r] > -1 ) metastr=Form("rapidity_bin%d",rapbin_[r]);
+      if (rapbin_[r] > -1 && ptbin_[r] > -1 ){ mptstr=Form("pt_bin%d",rapbin_[r]); metastr=""; }//another temp fix until the zpt binning is available.
       mbincomb="*"+mptstr+metastr+"}*"; //This is the magic needed
       if ( ptbin_[r] > -1 && etabin_[r] > -1)  mbincomb="*"+mptstr+";*"+metastr+"}*"; //This is the magic needed...
 

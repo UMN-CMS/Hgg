@@ -180,7 +180,7 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 
       // fill histograms for before any selection (except mass window for logic...)
       allCase_.Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
-      //allCase_.FillEvt(evt_); // ONLY WORKON FULL MC
+      allCase_.FillEvt(evt_,true); // ONLY WORKON FULL MC if false
 
       int necal=(evt_.elec(0).passed("ACC(ECAL+TRK)")?(1):(0))+(evt_.elec(1).passed("ACC(ECAL+TRK)")?(1):(0));
       int ntrk=(evt_.elec(0).passed("ACC(ECAL-TRK)")?(1):(0))+(evt_.elec(1).passed("ACC(ECAL-TRK)")?(1):(0));
@@ -246,14 +246,14 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 	// fill standard histograms after acceptance
 	if (!pairing) plots->acceptance_.Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
 	else plots->acceptance_.Fill(evt_.elec(1), evt_.elec(0), evt_.elecTreeLevel(1).polarP4(), evt_.elecTreeLevel(0).polarP4());      
-	//plots->acceptance_.FillEvt(evt_); //ONLY WORK ON FULL MC
+	plots->acceptance_.FillEvt(evt_,true); //ONLY WORK ON FULL MC if false
 	
 	// next n-cuts
 	bool ok=true;
 	for (int j=1; ok && j<q->second->criteriaCount(ZShapeZDef::crit_E1); j++) {
 	  ok=q->second->pass(evt_,j+1,j+1,0,&pairing);
           if (ok) { 
-	    //plots->postCut_[j-1].FillEvt(evt_); //ONLY WORKS ON FULL MC 
+	    plots->postCut_[j-1].FillEvt(evt_,true); //ONLY WORKS ON FULL MC if false
             if (!pairing)  
               plots->postCut_[j-1].Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4());
             else 
@@ -264,7 +264,7 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
 	  ok=q->second->pass(evt_,1000,1000,j+1,&pairing);
 	  
           if (ok) {
-	    //plots->zCut_[j].FillEvt(evt_); //ONLY WORKS ON FULL MC
+	    plots->zCut_[j].FillEvt(evt_,true); //ONLY WORKS ON FULL MC if false
             if (!pairing)  
               plots->zCut_[j].Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4());
             else 
@@ -281,7 +281,7 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
      
 	ZShapeZDef* zdef=q->second; 
 	if (zdef->pass(evt_,zdef->criteriaCount(ZShapeZDef::crit_E1),zdef->criteriaCount(ZShapeZDef::crit_E2),0,&pairing)) {
-	  //statsBox_.hists[q->first][pass-1].FillEvt(evt_); //Decided these plots aren't needed... yet...
+	  statsBox_.hists[q->first][pass-1].FillEvt(evt_,true); //Decided these plots aren't needed... yet... for false
 	  if (!pairing)  
 	    statsBox_.hists[q->first][pass-1].Fill(evt_.elec(0), evt_.elec(1), evt_.elecTreeLevel(0).polarP4(), evt_.elecTreeLevel(1).polarP4()); 
 	  else 

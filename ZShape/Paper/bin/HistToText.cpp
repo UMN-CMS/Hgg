@@ -15,6 +15,16 @@
 #include <TProfile.h>
 #include <TObject.h>
 #include <TKey.h>
+#include <TPad.h>
+#include <TLegend.h>
+#include <TClass.h>
+#include <TBox.h>
+#include <TPave.h>
+#include <TFrame.h>
+#include <TWbox.h>
+#include <TBox.h>
+#include <TLegendEntry.h>
+#include <TAttCanvas.h>
 
 
 int main (int argc, char **argv) {

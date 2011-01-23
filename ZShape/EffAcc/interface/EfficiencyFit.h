@@ -117,7 +117,7 @@ class EfficiencyFit {
   std::string effType_;
   double vmax_,vmin_;
   Double_t eff_, effSystLo_, effSystHi_;
-  bool isEta_,isBoth_,doSig_,doBkg_,isRap_;
+  bool isEta_,isBoth_,doSig_,doBkg_,isRap_,isZpt_;
   void produceTxtFile1D(std::string sbtype);
   void produce1DHistograms(TFile * rootFile, bool issig);
   //  void produce2DHistograms(TFile * rootFile);
