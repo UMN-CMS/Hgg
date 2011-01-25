@@ -167,12 +167,27 @@ void plotFinal(TFile* mctruth) {
   }
   // unsmear
 
+
+  for (int i=0; i<BINCOUNT; i++) {  
+    if   (effAcc.y[i]==0) corrData.y[i]=0;
+    else                  corrData.ey[i]=sqrt(data_all.y[i]+backgroundAll.y[i])/effAcc.y[i];
+  }
+  DataSeries corrDataClone(corrData);
+
   printf("A\n");
+  bool doUnsmearing(false); // use this to activate unsmearing + associated errors or leave it completely off
   TH1* data_corr_smeared=corrData.makeTH1("data_corr_smeared",100,0);
   TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../root/unfoldingMatrix_theOutPut.root");
+  TFile*    theunfoldingMatrixInputFile = new TFile("../root/unfoldingMatrix_theOutPut.root","read");
+  TMatrixD* theUnfoldingMatrix          = (TMatrixD*)theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotal"); // indices [0.. 99] X [0.. 99]
+  double errorCumul=0;
   for (int i=0; i<BINCOUNT; i++) {  
-    //      corrData.y[i]=data_corr_unsmeared->GetBinContent(i+1);
-    //    data_all.ey[i]=sqrt(data_all.y[i]);
+    corrData.y[i]=data_corr_unsmeared->GetBinContent(i+1);
+    for (int s=0; s<BINCOUNT; s++) {
+      errorCumul+= pow( corrDataClone.ey[s] * (*theUnfoldingMatrix)(s,i) , 2);
+    }
+    if (doUnsmearing) corrData.ey[i]=sqrt(errorCumul);
+    errorCumul=0;
   }
   DataSeries corrDataSyst(corrData);
   DataSeries corrDataBkgd(corrData);
@@ -207,8 +222,8 @@ void plotFinal(TFile* mctruth) {
       corrData.y[i]=0;
       continue;
     }
-
-    corrData.ey[i]=sqrt(data_all.y[i])/effAcc.y[i];
+    // what is this for??
+    //corrData.ey[i]=sqrt(data_all.y[i])/effAcc.y[i];
     //    corrDataSyst.xave[i]+=0.02; // uncomment to offset error bars
 
 
@@ -216,9 +231,9 @@ void plotFinal(TFile* mctruth) {
     td+=corrData.y[i];
 
     backgroundUncFrac.y[i]=backgroundAllUnc.y[i]/std::max(1.0,data_bkgd.y[i]);
-
-    corrDataBkgd.ey[i]=sqrt(data_all.y[i]+backgroundAll.y[i])/effAcc.y[i];
-
+    // GF
+    //corrDataBkgd.ey[i]=sqrt(data_all.y[i]+backgroundAll.y[i])/effAcc.y[i];
+    
     dataStatError.y[i]= corrDataBkgd.ey[i]/std::max(1.0,corrDataBkgd.y[i]);
 
     //    corrDataSyst.y[i]/=effAcc.y[i];
@@ -279,8 +294,8 @@ void plotFinal(TFile* mctruth) {
     double bkgderr=sqrt(pow(backgroundAllUnc.y[j],2)+pow(backgroundAllUnc.y[jadd],2))/ea_Ave/sumtotal;
     double energyerr=(energyScale.y[j]+energyScale.y[jadd])/2/ea_Ave/sumtotal;
 
-
-    corrDataFold.ey[j]=sqrt(data_all.y[j]+data_all.y[jadd]+backgroundAll.y[j]+backgroundAll.y[jadd])/ea_Ave/sumtotal;
+    //corrDataFold.ey[j]=sqrt(data_all.y[j]+data_all.y[jadd]+backgroundAll.y[j]+backgroundAll.y[jadd])/ea_Ave/sumtotal;//FG
+    corrDataFold.ey[j]=sqrt( pow(corrData.ey[j]*effAcc.y[j],2) + pow(corrData.ey[jadd]*effAcc.y[j],2) )/ea_Ave/sumtotal;
 
     corrDataSystFold.y[j]=corrDataFold.y[j];
     corrDataSystFold.ey[j]=sqrt(pow(corrDataFold.ey[j],2)+
@@ -310,7 +325,7 @@ void plotFinal(TFile* mctruth) {
   fclose(ftable);
  
   truth->Scale(td/tt*1.0);
- 
+  
   TGraph* rawd=data_all.makeTG(npoint,firsti-1);
   TGraph* rawdb=data_bkgd.makeTG(npoint,firsti-1);
   TGraph* corrd=corrData.makeTGE(npoint,firsti-1);
