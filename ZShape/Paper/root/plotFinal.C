@@ -155,17 +155,28 @@ void plotFinal(TFile* mctruth) {
     data_all.ey[i]=data_bkgd.ey[i];
   }    
 
-
-  // unsmear
-  /*  
-  TH1* data_all_smeared=data_all.makeTH1("data_all_smeared",100,0);
-  TH1* data_all_unsmeared=unfold(data_all_smeared,"../scripts/unfoldingMatrix_theOutPut.root");
+  DataSeries corrData(data_all);
+  DataSeries totalSyst(data_all);
 
   for (int i=0; i<BINCOUNT; i++) {  
-    data_all.y[i]=data_all_unsmeared->GetBinContent(i+1);
+    if (effAcc.y[i]==0) {
+      corrData.y[i]=0;
+      continue;
+    }
+    corrData.y[i]/=effAcc.y[i];
+  }
+  // unsmear
+
+  printf("A\n");
+  TH1* data_corr_smeared=corrData.makeTH1("data_corr_smeared",100,0);
+  TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../scripts/unfoldingMatrix_theOutPut.root");
+  for (int i=0; i<BINCOUNT; i++) {  
+    //      corrData.y[i]=data_corr_unsmeared->GetBinContent(i+1);
     //    data_all.ey[i]=sqrt(data_all.y[i]);
   }
-  */
+  DataSeries corrDataSyst(corrData);
+  DataSeries corrDataBkgd(corrData);
+
   //  DataSeries pdfPos("pdfErrsPos.txt");
   //  DataSeries pdfNeg("pdfErrsNeg.txt");
   //DataSeries pdfTotal(data_all);
@@ -189,11 +200,6 @@ void plotFinal(TFile* mctruth) {
 			 pow(effSystHLT.y[i],2));
   }  
 
-  DataSeries corrData(data_all);
-  DataSeries corrDataSyst(data_all);
-  DataSeries corrDataBkgd(data_all);
-  DataSeries totalSyst(data_all);
-
   double sumtotal=0;
   
   for (int i=firsti-1; i<lasti; i++) {
@@ -201,7 +207,7 @@ void plotFinal(TFile* mctruth) {
       corrData.y[i]=0;
       continue;
     }
-    corrData.y[i]/=effAcc.y[i];
+
     corrData.ey[i]=sqrt(data_all.y[i])/effAcc.y[i];
     //    corrDataSyst.xave[i]+=0.02; // uncomment to offset error bars
 
@@ -211,12 +217,11 @@ void plotFinal(TFile* mctruth) {
 
     backgroundUncFrac.y[i]=backgroundAllUnc.y[i]/std::max(1.0,data_bkgd.y[i]);
 
-    corrDataBkgd.y[i]/=effAcc.y[i];
     corrDataBkgd.ey[i]=sqrt(data_all.y[i]+backgroundAll.y[i])/effAcc.y[i];
 
     dataStatError.y[i]= corrDataBkgd.ey[i]/std::max(1.0,corrDataBkgd.y[i]);
 
-    corrDataSyst.y[i]/=effAcc.y[i];
+    //    corrDataSyst.y[i]/=effAcc.y[i];
 
     /*
     pdfTotal.y[i]=(pdfPos.y[i]+(-pdfNeg.y[i]))/2*corrDataBkgd.y[i];

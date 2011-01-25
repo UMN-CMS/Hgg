@@ -15,7 +15,7 @@
 //      root [0] .L readUnfoldingMatrices.C                                                  
 //      root [1] readUnfoldingMatrices("unfoldingMatrix_theOutPut.root","effAccSource.root")
 
-
+TH1* unfold(const TH1* source, TMatrixD * theUnfoldingMatrix);
 
 TH1* unfold(const TH1* source, const char* unfoldingMatrixIF)  {
   // load the matrix...
@@ -24,8 +24,9 @@ TH1* unfold(const TH1* source, const char* unfoldingMatrixIF)  {
 
   TMatrixD * theUnfoldingMatrix = (TMatrixD*)theunfoldingMatrixInputFile.Get("unsmearMatrices/unfoldingMatrixTotal");
 
-  unfold(source, theUnfoldingMatrix);
+  return unfold(source, theUnfoldingMatrix);
 }
+
 
 
 TH1* unfold(const TH1* source, TMatrixD * theUnfoldingMatrix)  {
