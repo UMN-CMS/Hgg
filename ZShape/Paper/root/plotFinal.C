@@ -169,7 +169,7 @@ void plotFinal(TFile* mctruth) {
 
   printf("A\n");
   TH1* data_corr_smeared=corrData.makeTH1("data_corr_smeared",100,0);
-  TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../scripts/unfoldingMatrix_theOutPut.root");
+  TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../root/unfoldingMatrix_theOutPut.root");
   for (int i=0; i<BINCOUNT; i++) {  
     //      corrData.y[i]=data_corr_unsmeared->GetBinContent(i+1);
     //    data_all.ey[i]=sqrt(data_all.y[i]);
