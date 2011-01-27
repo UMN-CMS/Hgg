@@ -26,6 +26,8 @@ bool EtaAcceptance::isInAcceptance(double p, Zone z) const {
     return (eta>=2.5) && (eta<2.850);
   case (zone_EE_muon) : // joint acceptance with muons
     return (eta>1.566) && (eta<2.10); 
+  case (zone_MUON) : // only acceptance with muons
+    return (eta<2.10); 
   case (zone_HF) :
     return (eta>3.05) && (eta<4.60);
   case (zone_ECAL) :

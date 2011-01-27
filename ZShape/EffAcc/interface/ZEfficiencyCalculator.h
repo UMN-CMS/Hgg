@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.18 2009/09/15 17:36:40 haupt Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.19 2011/01/10 03:43:57 mansj Exp $
 //
 //
 
@@ -135,10 +135,3 @@ private:
 };
 
 
-/** TODO: 
-
-    Efficiencies need to specify dependencies (eta, pT, etc) [current: hack]
-
-    Randomization of efficiencies
-
- */
