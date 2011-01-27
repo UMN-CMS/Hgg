@@ -246,16 +246,16 @@ void plotFinal(TFile* mctruth) {
     corrDataSyst.ey[i]=sqrt(pow(corrDataBkgd.ey[i],2)+
 			    pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
 			    pow(backgroundAllUnc.y[i]/effAcc.y[i],2)+
-			    pow(energyScale.y[i]*data_all.y[i],2)+
-			    pow(effSystErr.y[i]*data_all.y[i],2)+
+			    pow(energyScale.y[i]*corrData.y[i],2)+
+			    pow(effSystErr.y[i]*corrData.y[i],2)+
 			    0
 			    //			    pow(pdfTotal.y[i],2)
 			    );
 
     totalSyst.ey[i]=sqrt( pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
 			  pow(backgroundAllUnc.y[i]/effAcc.y[i],2)+
-			  pow(energyScale.y[i]*data_all.y[i],2)+
-			  pow(effSystErr.y[i]*data_all.y[i],2)+
+			  pow(energyScale.y[i]*corrData.y[i],2)+
+			  pow(effSystErr.y[i]*corrData.y[i],2)+
 			  0
 			  //			  pow(pdfTotal.y[i],2)
 			  );
