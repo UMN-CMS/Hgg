@@ -3,9 +3,11 @@
 void ZShapeStandardCuts::acceptanceCuts(ZShapeElectron& elec) const {
   elec.cutResult("ACC(EB)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_EB));
   elec.cutResult("ACC(EE)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_EE));
+  elec.cutResult("ACC(EE+MUON)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_EE_muon));
   elec.cutResult("ACC(EE+TRK)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_EE_tracker));
   elec.cutResult("ACC(ECAL)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_ECAL));
   elec.cutResult("ACC(ECAL+TRK)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_ECAL) && (!theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_EE_notracker)));
+  elec.cutResult("ACC(ECAL+MUON)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_ECAL_muon));
   elec.cutResult("ACC(ECAL-TRK)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_ECAL) && (theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_EE_notracker)));
   elec.cutResult("ACC(HF)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_HF));
   elec.cutResult("ACC(ANY)",theEtaSelector_.isInAcceptance(elec,EtaAcceptance::zone_ANY));

@@ -24,10 +24,14 @@ bool EtaAcceptance::isInAcceptance(double p, Zone z) const {
     return (eta>1.566) && (eta<2.5);
   case (zone_EE_notracker) :
     return (eta>=2.5) && (eta<2.850);
+  case (zone_EE_muon) : // joint acceptance with muons
+    return (eta>1.566) && (eta<2.10); 
   case (zone_HF) :
     return (eta>3.05) && (eta<4.60);
   case (zone_ECAL) :
     return isInAcceptance(p,zone_EB) || isInAcceptance(p,zone_EE);
+  case (zone_ECAL_muon) :
+    return isInAcceptance(p,zone_EB) || isInAcceptance(p,zone_EE_muon);
   case (zone_ANY) :
     return isInAcceptance(p,zone_EB) || isInAcceptance(p,zone_EE) || isInAcceptance(p,zone_HF);
   case (zone_ALL) :
