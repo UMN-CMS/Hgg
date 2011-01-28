@@ -20,7 +20,7 @@
 #include "RooAbsReal.h"
 #include "RooAbsPdf.h"
 #include <boost/algorithm/string/replace.hpp>
-
+#include "PhysicsTools/TagAndProbe/interface/ZGeneratorLineShape.h"
 
 SignalBackgroundExtraction::SignalBackgroundExtraction()
 {

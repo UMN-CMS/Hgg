@@ -8,6 +8,7 @@
 <use name=CommonTools/UtilAlgos>
 <use name=CommonTools/Utils>
 <use name=PhysicsTools/UtilAlgos>
+<use name=PhysicsTools/TagAndProbe>
 <use name=SimDataFormats/GeneratorProducts>
 <use name=FastSimulation/Particle>
 <use name=ZShape/Base>
