@@ -6,14 +6,28 @@
 #include "TStyle.h"
 
 // In this example, you pick up an unfolding matrix (made with makeUnfoldingMatrices.C) from a file (unfoldingMatrix_theOutPut.root)
-// and apply to a rapidity distribution you get from an effAcc file (effAccSource.root)
+// and apply to a rapidity/pt distribution you get from an effAcc file (effAccSource.root)
+
+// the function:
+//  readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string effAccFileForTest, std::string variable) 
+// works as well for Rapidity and transverse momentum, you have to choose when you launch it
+// the functions:
+//    TH1* unfold(const TH1* source, TMatrixD * theUnfoldingMatrix)
+//    TH1* unfold(const TH1* source, const char* unfoldingMatrixIF)
+// also as well for Rapidity and transverse momentum, but need not to know whether you're unfolding Y or py
+
+// note if you want to _read_ the code: for how this code developed (written initially for rapidity)
+// somewhere the 'variable' which is to be unsmeared is referred to as 'rapidity',
+// while the macro consistently works for both Pt and Y
+
 
 // to execute this example
 //      wget http://homepages.spa.umn.edu/~franzoni/reps/11/jan12/effAccSource.root
 //      (getting this file is only needed to run the example)
 //      pb-d-128-141-34-30:2011-01-12-migMatrixReleaseFRESH franzoni$ root -l 
 //      root [0] .L readUnfoldingMatrices.C                                                  
-//      root [1] readUnfoldingMatrices("unfoldingMatrix_theOutPut.root","effAccSource.root")
+//      root [1] readUnfoldingMatrices("matrices-Y/matrix-BASE.py.hadded.root","effAcc-V00-05-05/BASE.py.hadded.root","Y")  
+//      root [2] readUnfoldingMatrices("matrices-pt/matrix-BASE.py.hadded.root","effAcc-V00-05-05/BASE.py.hadded.root","pt")
 
 TH1* unfold(const TH1* source, TMatrixD * theUnfoldingMatrix);
 
@@ -31,109 +45,125 @@ TH1* unfold(const TH1* source, const char* unfoldingMatrixIF)  {
 
 TH1* unfold(const TH1* source, TMatrixD * theUnfoldingMatrix)  {
   Double_t arrayRapiditySmeared[100]; // this needs be hardcoded...
-  for(int bin=1; bin<=100; bin++)
+
+  for(int bin=1; bin<=source->GetNbinsX() ; bin++)
     {
       arrayRapiditySmeared[bin-1]=source->GetBinContent(bin);
       if (0) std::cout << source->GetBinContent(bin) << std::endl;
     }
-
-  TVectorD vectorRapiditySmeared; vectorRapiditySmeared.Use(100,arrayRapiditySmeared);
-
+  
+  
+  //setTDRStyle();
+  //zrap_colors();
+  
+  
+  TVectorD vectorRapiditySmeared; vectorRapiditySmeared.Use(source->GetNbinsX(),arrayRapiditySmeared);
+  
   // this is the multiplication for clusure test
   TVectorD vectorRapidityUNSmeared = (*theUnfoldingMatrix) * vectorRapiditySmeared;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   char name[1024];
   sprintf(name,"%s_unfolded",source->GetName());
-  TH1 * h_RapidityUNSmeared = (TH1*)(source->Clone(name));
+  TH1D * h_RapidityUNSmeared = (TH1D*)(source->Clone(name));
   h_RapidityUNSmeared->SetDirectory(0);
+
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // turning the unsmeared vector into a histogram
-  for(int bin=1; bin<=100; bin++)
-  {
-   h_RapidityUNSmeared->SetBinContent(bin,vectorRapidityUNSmeared[bin-1]);
-   if(fabs(vectorRapiditySmeared[bin-1]) > 1.e-9) h_RapidityUNSmeared->SetBinError(bin,vectorRapidityUNSmeared[bin-1]/vectorRapiditySmeared[bin-1]*source->GetBinError(bin));
-   else                                           h_RapidityUNSmeared->SetBinError(bin,source->GetBinError(bin));
-  }
+  for(int bin=1; bin<=source->GetNbinsX() ; bin++)
+    {
+      h_RapidityUNSmeared->SetBinContent(bin,vectorRapidityUNSmeared[bin-1]);
+      if(fabs(vectorRapiditySmeared[bin-1]) > 1.e-9) h_RapidityUNSmeared->SetBinError(bin,vectorRapidityUNSmeared[bin-1]/vectorRapiditySmeared[bin-1]*source->GetBinError(bin));
+      else                                           h_RapidityUNSmeared->SetBinError(bin,source->GetBinError(bin));
+    }
   return h_RapidityUNSmeared;
 }
 
 
 
 
-int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string effAccFileForTest) 
+int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string effAccFileForTest, std::string variable) 
 
 {
 
-    gStyle->SetOptStat(110011);
-    gStyle->SetPaintTextFormat(".2f");
+  bool isRapidity(true);
+  if (variable==std::string("Y")){
+	std::cout << "\n\tyou have chosen Y" << std::endl;
+  }  
+  else if (variable==std::string("pt")){
+	std::cout << "\n\tyou have chosen pt" << std::endl;
+	isRapidity=false;
+  }
+  else{
+	std::cout << "not done a valid choice of variable. Bailing out" << std::endl;
+	return 0;
+  }
 
-    std::cout << "\n\n\tReading test histogram  from: " << effAccFileForTest          << std::endl;
-    std::cout << "\tReading unfolding matrices in:  "   << unfoldingMatrixFileInputFile <<"\n\n"<< std::endl;
 
-    TFile *theEffAccInpuntFile = new TFile(effAccFileForTest.c_str(),"read");
+  gStyle->SetOptStat(110011);
+  gStyle->SetPaintTextFormat(".2f");
 
-    TFile *theunfoldingMatrixInputFile = new TFile(unfoldingMatrixFileInputFile.c_str(),"read");
-    theunfoldingMatrixInputFile->cd();
-    std::cout << "The file: " << theunfoldingMatrixInputFile->GetName() << " has been opened"<< std::endl;
+  std::cout << "\n\n\tReading test histogram  from: " << effAccFileForTest          << std::endl;
+  std::cout << "\tReading unfolding matrices in:  "   << unfoldingMatrixFileInputFile <<"\n\n"<< std::endl;
+
+  TFile *theEffAccInpuntFile = new TFile(effAccFileForTest.c_str(),"read");
+
+  TFile *theunfoldingMatrixInputFile = new TFile(unfoldingMatrixFileInputFile.c_str(),"read");
+  theunfoldingMatrixInputFile->cd();
+  std::cout << "The file: " << theunfoldingMatrixInputFile->GetName() << " has been opened"<< std::endl;
     
-    // this is the matrix you want to use for to unfold
-    TMatrixD * theUnfoldingMatrix = (TMatrixD*)theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotal");
+  // this is the matrix you want to use for to unfold
+  TMatrixD * theUnfoldingMatrix = (TMatrixD*)theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotal");
 
 
-    //////////////////////////////////////////////////////
-    // to be consistent with the definitions 
-    // of AN-10-367 one needs to use the YZTL_vs_YZ before Eff and Acc
-    // are applied ==> move to the "All" folder
+  //////////////////////////////////////////////////////
+  // to be consistent with the definitions 
+  // of AN-10-367 one needs to use the YZTL_vs_YZ before Eff and Acc
+  // are applied ==> move to the "All" folder
 
-    std::string prefix("mcEff/");
-    std::string definition=std::string("All");
-    std::string cut("");
-    std::string plot=std::string("Z0_Y"); // smeared Y before Eff&Acc
-    std::string plotName = prefix + definition;
-    plotName = plotName + std::string("/");    plotName = plotName + cut;
-    plotName = plotName + std::string("/");    plotName = plotName + plot;
-    std::cout << "\tUsing directly the total smeared Y plot:     "<< plotName << endl;
-    TH2F * h_fullTest_smeared = (TH2F*) theEffAccInpuntFile->Get(plotName.c_str());
+  std::string prefix("mcEff/");
+  std::string definition=std::string("All");
+  std::string cut("");
+  std::string plot("ciao");
+  if(isRapidity){
+    plot=std::string("Z0_Y"); }// smeared Y before Eff&Acc
+  else{
+    plot=std::string("Z0_Pt"); 
+  }
+  std::string plotName = prefix + definition;
+  plotName = plotName + std::string("/");    plotName = plotName + cut;
+  plotName = plotName + std::string("/");    plotName = plotName + plot;
+  if(isRapidity){
+    std::cout << "\tUsing directly the total smeared Y plot:     "<< plotName << endl;}
+  else {
+    std::cout << "\tUsing directly the total smeared Pt plot:     "<< plotName << endl;  }
+  TH1F * h_fullTest_smeared = (TH1F*) theEffAccInpuntFile->Get(plotName.c_str());
 
+
+  plotName = prefix + definition;
+  plotName = plotName + std::string("/");    plotName = plotName + cut;
+  if(isRapidity){
     plot=std::string("Z0_YTL"); // tree-level Y before Eff&Acc
-    plotName = prefix + definition;
-    plotName = plotName + std::string("/");    plotName = plotName + cut;
-    plotName = plotName + std::string("/");    plotName = plotName + plot;
-    std::cout << "\tComparing agains the total tree-Level Y plot:     "<< plotName << endl;
-    TH2F * h_fullTest_treeLevel = (TH2F*) theEffAccInpuntFile->Get(plotName.c_str());
+    std::cout << "\tComparing against the total tree-Level Y plot:     "<< plotName << endl;}
+  else{
+    plot=std::string("Z0_PtTL"); 
+    std::cout << "\tComparing against the total tree-Level Pt plot:     "<< plotName << endl;  }
+  plotName = plotName + std::string("/");    plotName = plotName + plot;
 
 
+  TH1F * h_fullTest_treeLevel = (TH1F*) theEffAccInpuntFile->Get(plotName.c_str());
 
-   //Double_t arrayRapiditySmeared[110]; // this needs be hardcoded...
-  Double_t arrayRapiditySmeared[100]; // this needs be hardcoded...
-  for(int bin=1; bin<=100; bin++)
-  {
-   arrayRapiditySmeared[bin-1]=h_fullTest_smeared->GetBinContent(bin);
-  }
-
-  TVectorD vectorRapiditySmeared; vectorRapiditySmeared.Use(100,arrayRapiditySmeared);
-
-  // this is the multiplication for clusure test
-  TVectorD vectorRapidityUNSmeared = (*theUnfoldingMatrix) * vectorRapiditySmeared;
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  TH1D * h_RapidityUNSmeared = new TH1D("Rapidity Unsmeared", "Rapidity Unsmeared", 
-		h_fullTest_treeLevel->GetNbinsX(),
-		h_fullTest_treeLevel->GetXaxis()->GetXmin(),
-		h_fullTest_treeLevel->GetXaxis()->GetXmax());
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // turning the unsmeared vector into a histogram
-  for(int bin=1; bin<=100; bin++)
-  {
-   h_RapidityUNSmeared->SetBinContent(bin,vectorRapidityUNSmeared[bin-1]);
-   //std::cout << vectorRapidityUNSmeared[bin-1]<<std::endl;
-  }
+  TH1D * h_RapidityUNSmeared;
+  h_RapidityUNSmeared = (TH1D*) unfold(h_fullTest_smeared, theUnfoldingMatrix );
 
   gStyle->SetOptStat(0);
   TCanvas * theBaseCanvas = new TCanvas("check of closure","check of closure",200,200,1000,800);  
   theBaseCanvas->cd();
+  if(!isRapidity){
+   theBaseCanvas->SetLogx();   theBaseCanvas->SetLogy();
+  }
+  
   h_RapidityUNSmeared->Draw();
 
   h_fullTest_smeared->SetLineColor(kGreen);
@@ -152,7 +182,7 @@ int readUnfoldingMatrices(std::string unfoldingMatrixFileInputFile, std::string 
   leg->Draw();  
   
 
-  std::cout << "\n\n\n\t If you see tree plots and two are overlayed (gree and black), you've applied unfolding matrix succesfully" << std::endl;
+  std::cout << "\n\n\n\t If you see tree plots and two are overlayed (red and black), you've applied unfolding matrix succesfully" << std::endl;
 
   return 0;
 }
