@@ -3,24 +3,44 @@
 
 // In this example, you pick up migration matrix from a file from the standard EffAcc (effAccSource.root),
 // produce an unsmearing matrix and save it to a file (for usage with readUnfoldingMatrices.C)
+// this macro works as well for Rapidity and transverse momentum, you have to choose when you launch it
+// note if you want to _read_ the code: for how this code developed (written initially for rapidity)
+// somewhere the 'variable' which is to be unsmeared is referred to as 'rapidity',
+// while the macro consistently works for both Pt and Y
 
 // to execute this example
 //     root -l
 //root [0] .L makeUnfoldingMatrices.C 
-//root [1] makeUnfoldingMatrices("effAccSource.root","unfoldingMatrix_theOutPut.root")
+// if you want to produce a RAPIDITY unfolding matrix:
+//root [1] makeUnfoldingMatrices("effAcc-V00-05-05/BASE.py.hadded.root","pincopincopFriday.root","Y");
+// if you want to produce a TRANSVERSE MOMENTUM unfolding matrix:
+//root [1] makeUnfoldingMatrices("effAcc-V00-05-05/BASE.py.hadded.root","pincopincopFriday.root","pt");
 
 #include <TDatime.h>
 
 #include "tdrstyle.C"
 #include "zrapidityStandard.C"
-int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfoldingMatrixOutPutFile) 
+int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfoldingMatrixOutPutFile, std::string variable) 
 {
-  
+  bool isRapidity(true);
+  if (variable==std::string("Y")){
+	std::cout << "\n\tyou have chosen Y" << std::endl;
+  }  
+  else if (variable==std::string("pt")){
+	std::cout << "\n\tyou have chosen pt" << std::endl;
+	isRapidity=false;
+  }
+  else{
+	std::cout << "not done a valid choice of variable. Bailing out" << std::endl;
+	return 0;
+  }
+
   setTDRStyle();
   zrap_colors();
   
   //gStyle->SetPalette(1);
   gStyle->SetPaintTextFormat(".2f");
+  gStyle->SetOptStat(0);
   
   std::cout << "\n\n\tGetting migration matrices from: " << effAccFileInputFile          << std::endl;
   std::cout << "\tCreating unfolding matrices in:  "     << unfoldingMatrixOutPutFile <<"\n\n"<< std::endl;
@@ -39,13 +59,14 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
 
     //////////////////////////////////////////////////////
     // to be consistent with the definitions 
-    // of AN-10-367 one needs to use the YZTL_vs_YZ before Eff and Acc
+    // of AN-10-367/AN-11-xxx one needs to use the YZTL_vs_YZ/PtTL_vs_PtZ before Eff and Acc
     // are applied ==> move to the "All" folder
-    // get hold of ECAL-HF 2d plot 
+
     std::string prefix("mcEff/");
     std::string definition=std::string("All");
     std::string cut("");
-    plot=std::string("YZTL_vs_YZ"); // bin migration histogram
+    if(isRapidity) plot=std::string("YZTL_vs_YZ"); // bin migration histogram for rapidity
+    else           plot=std::string("PtTL_vs_PtZ"); // bin migration histogram for Pt
     std::string plotName = prefix + definition;
     plotName = plotName + std::string("/");    plotName = plotName + cut;
     plotName = plotName + std::string("/");    plotName = plotName + plot;
@@ -59,44 +80,72 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    float yMinEcalEcal = histoMigration->GetYaxis()->GetXmin();
    float yMaxEcalEcal = histoMigration->GetYaxis()->GetXmax();
 
-
-   histoMigration->GetXaxis()->SetTitle("Y_{ZtreeLevel}");
+   if(isRapidity){
+   histoMigration->GetXaxis()->SetTitle("Y_{reco}");
    histoMigration->GetYaxis()->SetTitle("Y_{ZtreeLevel}");
-   
+   } else
+   {
+   histoMigration->GetXaxis()->SetTitle("P_{t,reco}");
+   histoMigration->GetYaxis()->SetTitle("P_{t,ZtreeLevel}");
+   }
+
    TH2F * histoMigrationTotal_toBeSaved = histoMigration->Clone();
    histoMigrationTotal_toBeSaved->Write("originalHistoMigrationTotal");
 
-
    // build verification histograms
-   TH1D * h_RapidityTreeLevel = histoMigration->ProjectionY("Rapidity TreeLevel",0,-1,"");
-   histoMigration->SetTitle("RapidityTreeLevel");
-   TH1D * h_RapidityTreeLevel_toSave =  h_RapidityTreeLevel->Clone();  h_RapidityTreeLevel_toSave->Write("original1dTreeLevelRapidity");
+   std::string histoMigrationTitle("");
+   std::string theEffectTitle("");
+   if(isRapidity){
+	histoMigrationTitle = std::string("Rapidity TreeLevel");
+        theEffectTitle = std::string("Y migration");
+   } else
+   {
+	histoMigrationTitle = std::string("Pt TreeLevel");
+        theEffectTitle = std::string("Pt migration");
+   }
+   TH1D * h_RapidityTreeLevel = histoMigration->ProjectionY(histoMigrationTitle.c_str(),0,-1,"");
+   if(isRapidity) histoMigration->SetTitle("RapidityTreeLevel");
+   else           histoMigration->SetTitle("PtTreeLevel");
+
+   TH1D * h_RapidityTreeLevel_toSave =  h_RapidityTreeLevel->Clone();  
+   if(isRapidity) h_RapidityTreeLevel_toSave->Write("original1dTreeLevelRapidity");
+   else           h_RapidityTreeLevel_toSave->Write("original1dTreeLevelPt");
 
    TH1D * h_RapiditySmeared   = histoMigration->ProjectionX("Rapidity Smeared",0,-1,"");
-   h_RapiditySmeared->SetTitle("RapiditySmeared");
+   if(isRapidity) h_RapiditySmeared->SetTitle("RapiditySmeared");
+   else           h_RapiditySmeared->SetTitle("PtSmeared");
    h_RapiditySmeared->SetLineColor(2);
-   TH1D * h_RapiditySmeared_toSave =  h_RapiditySmeared->Clone();  h_RapiditySmeared_toSave->Write("original1dSmearedRapidity");
 
-   TH1D * h_effect = new TH1D("Y migration","Y migration",binsXMatrixEcalEcal,xminEcalEcal,xmaxEcalEcal); 
+   TH1D * h_RapiditySmeared_toSave =  h_RapiditySmeared->Clone();
+   if(isRapidity) h_RapiditySmeared_toSave->Write("original1dSmearedRapidity");
+   else           h_RapiditySmeared_toSave->Write("original1dSmearedPt");
+
+   //TH1D * h_effect = new TH1D("Y migration","Y migration",binsXMatrixEcalEcal,xminEcalEcal,xmaxEcalEcal); 
+   TH1D * h_effect = h_RapiditySmeared->Clone(theEffectTitle.c_str());
+   h_effect->Reset();
    h_effect->Add(h_RapiditySmeared, h_RapidityTreeLevel, 1, -1);
    h_effect->Divide(h_RapidityTreeLevel);
    h_effect->SetTitle("(smeared-true)/true");
    h_effect->SetStats(0);
 
 
-   TH2F * histoMatrix  = new TH2F("histoMatrix","Migration matrix",
-	binsXMatrixEcalEcal,xminEcalEcal,xmaxEcalEcal,
-	binsYMatrixEcalEcal,yMinEcalEcal,yMaxEcalEcal
-	);
+   TH2F * histoMatrix  = histoMigration->Clone("Migration matrix");
+   histoMatrix->Reset();
+   if(isRapidity) {
    histoMatrix->GetXaxis()->SetTitle("Y_{ZtreeLevel}");
    histoMatrix->GetYaxis()->SetTitle("Y_{ZtreeLevel}");
+   } else
+   {
+   histoMatrix->GetXaxis()->SetTitle("P_{t,reco}");
+   histoMatrix->GetYaxis()->SetTitle("P_{t,true}");
+   }
 
     float integral=0;
-    for(int binY=1; binY<=binsYMatrixEcalEcal; binY++)
+    for(int binY=1; binY<=histoMigration->GetNbinsY(); binY++)
     {
        integral=0;
 
-       for(int binX=1; binX<=binsXMatrixEcalEcal; binX++)
+       for(int binX=1; binX<=histoMigration->GetNbinsX(); binX++)
        {
         integral+=histoMigration->GetBinContent(binX,binY);
        }// binX
@@ -115,11 +164,10 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    
 
    int counter(0);
-   //   double migration[1936];//array reordering histoMatrix, to construct TMatrix
-   // double migration[12100];    //array reordering histoMatrix, to construct TMatrix
+   // double migration[1936];//array reordering histoMatrix, to construct TMatrix
    double migration[10000];    //array reordering histoMatrix, to construct TMatrix
                                // this has to be hard-coded
-      for (int u=0; u<histoMatrix->GetNbinsX(); u++){//rows
+     for (int u=0; u<histoMatrix->GetNbinsX(); u++){//rows
      for (int v=0; v<histoMatrix->GetNbinsX(); v++){//col
 
        migration[counter]=histoMatrix->GetBinContent(u+1,v+1);
@@ -127,7 +175,7 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
        // for matrix to be invertible, no diagonal elements can be 0
        // for now set, in all rows which are empty, the diagonal element to 1
        if(u==v && histoMatrix->GetBinContent(u+1,v+1)==0) migration[counter]=1;
-       if(1 &&  migration[counter]!=0)  std::cout << u << " " << v << " " << migration[counter] <<std::endl;
+       if(0 &&  migration[counter]!=0)  std::cout << u << " " << v << " " << migration[counter] <<std::endl;
 
        counter++;
 
@@ -149,8 +197,12 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
 
   // this is the name I assign to the unfolding matrix for all Z candidates: ECAL-ECAL and ECAL-HF
   inverseMigrationMatrix.Write("unfoldingMatrixTotal");
-
-  FILE* texTable=fopen("migration_table.tex","wt");
+  
+  std::string tableFileName; 
+  if(isRapidity) tableFileName=std::string("migration_table_Y.tex");
+  else           tableFileName=std::string("migration_table_Pt.tex");
+  //FILE* texTable=fopen("migration_table.tex","wt");
+  FILE* texTable=fopen(tableFileName.c_str(),"wt");
   fprintf(texTable,"\\begin{tabular}{|cc|ccccc|} \\hline \n");
   fprintf(texTable,"$min(Y^\\mathrm{true}_i)$ & $max(Y^\\mathrm{true}_i)$ & $Y^\\mathrm{reco}_{i-2}$ & $Y^\\mathrm{reco}_{i-1}$ & $Y^\\mathrm{reco}_i$ & $Y^\\mathrm{reco}_{i+1}$ & $Y^\\mathrm{reco}_{i+2}$ \\\\ \\hline \n");
   for (int i=0; i<100; i++) {
@@ -209,7 +261,9 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
   TVectorD vectorRapidityUNSmeared = inverseMigrationMatrix * vectorRapiditySmeared;
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  TH1D * h_RapidityUNSmeared = new TH1D("Rapidity Unsmeared", "Rapidity Unsmeared", binsXMatrixEcalEcal, xminEcalEcal, xmaxEcalEcal);
+  //TH1D * h_RapidityUNSmeared = new TH1D("Rapidity Unsmeared", "Rapidity Unsmeared", binsXMatrixEcalEcal, xminEcalEcal, xmaxEcalEcal);
+  TH1D * h_RapidityUNSmeared = h_RapiditySmeared->Clone(theEffectTitle.c_str()); 
+  h_RapidityUNSmeared->Reset();
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // turning the unsmeared vector into a histogram
   for(int bin=1; bin<=binsXMatrixEcalEcal; bin++)
@@ -231,8 +285,13 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
 
    TCanvas * c4 = new TCanvas("Migration histogram","Migration histogram",1050,750);
    c4->cd(1);  c4->SetLogz();     
+   if(!isRapidity) {
+   c4->SetLogx();   c4->SetLogy();
+   }
    histoMigration->SetTitle("Migration histogram");
    histoMigration->SetTitle("Migration Total");
+   histoMigration->GetXaxis()->CenterTitle();
+   histoMigration->GetYaxis()->CenterTitle();
    histoMigration->Draw("colz");
    c4->Print( (std::string("migration-total") + std::string(".png") ).c_str() );
 
@@ -268,34 +327,40 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    c5->SetLeftMargin(0.11);   
    c5->SetBottomMargin(0.125);
    c5->cd(1);  c5->SetLogz();   
+   if(isRapidity) {
    histoMatrix->GetXaxis()->SetTitle("Y_{Z,reco}");
-   histoMatrix->GetXaxis()->CenterTitle();
    histoMatrix->GetYaxis()->SetTitle("Y_{Z,true}");
-   histoMatrix->GetYaxis()->CenterTitle(true);
-   histoMatrix->GetYaxis()->SetTitleOffset(0.8);
    histoMatrix->GetXaxis()->SetRangeUser(-3.8,3.8);
    histoMatrix->GetYaxis()->SetRangeUser(-3.8,3.8);
+   } else {
+   histoMatrix->GetXaxis()->SetTitle("P_{t,reco}");
+   histoMatrix->GetYaxis()->SetTitle("P_{t,true}");
+   c5->SetLogx();   c5->SetLogy();
+   }
+   histoMatrix->GetXaxis()->CenterTitle();
+   histoMatrix->GetYaxis()->CenterTitle(true);
+   histoMatrix->GetYaxis()->SetTitleOffset(0.8);
    histoMatrix->SetMaximum(1);
    histoMatrix->SetStats(0);
    histoMatrix->Draw("colz");
    plabel -> DrawText(0.30, 0.93, "CMS 2010 PRELIMINARY");
    tlabel -> DrawText(0.30, 0.90, Form("%s",time_));
-   //histoMatrix->SetTitle("Migration matrix (normalized)");
+   histoMatrix->SetTitle("Migration matrix (normalized)");
    c5->Print("migrationMatrix.png");
    c5->Print("migrationMatrix.eps");
    c5->Print("migrationMatrix.pdf");
 
 
    TCanvas * c7pre = new TCanvas("closure test","closure test",1050,750);
+   if(!isRapidity) {
+   c7pre->SetLogx();   c7pre->SetLogy();
+   }
    c7pre->cd();
    h_RapidityTreeLevel->SetLineWidth(2);//this is black for now
    h_RapidityTreeLevel->GetYaxis()->SetTitle("events");
    h_RapidityTreeLevel->SetTitle(0);
    h_RapidityTreeLevel->Draw("");//this is black for now
   
-   //h_RapidityUNSmeared->SetLineStyle(4);
-   //h_RapidityUNSmeared->SetLineWidth(2);//this is black for now
-   //h_RapidityUNSmeared->SetLineColor(4);
    h_RapidityUNSmeared->SetMarkerColor(4);
    h_RapidityUNSmeared->SetMarkerStyle(20);
    h_RapidityUNSmeared->SetMarkerSize(0.7);
@@ -333,6 +398,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
 
    TH1D * h_effectUnsmearing       = new TH1D("Y unsmearing","Y unsmearing",binsXMatrixEcalEcal,xminEcalEcal,xmaxEcalEcal); 
    TH1D * h_effectUnsmearingByHand = new TH1D("Y unsmearing BH","Y unsmearing BH",binsXMatrixEcalEcal,xminEcalEcal,xmaxEcalEcal); 
+   h_RapidityUNSmeared->Sumw2();
+   h_RapidityTreeLevel->Sumw2();
    h_effectUnsmearing->Add(h_RapidityUNSmeared, h_RapidityTreeLevel, 1, -1);
    h_effectUnsmearing->Divide(h_RapidityTreeLevel);
    h_effectUnsmearing->SetTitle(0);
@@ -345,7 +412,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
      TCanvas * c8 = new TCanvas("closure test: (UNsmeared-true)/true","closure test: (UNsmeared-true)/true",1050,750);
      c8->cd();
      //h_effectUnsmearing->Draw();
-     h_effectUnsmearingByHand->Draw();
+     // h_effectUnsmearingByHand->Draw("e hpx HIST");
+     h_effectUnsmearingByHand->Draw("hpx HIST");
      int i;
    }
    c8->Print("UNsmeared-true-over-true-Closure.png");
