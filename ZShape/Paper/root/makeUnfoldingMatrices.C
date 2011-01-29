@@ -203,20 +203,20 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
   else           tableFileName=std::string("migration_table_Pt.tex");
   //FILE* texTable=fopen("migration_table.tex","wt");
   FILE* texTable=fopen(tableFileName.c_str(),"wt");
-  fprintf(texTable,"\\begin{tabular}{|cc|ccccc|} \\hline \n");
-  fprintf(texTable,"$min(Y^\\mathrm{true}_i)$ & $max(Y^\\mathrm{true}_i)$ & $Y^\\mathrm{reco}_{i-2}$ & $Y^\\mathrm{reco}_{i-1}$ & $Y^\\mathrm{reco}_i$ & $Y^\\mathrm{reco}_{i+1}$ & $Y^\\mathrm{reco}_{i+2}$ \\\\ \\hline \n");
-  for (int i=0; i<100; i++) {
+  fprintf(texTable,"\\begin{tabular}{|cc||ccccc|} \\hline \n");
+  if(isRapidity) fprintf(texTable,"$min(Y^\\mathrm{true}_i)$ & $max(Y^\\mathrm{true}_i)$ & $Y^\\mathrm{reco}_{i-2}$ & $Y^\\mathrm{reco}_{i-1}$ & $Y^\\mathrm{reco}_i$ & $Y^\\mathrm{reco}_{i+1}$ & $Y^\\mathrm{reco}_{i+2}$ \\\\ \\hline \n");
+  else fprintf(texTable,"$min(q^\\mathrm{true}_{T,i})$ & $max(q^\\mathrm{true}_{T,i})$ & $q^\\mathrm{reco}_{T,i-2}$ & $q^\\mathrm{reco}_{T,i-1}$ & $q^\\mathrm{reco}_i$ & $q^\\mathrm{reco}_{T,i+1}$ & $q^\\mathrm{reco}_{T,i+2}$ \\\\ \\hline \n");
+  for (int i=0; i<histoMigration->GetNbinsX(); i++) {
     double lv=histoMigration->GetXaxis()->GetBinLowEdge(i+1);
     double lh=histoMigration->GetXaxis()->GetBinUpEdge(i+1);
 
-    if (fabs(lv)>3.8 || fabs(lh)>3.8) continue;
-
+    if ((isRapidity) && ( fabs(lv)>3.8 || fabs(lh)>3.8)) continue;
 
     fprintf(texTable,"%5.2f & %5.2f & ",lv,lh);
 
     for (int j=-2; j<=2; j++) {
       int ireco=i+j;
-      if (ireco<0 || ireco>=100) {
+      if (ireco<0 || ireco>=histoMigration->GetNbinsX()) {
 	fprintf(texTable," -- ");
 	if (j!=2) fprintf(texTable," & ");
 	else fprintf(texTable,"\\\\\n");
