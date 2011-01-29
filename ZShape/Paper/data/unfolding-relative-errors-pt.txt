@@ -1,6 +1,6 @@
 #put your comments after a '#'.
 #Variable name: unfolding_error
-PtBin     PtMin      PtMax    Value    Error
+PtBin   PtMin   PtMax   Value    Error
 1	0	2.5	5.834e-03	0
 2	2.5	5	5.035e-03	0
 3	5	7.5	1.533e-03	0
