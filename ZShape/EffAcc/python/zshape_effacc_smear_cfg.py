@@ -24,35 +24,35 @@ process.TFileService = cms.Service("TFileService",
 process.load("ZShape.EffAcc.SmearedElectronsProducer_cfi")
 process.load("ZShape.EffAcc.ZEfficiencyStd_cfi")
 
-# errors used are associated to the parameter vaues of SmearedElectronsProducer_cfi.py V00-05-03 :
+# errors used are associated to the parameter vaues of SmearedElectronsProducer_cfi.py V00-05-08 :
 #a-EB-down
-#process.SmearedElectronsProducer.EB.p0 = 0.0389
+#process.SmearedElectronsProducer.EB.p0 = 0.0391
 #a-EB-up
-#process.SmearedElectronsProducer.EB.p0 = 0.0431
+#process.SmearedElectronsProducer.EB.p0 = 0.0429
 #a-EE-down
-#process.SmearedElectronsProducer.EE.p0 = 1.453
+#process.SmearedElectronsProducer.EE.p0 = 1.407
 #a-EE-up
-#process.SmearedElectronsProducer.EE.p0 = 1.593
+#process.SmearedElectronsProducer.EE.p0 = 1.541
 #alpha-EB-down
-#process.SmearedElectronsProducer.EB.alpha = 1.373
+#process.SmearedElectronsProducer.EB.alpha = 1.359
 #alpha-EB-up
-#process.SmearedElectronsProducer.EB.alpha = 1.429
+#process.SmearedElectronsProducer.EB.alpha = 1.413
 #alpha-EE-down
-#process.SmearedElectronsProducer.EE.alpha = 1.616
+#process.SmearedElectronsProducer.EE.alpha = 1.573
 #alpha-EE-up
-#process.SmearedElectronsProducer.EE.alpha = 1.738
+#process.SmearedElectronsProducer.EE.alpha = 1.697
 #c-EB-down
 #process.SmearedElectronsProducer.EB.c = 0.0081
 #c-EB-up
 #process.SmearedElectronsProducer.EB.c = 0.0099
 #c-HFm-down
-#process.SmearedElectronsProducer.HF.constantm = 0.128
+#process.SmearedElectronsProducer.HF.constantm = 0.127
 #c-HFm-up
-#process.SmearedElectronsProducer.HF.constantm = 0.152
+#process.SmearedElectronsProducer.HF.constantm = 0.151
 #c-HFp-down
-#process.SmearedElectronsProducer.HF.constantp = 0.16
+#process.SmearedElectronsProducer.HF.constantp = 0.168
 #c-HFp-up
-#process.SmearedElectronsProducer.HF.constantp = 0.188
+#process.SmearedElectronsProducer.HF.constantp = 0.19
 
 
 process.p = cms.Path(process.SmearedElectronsProducer
