@@ -85,8 +85,10 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    histoMigration->GetYaxis()->SetTitle("Y_{ZtreeLevel}");
    } else
    {
-   histoMigration->GetXaxis()->SetTitle("P_{t,reco}");
-   histoMigration->GetYaxis()->SetTitle("P_{t,ZtreeLevel}");
+   histoMigration->GetXaxis()->SetTitle("Q_{T,reco} [GeV/c]");
+   histoMigration->GetYaxis()->SetTitle("Q_{T,ZtreeLevel} [GeV/c]");
+   histoMigration->GetXaxis()->SetTitleOffset(1.3);
+   histoMigration->GetYaxis()->SetTitleOffset(1.4);
    }
 
    TH2F * histoMigrationTotal_toBeSaved = histoMigration->Clone();
@@ -136,8 +138,10 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    histoMatrix->GetYaxis()->SetTitle("Y_{ZtreeLevel}");
    } else
    {
-   histoMatrix->GetXaxis()->SetTitle("P_{t,reco}");
-   histoMatrix->GetYaxis()->SetTitle("P_{t,true}");
+   histoMatrix->GetXaxis()->SetTitle("Q_{T,reco} [GeV/c]");
+   histoMatrix->GetYaxis()->SetTitle("Q_{T,true} [GeV/c]");
+   histoMatrix->GetXaxis()->SetTitleOffset(1.3);
+   histoMatrix->GetYaxis()->SetTitleOffset(1.4);
    }
 
     float integral=0;
@@ -327,14 +331,24 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    c5->SetLeftMargin(0.11);   
    c5->SetBottomMargin(0.125);
    c5->cd(1);  c5->SetLogz();   
+   TH2F * dummyForRange = new TH2F("dummyForRange","dummyForRange",2,0,600,2,0,600);
+   dummyForRange->GetXaxis()->CenterTitle();
+   dummyForRange->GetYaxis()->CenterTitle(true);
+   dummyForRange->GetYaxis()->SetTitleOffset(0.8);
+   dummyForRange->SetStats(0);
    if(isRapidity) {
    histoMatrix->GetXaxis()->SetTitle("Y_{Z,reco}");
    histoMatrix->GetYaxis()->SetTitle("Y_{Z,true}");
    histoMatrix->GetXaxis()->SetRangeUser(-3.8,3.8);
    histoMatrix->GetYaxis()->SetRangeUser(-3.8,3.8);
    } else {
-   histoMatrix->GetXaxis()->SetTitle("P_{t,reco}");
-   histoMatrix->GetYaxis()->SetTitle("P_{t,true}");
+   histoMatrix->GetXaxis()->SetTitle("Q_{T,reco} [GeV/c]");
+   histoMatrix->GetYaxis()->SetTitle("Q_{T,true} [GeV/c]");
+   histoMatrix->GetXaxis()->SetTitleOffset(1.3);
+   histoMatrix->GetYaxis()->SetTitleOffset(1.4);
+   histoMatrix->GetXaxis()->SetRangeUser(0.0001,600);
+   histoMatrix->GetYaxis()->SetRangeUser(0.0001,600);
+   // dummyForRange->Draw();
    c5->SetLogx();   c5->SetLogy();
    }
    histoMatrix->GetXaxis()->CenterTitle();
@@ -342,6 +356,7 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    histoMatrix->GetYaxis()->SetTitleOffset(0.8);
    histoMatrix->SetMaximum(1);
    histoMatrix->SetStats(0);
+   //histoMatrix->Draw("colz same");
    histoMatrix->Draw("colz");
    plabel -> DrawText(0.30, 0.93, "CMS 2010 PRELIMINARY");
    tlabel -> DrawText(0.30, 0.90, Form("%s",time_));
