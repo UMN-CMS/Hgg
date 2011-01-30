@@ -115,7 +115,7 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,
 			       pow(valp->GetBinError(i),2)
 				 ));
 
-    if (i>=15 && i<=86) {
+    if (i>=16 && i<=85) {
       if (errfile!=0)
 	fprintf(errfile,"%4d %5.2f %5.2f %6.4f %6.4f\n",i,
 		valave->GetXaxis()->GetBinLowEdge(i),

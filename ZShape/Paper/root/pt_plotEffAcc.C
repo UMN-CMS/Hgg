@@ -31,7 +31,8 @@ const char* labelFor(int i) {
 void pt_plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Pt_masscut") {
   TDirectory* basedir=f->Get("mcEff");
 
-  TH1* base=((TDirectory*)basedir->Get("ECAL80-ECAL95-MUO/Acceptance"))->Get(var);
+  //  TH1* base=((TDirectory*)basedir->Get("MUON-MUON/Acceptance"))->Get(var);
+  TH1* base=((TDirectory*)basedir->Get("MUON-MUON/Acceptance"))->Get("Z0_PtTL");
 
 
   TDirectory* zdir=basedir->Get("ECAL80-ECAL95-MUO");
@@ -114,8 +115,8 @@ void pt_plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Pt_masscut"
     } else if (n!=4) 
       work->Draw("SAMEHIST");
 
-    if (n==0 || n==4) { 
-    } else if (n<4) 
+    if (n==4 || n==4) { 
+    } else if (n<3) 
       tl->AddEntry(work,labelFor(n));
     else
       tl2->AddEntry(work,labelFor(n));

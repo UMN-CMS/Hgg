@@ -88,7 +88,7 @@ void plotEffAcc(TFile* f, int mode=0, const char* var="Z0_Y_masscut") {
 
     if (!strcmp(cleanname,"PT10")) continue;
     if (!strcmp(fullname,"C05-PT20")) continue;
-    if (strstr(fullname,"-m(")!=0) continue;
+    //    if (strstr(fullname,"-m(")!=0) continue;
     // if (!strcmp(cleanname,"PT20")) continue;
     printf("%d %s %s %p %p\n",n,fullname,cleanname,stage,pt);
     TH1* work=stage->Clone();
@@ -130,9 +130,9 @@ void plotEffAcc(TFile* f, int mode=0, const char* var="Z0_Y_masscut") {
       work->GetXaxis()->CenterTitle(true);
       work->GetYaxis()->CenterTitle(true);
       work->Draw("HIST");
-    } else if (n!=4) work->Draw("SAMEHIST");
+    } else if (n!=4 && n!=7) work->Draw("SAMEHIST");
 
-    if (n!=4) {
+    if (n!=4 && n!=7) {
       if (n<3) 
 	tl->AddEntry(work,labelFor(n));
       else

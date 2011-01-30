@@ -19,7 +19,7 @@ struct DataSeries {
   void clear() {
     for (int i=0; i<BINCOUNT; i++) {
       xave[i]=xlow+(xhigh-xlow)/BINCOUNT*(i+0.5);
-      xwidth[i]=(xhigh-xlow)/BINCOUNT;
+      xwidth[i]=(xhigh-xlow)/BINCOUNT/2;
       y[i]=0;
       ey[i]=0;
     }
@@ -49,6 +49,7 @@ struct DataSeries {
   }
 
   TH1* makeTH1(const char* name, int bins, int startFrom) {
+    printf("%s %d %f %f \n",name,bins,xave[startFrom]-xwidth[startFrom],xave[startFrom+bins-1]+xwidth[startFrom+bins-1]);
     TH1F* hist=new TH1F(name,name,bins,xave[startFrom]-xwidth[startFrom],xave[startFrom+bins-1]+xwidth[startFrom+bins-1]);
     for (int i=1; i<=bins; i++) {
       hist->SetBinContent(i,y[startFrom+i-1]);
@@ -111,7 +112,7 @@ void DataSeries::create(const char* file, int iy) {
   fclose(f);
 }
 
-void plotFinal(TFile* mctruth) {
+void plotFinal(TFile* mctruth, int mode=1) {
   int lumi=30;
   setTDRStyle();
 
@@ -122,11 +123,15 @@ void plotFinal(TFile* mctruth) {
   DataSeries data_ef("ECAL80-HF_RAW.csv"), data_all;
   DataSeries data_bkgd(data_all);
   
-  DataSeries effAcc("effAcc_combined.csv"), ea_statErr("effStatError.csv");
+  DataSeries effAcc;
 
-  const int firsti=15;
+  if (mode==1) effAcc=DataSeries("effAcc_combined.csv");
+  if (mode==2) effAcc=DataSeries("effAcc_smearOverTrue.csv");
+  DataSeries ea_statErr("effStatError.csv");
+
+  const int firsti=16;
   const int lasti=84;
-  const int npoint=lasti-firsti+1;
+  const int npoint=lasti-firsti+2;
 
   double tt=0, td=0;
  
@@ -174,20 +179,21 @@ void plotFinal(TFile* mctruth) {
   }
   DataSeries corrDataClone(corrData);
 
-  printf("A\n");
   bool doUnsmearing(false); // use this to activate unsmearing + associated errors or leave it completely off
-  TH1* data_corr_smeared=corrData.makeTH1("data_corr_smeared",100,0);
-  TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../root/unfoldingMatrix_theOutPut.root");
-  TFile*    theunfoldingMatrixInputFile = new TFile("../root/unfoldingMatrix_theOutPut.root","read");
-  TMatrixD* theUnfoldingMatrix          = (TMatrixD*)theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotal"); // indices [0.. 99] X [0.. 99]
-  double errorCumul=0;
-  for (int i=0; i<BINCOUNT; i++) {  
-    corrData.y[i]=data_corr_unsmeared->GetBinContent(i+1);
-    for (int s=0; s<BINCOUNT; s++) {
-      errorCumul+= pow( corrDataClone.ey[s] * (*theUnfoldingMatrix)(s,i) , 2);
+  if (doUnsmearing) {
+    TH1* data_corr_smeared=corrData.makeTH1("data_corr_smeared",100,0);
+    TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../root/unfoldingMatrix_theOutPut.root");
+    TFile*    theunfoldingMatrixInputFile = new TFile("../root/unfoldingMatrix_theOutPut.root","read");
+    TMatrixD* theUnfoldingMatrix          = (TMatrixD*)theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotal"); // indices [0.. 99] X [0.. 99]
+    double errorCumul=0;
+    for (int i=0; i<BINCOUNT; i++) {  
+      corrData.y[i]=data_corr_unsmeared->GetBinContent(i+1);
+      for (int s=0; s<BINCOUNT; s++) {
+	errorCumul+= pow( corrDataClone.ey[s] * (*theUnfoldingMatrix)(s,i) , 2);
+      }
+      if (doUnsmearing) corrData.ey[i]=sqrt(errorCumul);
+      errorCumul=0;
     }
-    if (doUnsmearing) corrData.ey[i]=sqrt(errorCumul);
-    errorCumul=0;
   }
   DataSeries corrDataSyst(corrData);
   DataSeries corrDataBkgd(corrData);
@@ -242,7 +248,7 @@ void plotFinal(TFile* mctruth) {
     pdfTotal.y[i]=(pdfPos.y[i]+(-pdfNeg.y[i]))/2*corrDataBkgd.y[i];
     pdfFrac.y[i]=(pdfPos.y[i]+(-pdfNeg.y[i]))/2;
     */
-    printf("%d %f %f %f %f\n",i,corrData.ey[i],corrData.y[i]*ea_statErr.y[i]);
+    printf("%d %f %f %f %f\n",i+1,corrData.ey[i],corrData.y[i]*ea_statErr.y[i]);
     corrDataSyst.ey[i]=sqrt(pow(corrDataBkgd.ey[i],2)+
 			    pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
 			    pow(backgroundAllUnc.y[i]/effAcc.y[i],2)+
