@@ -8,7 +8,7 @@ set Jason3="`cat nothing3.txt`"
 
 cat EffStats.C | sed "s@MYSUPERCRUST@${Jason2}@g; s@DARUNMAPCRUST@${Jason3}@g "  > nothing.C
 
-g++ nothing.C -o nothing `root-config --cflags --libs` -L $ROOTSYS/lib -lRooFit -lHtml -lMinuit -lRooFitCore -lFoam -std=c++0x
+g++ nothing.C -o nothing `root-config --cflags --libs` -L $ROOTSYS/lib -lHtml -lMinuit  -lFoam 
 ./nothing
 
 rm nothing2.txt nothing3.txt nothing.C

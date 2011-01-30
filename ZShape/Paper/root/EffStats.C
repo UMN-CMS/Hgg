@@ -15,15 +15,15 @@
 #include <fstream>
 #include <TProfile.h>
 #include <TObject.h>
-#include "/home/haupt/MACROS/tdrstyle.C"
-#include "RooWorkspace.h"
-#include "RooDataSet.h"
-#include "RooDataHist.h"
-#include "RooRealVar.h"
-#include "RooAbsPdf.h"
-#include "RooFormulaVar.h"
-#include "RooPlot.h"
-#include <initializer_list>
+#include "tdrstyle.C"
+// #include "RooWorkspace.h"
+// #include "RooDataSet.h"
+// #include "RooDataHist.h"
+// #include "RooRealVar.h"
+// #include "RooAbsPdf.h"
+// #include "RooFormulaVar.h"
+// #include "RooPlot.h"
+//#include <initializer_list>
 
 using namespace std;
 
@@ -80,8 +80,9 @@ T myTClass<T>::getFiles (std::string myfs)
 template <class T>
 void myTClass<T>::doLegend (TLegend* myLeg, std::string legfops, std::string legops)
 {
+  typename std::vector<T>::iterator iTvec;
    int i=0;
-  for (auto iTvec = Tvec.begin(); iTvec != Tvec.end(); ++iTvec) 
+   for (iTvec = Tvec.begin(); iTvec != Tvec.end(); ++iTvec) 
   {
       if (i < 1)  myLeg->AddEntry((*iTvec),(*iTvec)->GetTitle(),legfops.c_str());
       else myLeg->AddEntry((*iTvec),(*iTvec)->GetTitle(),legops.c_str());
@@ -102,7 +103,7 @@ void myTClass<T>::doSummedQuad (void)
    for (Int_t bin = 0 ; bin < numBins; ++bin)
    {
       double x2 = 0.0;
-      for (auto iTvec = Tvec.begin(); iTvec != Tvec.end(); ++iTvec) 
+      for (typename std::vector<T>::iterator iTvec = Tvec.begin(); iTvec != Tvec.end(); ++iTvec) 
       {
 	double val = (*iTvec)->GetBinContent(bin);
 	x2 += val*val;
@@ -117,47 +118,47 @@ template <class T>
 void myTClass<T>::doIndiPlots(T myp, iRunType &ir)
 {
   if (!doIndi_) return;
-  RooWorkspace* w = new RooWorkspace();
-  RooRealVar* mass = new RooRealVar("mass","mass", 50, 140);
-  RooDataHist *data = new RooDataHist("data", "data", *mass, myp); 
-  w->import(*data);
-  std::cout << " I was here " << std::endl;
-  w->factory("Voigtian::signal(mass, mean[91.2,85,96], width[2.495], sigma[2.3,1,9])");
-  w->factory("EXPR::backgroundPass('(RooMath::erfc((alpha - mass) * beta))*(( (mass-peak)*gamma < -70  )* (1e20) + ( (mass-peak)*gamma > 70 )* (0.0) + ( (mass-peak)*gamma >= -70 && (mass-peak)*gamma <= 70) * exp(-(mass-peak)*gamma))',mass,peak[91.1876],gamma[0.05, 0.0, 0.1],beta[0.051,0.0,0.2],alpha[62.0,35.0,105.0])");
+ //  RooWorkspace* w = new RooWorkspace();
+//   RooRealVar* mass = new RooRealVar("mass","mass", 50, 140);
+//   RooDataHist *data = new RooDataHist("data", "data", *mass, myp); 
+//   w->import(*data);
+//   std::cout << " I was here " << std::endl;
+//   w->factory("Voigtian::signal(mass, mean[91.2,85,96], width[2.495], sigma[2.3,1,9])");
+//   w->factory("EXPR::backgroundPass('(RooMath::erfc((alpha - mass) * beta))*(( (mass-peak)*gamma < -70  )* (1e20) + ( (mass-peak)*gamma > 70 )* (0.0) + ( (mass-peak)*gamma >= -70 && (mass-peak)*gamma <= 70) * exp(-(mass-peak)*gamma))',mass,peak[91.1876],gamma[0.05, 0.0, 0.1],beta[0.051,0.0,0.2],alpha[62.0,35.0,105.0])");
   //w->factory("Voigtian::signal(mass, mean[91.2,85,96], width[2.495], sigma[7.0,1,9])");
   //w->factory("EXPR::backgroundPass('(RooMath::erfc((alpha - mass) * beta))*(( (mass-peak)*gamma < -70  )* (1e20) + ( (mass-peak)*gamma > 70 )* (0.0) + ( (mass-peak)*gamma >= -70 && (mass-peak)*gamma <= 70) * exp(-(mass-peak)*gamma))',mass,peak[91.1876],gamma[0.05, 0.0, 0.1],beta[0.051,0.0,0.2],alpha[62.0,35.0,75.0])");
-  w->factory("SUM::pdfPass(numSignalAll[0.,1e10]*signal, numBackgroundPass[0.,1e10]*backgroundPass)");
-  double totPassing = w->data("data")->sumEntries();
-  std::cout << " total is " << totPassing << std::endl;
-  w->var("numSignalAll")->setVal(0.95*totPassing);
-  w->var("numBackgroundPass")->setVal(0.05*totPassing);
-  bool quiet = true;
-  w->pdf("pdfPass")->fitTo(*data, RooFit::Save(true), RooFit::Extended(true), RooFit::NumCPU(1), RooFit::PrintLevel(quiet?-1:1), RooFit::PrintEvalErrors(quiet?-1:1), RooFit::Warnings(!quiet));
-  w->saveSnapshot("finalState",w->components());
+ //  w->factory("SUM::pdfPass(numSignalAll[0.,1e10]*signal, numBackgroundPass[0.,1e10]*backgroundPass)");
+//   double totPassing = w->data("data")->sumEntries();
+//   std::cout << " total is " << totPassing << std::endl;
+//   w->var("numSignalAll")->setVal(0.95*totPassing);
+//   w->var("numBackgroundPass")->setVal(0.05*totPassing);
+//   bool quiet = true;
+//   w->pdf("pdfPass")->fitTo(*data, RooFit::Save(true), RooFit::Extended(true), RooFit::NumCPU(1), RooFit::PrintLevel(quiet?-1:1), RooFit::PrintEvalErrors(quiet?-1:1), RooFit::Warnings(!quiet));
+//   w->saveSnapshot("finalState",w->components());
 
-  std::string fullabel = legtype + ((*ir).first);
-  std::cout << " fulllabel " << fullabel << std::endl;
+//   std::string fullabel = legtype + ((*ir).first);
+//   std::cout << " fulllabel " << fullabel << std::endl;
 
   
-  TCanvas *mycc = new TCanvas("mycc","mycc",1200,700);
-  RooPlot* frame = w->var("mass")->frame(RooFit::Title(fullabel.c_str())) ;
-  w->data("data")->plotOn(frame);
-  w->pdf("pdfPass")->plotOn(frame,RooFit::LineColor((*ir).second.color)) ;
-  w->pdf("pdfPass")->plotOn(frame,RooFit::LineColor((*ir).second.color),RooFit::Components("backgroundPass"), RooFit::LineStyle(kDashed)) ;
-  w->pdf("pdfPass")->paramOn(frame,RooFit::Label(fullabel.c_str()),RooFit::Format("NELU",RooFit::AutoPrecision(2)),RooFit::Layout(0.61, 0.98, 0.95));
-  //w->pdf("pdfPass")->paramOn(frame, w->data("data"), (*ir).first.c_str(), 0, "NELU", 0.65, 0.98, 0.94);
-  frame->GetYaxis()->SetTitleOffset(0.9);
-  frame->Draw();
+//   TCanvas *mycc = new TCanvas("mycc","mycc",1200,700);
+//   RooPlot* frame = w->var("mass")->frame(RooFit::Title(fullabel.c_str())) ;
+//   w->data("data")->plotOn(frame);
+//   w->pdf("pdfPass")->plotOn(frame,RooFit::LineColor((*ir).second.color)) ;
+//   w->pdf("pdfPass")->plotOn(frame,RooFit::LineColor((*ir).second.color),RooFit::Components("backgroundPass"), RooFit::LineStyle(kDashed)) ;
+//   w->pdf("pdfPass")->paramOn(frame,RooFit::Label(fullabel.c_str()),RooFit::Format("NELU",RooFit::AutoPrecision(2)),RooFit::Layout(0.61, 0.98, 0.95));
+//   //w->pdf("pdfPass")->paramOn(frame, w->data("data"), (*ir).first.c_str(), 0, "NELU", 0.65, 0.98, 0.94);
+//   frame->GetYaxis()->SetTitleOffset(0.9);
+//   frame->Draw();
 
-  //Print these out
-  std::vector<std::string> mytype = {"png","C","root"};
-  for (auto imytype=mytype.begin(); imytype!=mytype.end(); ++imytype)
-  mycc->Print(Form("%s_%d.%s",stlab.c_str(),Tvec.size(),(*imytype).c_str()));
-  delete mycc;
-  delete w;
-  delete mass;
-  delete data;
-  delete frame;
+//   //Print these out
+//   std::vector<std::string> mytype = {"png","C","root"};
+//   for (auto imytype=mytype.begin(); imytype!=mytype.end(); ++imytype)
+//   mycc->Print(Form("%s_%d.%s",stlab.c_str(),Tvec.size(),(*imytype).c_str()));
+//   delete mycc;
+//   delete w;
+//   delete mass;
+//   delete data;
+//   delete frame;
 }
 
 template <class T>
@@ -186,7 +187,7 @@ void myTClass<T>::plot (std::string myfs, RunType &myrt, std::string ops)
   //myp->GetXaxis()->SetRangeUser(4,140);
   if (myp){
           std::cout << " entries " << myp->GetEntries() << std::endl;
-    if (myp->GetEntries() > 0) {
+    if (myp->GetEntries() != 0) {
       doIndiPlots(myp,ir);
       if (scale) {
 	std::cout << " Scale Factor is " << (double (baseT->Integral()))/( double ( myp->Integral())) << std::endl;
@@ -214,7 +215,7 @@ void myTClass<T>::plot (std::string myfs, RunType &myrt, std::string ops)
 
       //myp->GetYaxis()->SetTitle("Fractional Error From Bin Correlations");
       //myp->GetYaxis()->SetTitle("Fractional Error From Efficiency Statistics");
-      myp->GetYaxis()->SetTitle("Fractional Error ");
+      myp->GetYaxis()->SetTitle("Fractional Error From Bin Correlations");
       myp->GetYaxis()->SetTitleSize(0.05);
       myp->GetXaxis()->CenterTitle();
       myp->GetYaxis()->CenterTitle();
@@ -262,8 +263,8 @@ int main () {
     TCanvas *myc = new TCanvas("myc","myc",1400,800);
     
     myc->cd();
-    myc->SetLogy(1);
-    for (auto it = myRunMap.begin(); it != myRunMap.end(); it++)
+    myc->SetLogy(1);myc->SetLogx(1);
+    for (RunTypeMap::iterator it = myRunMap.begin(); it != myRunMap.end(); it++)
     {
       std::string type = (*it).first;
       // rtype = (*it).second;
@@ -281,10 +282,11 @@ int main () {
    // myLeg->SetTitle("EB-EE Normalized Mass Plots");
     myLeg->Draw();
     
-    std::vector<std::string> mytype = {"png","C","root","eps"};
+    // std::vector<std::string> mytype = {"png","C","root","eps"};
+    std::string mytype[]={"png","C","root","eps"};
     //for (auto imytype=mytype.begin(); imytype!=mytype.end(); ++imytype) 
-    for (auto imytype=mytype.begin(); imytype!=mytype.end(); ++imytype)
-     myc->Print(Form("%s.%s",mystr.c_str(),(*imytype).c_str()));
+    for (int ii=0;ii<4;ii++)
+     myc->Print(Form("%s.%s",mystr.c_str(),mytype[ii].c_str()));
     
     std::cout << " what is up here " << std::endl;
     return 0;

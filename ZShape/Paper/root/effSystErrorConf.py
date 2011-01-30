@@ -3,7 +3,7 @@
 import sys
 
 
-B0=['TH1F','MYNA','EffSyst']
+B0=['TH1F','MYNA','~/public_html/EffSyst']
 #B0=['TH1F','ZFromData/ECAL95EB-ECAL95EE/C08-m(70,110)/e1_P_t','EB_ET_Shape_Changes_EB-EE']
 #B0=['TH1F','ZFromData/ECAL95EB-ECAL95EE/C07-HLT-GSF/e2_P_t','EE_ET_Shape_Changes_EB-EE']
 B1={'RedCirc':['kRed','kFullCircle','0.9','3'], 
@@ -16,7 +16,7 @@ B1={'RedCirc':['kRed','kFullCircle','0.9','3'],
     'BlkCirc':['kBlack','kFullCircle','1.0','2'],}
 B2={'WP95.root':['WP95','CynCirc'],
     'WP80.root':['WP80','RedCirc'],
-    'HFEID.root':['HF Electron ID','GrnSqur'],
+    #'HFEID.root':['HF Electron ID','GrnSqur'],
     'HLT.root':['HLT','MagnTri'],
     'GSF.root':['GSF Track Match','BlueTri'],
     'SC.root':['Supercluster','OrngTri']#,
@@ -28,7 +28,7 @@ G=['false',      'false',   'false','false','']
 LEGEND=['0.45','0.64','0.65','0.95','l','l','Error From']
 #LEGEND=['0.33','0.24','0.68','0.55','p','EB-EE Normalized Rapidity']
 
-XY=['-3.6','3.59','0.000005','0.08']
+XY=['0.7','500','0.000005','0.08']
 #XY=['-2.5','2.5','0','3.0']
 PLOT=[' HIST',' SAME HIST']
 

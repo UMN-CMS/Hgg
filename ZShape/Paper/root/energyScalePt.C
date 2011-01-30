@@ -126,6 +126,15 @@ void energyScalePt(TFile* base, TFile* vpe, TFile* vme, TFile* tpe, TFile* tme, 
     zrap_Prelim(0.6, 0.9, 0.6, 0.87);
     c1->Print("energyScale.eps");
 
+ const int pxbins=19;
+  const double pxbinEdges[]={0, 2.5, 5, 7.5, 10, 12.5, 15, 17.5, 20, 30, 40, 50, 70, 90, 110, 150, 190,250, 600,3500};
+
+  for (int kk=1;kk<=19;kk++){
+    printf("%9d %9.1f %9.1f %9.4f %9.4f \n",kk,pxbinEdges[kk-1],pxbinEdges[kk],valave->GetBinContent(kk),sqrt(valave->GetBinContent(kk)));
+
+  }
+
+
     if (errfile != 0) fclose(errfile);
 
 }
