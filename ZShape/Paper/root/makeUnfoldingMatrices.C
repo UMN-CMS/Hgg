@@ -85,8 +85,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    histoMigration->GetYaxis()->SetTitle("Y_{ZtreeLevel}");
    } else
    {
-   histoMigration->GetXaxis()->SetTitle("Q_{T,reco} [GeV/c]");
-   histoMigration->GetYaxis()->SetTitle("Q_{T,ZtreeLevel} [GeV/c]");
+   histoMigration->GetXaxis()->SetTitle("q_{T,reco} [GeV/c]");
+   histoMigration->GetYaxis()->SetTitle("q_{T,ZtreeLevel} [GeV/c]");
    histoMigration->GetXaxis()->SetTitleOffset(1.3);
    histoMigration->GetYaxis()->SetTitleOffset(1.4);
    }
@@ -138,8 +138,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    histoMatrix->GetYaxis()->SetTitle("Y_{ZtreeLevel}");
    } else
    {
-   histoMatrix->GetXaxis()->SetTitle("Q_{T,reco} [GeV/c]");
-   histoMatrix->GetYaxis()->SetTitle("Q_{T,true} [GeV/c]");
+   histoMatrix->GetXaxis()->SetTitle("q_{T,reco} [GeV/c]");
+   histoMatrix->GetYaxis()->SetTitle("q_{T,true} [GeV/c]");
    histoMatrix->GetXaxis()->SetTitleOffset(1.3);
    histoMatrix->GetYaxis()->SetTitleOffset(1.4);
    }
@@ -342,8 +342,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    histoMatrix->GetXaxis()->SetRangeUser(-3.8,3.8);
    histoMatrix->GetYaxis()->SetRangeUser(-3.8,3.8);
    } else {
-   histoMatrix->GetXaxis()->SetTitle("Q_{T,reco} [GeV/c]");
-   histoMatrix->GetYaxis()->SetTitle("Q_{T,true} [GeV/c]");
+   histoMatrix->GetXaxis()->SetTitle("q_{T,reco} [GeV/c]");
+   histoMatrix->GetYaxis()->SetTitle("q_{T,true} [GeV/c]");
    histoMatrix->GetXaxis()->SetTitleOffset(1.3);
    histoMatrix->GetYaxis()->SetTitleOffset(1.4);
    histoMatrix->GetXaxis()->SetRangeUser(0.0001,600);
