@@ -28,11 +28,17 @@ const char* labelFor(int i) {
 #include "tdrstyle.C"
 #include "zrapidityStandard.C"
 
-void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y_masscut") {
+void plotEffAcc(TFile* f, int mode=0, const char* var="Z0_Y_masscut") {
   TDirectory* basedir=f->Get("mcEff");
 
   TH1* base;
-  if (strstr(var,"Y")!=0) base=(TH1*)((TDirectory*)basedir->Get("All"))->Get("Z0_Y");
+  const char* post=0;
+  if (mode==0) {
+    if (strstr(var,"Y")!=0) base=(TH1*)((TDirectory*)basedir->Get("All"))->Get("Z0_Y");
+  } else {
+    post="smeartrue";
+    if (strstr(var,"Y")!=0) base=(TH1*)((TDirectory*)basedir->Get("All"))->Get("Z0_YTL");
+  }
   if (strstr(var,"Pt")!=0) {
     base=(TH1*)((TDirectory*)basedir->Get("All"))->Get("Z0_Pt");
   }
@@ -147,7 +153,7 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y_masscut") {
   else sprintf(stuff,"effacc_bycut_%s.png",post);
   c1->Print(stuff);
   if (post==0) sprintf(stuff,"effacc_bycut.eps");
-  else sprintf(stuff,"effacc_bycut_%s.eps");
+  else sprintf(stuff,"effacc_bycut_%s.eps",post);
   c1->Print(stuff);
 
   c2->cd();
@@ -201,7 +207,9 @@ void plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Y_masscut") {
 
   TDatime now;
 
-  fprintf(stats,"#Bin Y_min Y_max Eff*Acc MCErr#  %s\n",now.AsString());
+  if (mode==0)  fprintf(stats,"# Smear/Smear\n");
+  else  fprintf(stats,"# Smear/True\n");
+  fprintf(stats,"#Bin Y_min Y_max Eff*Acc MCErr#  %s \n",now.AsString());
 
   for (int i=1; i<=finalt->GetNbinsX(); i++) {
     fprintf(stats," %2d %5.2f %5.2f %7.5f %7.5f\n",i,finalt->GetBinLowEdge(i),finalt->GetBinWidth(i)+finalt->GetBinLowEdge(i),finalt->GetBinContent(i),finalt->GetBinError(i)); 

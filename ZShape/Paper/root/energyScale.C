@@ -1,9 +1,12 @@
 #include "readStandardFile.C"
 #include "readUnfoldingMatrices.C"
 
-TH1* extractDistribution(const char* name, TFile* f) {
+TH1* extractDistribution(const char* name, TFile* f, int mode) {
 
-  TH1* effAcc=readStandardFile("effAcc","../data/effAcc_combined.csv");
+  
+  TH1* effAcc;
+  if (mode==2) effAcc=readStandardFile("effAcc","../data/effAcc_smearOverTrue.csv");
+  else effAcc=readStandardFile("effAcc","../data/effAcc_combined.csv");
   
   const char* h1name="mcEff/ECAL80-ECAL95/C08-m(60,120)/Z0_Y";
   const char* h2name="mcEff/ECAL80-HF/C08-m(60,120)/Z0_Y";
@@ -25,8 +28,16 @@ TH1* extractDistribution(const char* name, TFile* f) {
 
 void energyScale(TFile* base, TFile* vpe, TFile* vme,  
 		 TFile* vpf, TFile* vmf, 
-		 TFile* vpv, TFile* vmv, 
+		 TFile* vpv, TFile* vmv, int mode,
 		 const char* errfilename=0 ) {
+
+  const char* smode=0;
+  switch (mode) {
+  case (1) : smode="No unsmearing, EffAcc is smear/smear"; break;
+  case (2) : smode="No unsmearing, EffAcc is smear/true"; break;
+  case (3) : smode="Unsmearing"; break;
+  default : return;
+  }
 
   FILE* errfile=0;
   if (errfilename!=0) {
@@ -39,31 +50,33 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,
   gROOT->SetStyle("Plain");
   setTDRStyle();
 
-  TH1* hb=extractDistribution("base",base);
-  TH1* valep=extractDistribution("vpe",vpe);
-  TH1* valem=extractDistribution("vme",vme);
-  TH1* valfp=extractDistribution("vpf",vpf);
-  TH1* valfm=extractDistribution("vmf",vmf);
-  TH1* valvp=extractDistribution("vpv",vpv);
-  TH1* valvm=extractDistribution("vmv",vmv);
+  TH1* hb=extractDistribution("base",base,mode);
+  TH1* valep=extractDistribution("vpe",vpe,mode);
+  TH1* valem=extractDistribution("vme",vme,mode);
+  TH1* valfp=extractDistribution("vpf",vpf,mode);
+  TH1* valfm=extractDistribution("vmf",vmf,mode);
+  TH1* valvp=extractDistribution("vpv",vpv,mode);
+  TH1* valvm=extractDistribution("vmv",vmv,mode);
   
-  valep->Scale(hb->Integral(15,86)/valep->Integral(15,86));
-  valem->Scale(hb->Integral(15,86)/valem->Integral(15,86));
+  valep->Scale(hb->Integral(16,85)/valep->Integral(16,85));
+  valem->Scale(hb->Integral(16,85)/valem->Integral(16,85));
 
-  valfp->Scale(hb->Integral(15,86)/valfp->Integral(15,86));
-  valfm->Scale(hb->Integral(15,86)/valfm->Integral(15,86));
+  valfp->Scale(hb->Integral(16,85)/valfp->Integral(16,85));
+  valfm->Scale(hb->Integral(16,85)/valfm->Integral(16,85));
 
-  valvp->Scale(hb->Integral(15,86)/valvp->Integral(15,86));
-  valvm->Scale(hb->Integral(15,86)/valvm->Integral(15,86));
+  valvp->Scale(hb->Integral(16,85)/valvp->Integral(16,85));
+  valvm->Scale(hb->Integral(16,85)/valvm->Integral(16,85));
 
-  hb=unfold(hb,"unfoldingMatrix_theOutPut.root");
-  valep=unfold(valep,"unfoldingMatrix_theOutPut.root");
-  valem=unfold(valem,"unfoldingMatrix_theOutPut.root");
-  valfp=unfold(valfp,"unfoldingMatrix_theOutPut.root");
-  valfm=unfold(valfm,"unfoldingMatrix_theOutPut.root");
-  valvp=unfold(valvp,"unfoldingMatrix_theOutPut.root");
-  valvm=unfold(valvm,"unfoldingMatrix_theOutPut.root");
-  
+  if (mode==3) {
+    hb=unfold(hb,"unfoldingMatrix_theOutPut.root");
+    valep=unfold(valep,"unfoldingMatrix_theOutPut.root");
+    valem=unfold(valem,"unfoldingMatrix_theOutPut.root");
+    valfp=unfold(valfp,"unfoldingMatrix_theOutPut.root");
+    valfm=unfold(valfm,"unfoldingMatrix_theOutPut.root");
+    valvp=unfold(valvp,"unfoldingMatrix_theOutPut.root");
+    valvm=unfold(valvm,"unfoldingMatrix_theOutPut.root");
+  }
+
   valep->Add(hb,-1);
   valem->Add(hb,-1);
 
@@ -114,11 +127,14 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,
 
   }
 
-  TCanvas* c1=new TCanvas("c1","c1",800,800);
-  c1->SetLeftMargin(0.15);
-  c1->SetTopMargin(0.02);
-  c1->SetRightMargin(0.02);
-  c1->SetBottomMargin(0.10);
+  TCanvas* c1=0;
+  if (mode==1) {
+    c1=new TCanvas("c1","c1",800,800);
+    c1->SetLeftMargin(0.15);
+    c1->SetTopMargin(0.02);
+    c1->SetRightMargin(0.02);
+    c1->SetBottomMargin(0.10);
+  }
 
   //  valm->SetLineColor(kBlue);
   //  valp->SetLineColor(kRed);
@@ -133,16 +149,17 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,
   
   valave->SetTitle(0);
   valave->SetStats(0);
-  valave->GetXaxis()->SetRangeUser(-3.6,3.6);
+  valave->GetXaxis()->SetRangeUser(-3.5,3.5);
   valave->GetXaxis()->CenterTitle(true);
   valave->GetYaxis()->SetTitle("Fractional Error from Energy Scale");
   valave->GetYaxis()->SetTitleOffset(1.8);
   valave->GetYaxis()->CenterTitle(true);
-  valave->Draw("HIST");
+  if (mode==1)   valave->Draw("HIST");
+  else   valave->Draw("HISTSAME");
   //  valm->Draw("HIST SAME");
 
   zrap_Prelim(0.6,0.9,0.6,0.87);
-  c1->Print("energyScale.eps");
+  if (c1!=0) c1->Print("energyScale.eps");
 
   if (errfile!=0) fclose(errfile);
 
