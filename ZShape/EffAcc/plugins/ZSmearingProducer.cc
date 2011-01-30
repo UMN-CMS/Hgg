@@ -333,6 +333,8 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
     double myconst = ( deteta > 0 ) ? HFParams_.constantp : HFParams_.constantm;
     double mymean = ( deteta > 0 ) ? HFParams_.meanp : HFParams_.meanm;
     double mysig = TMath::Power(TMath::Power(HFParams_.stocastic/sqrt(std::max(e,1.0)),2)+myconst*myconst,0.5);
+    //double mysig = HFParams_.stocastic/sqrt(std::max(e,1.0)+myconst;
+
     double  etaFact=sinh(eta)/sinh(deteta);
     Efrac = randomNum_->Gaus(mymean,mysig);
     double newEta=deteta;

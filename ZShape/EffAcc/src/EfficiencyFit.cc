@@ -682,14 +682,17 @@ void EfficiencyFit::produceConfig(std::string myconfig, std::string mytemplate,s
       //Open the input file
       ifstream is(mytemplate.c_str());
       char str [1000];
+      int yup = 0;
       while ( 	is.getline(str,1000)){
 	// std::cout << str <<"\n";
 	std::string mystr = str; //me likes strings, easy to use predefined algos to manipulate!
 
 	//find the xxbinxx thing first, and take the first part
+	
 	uint pos = mystr.find("xxbinxx");
-	if (pos != string::npos) 
+	if (pos != string::npos && !yup) 
 	  {
+	    yup = 1;
 	    mbinname = mystr.substr(0,pos)+ bincomb;
 	    if ( r == 0 ) bintopdfmap += "\""+mystr.substr(0,pos)+"\"";
 	  }

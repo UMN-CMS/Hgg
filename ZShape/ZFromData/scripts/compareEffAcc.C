@@ -222,7 +222,7 @@ EffAccHistos::getHistos(void)
    //MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/All/Z0_YTL"); //Changed to Z0_YTL rather than Z0_Y... to be the "truth"
    std::cout << " why am I here " << std::endl;
    //MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/AllInRange/Acceptance/Z0_YTL"); //Changed For ALL mass range  
-   MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/AllInRange/C01-m(70,110)/Z0_YTL"); //Changed InRange Z0_YTL
+   MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("mcEff/AllInRange/C01-m(60,120)/Z0_YTL"); //Changed InRange Z0_YTL
    ////MCHistos_.ZRapMC = (TH1F*)ZMCFile_->Get("ZFromData/AllFirst/Z0_Y"); //Changed InRange Z0_YTL
    std::cout << " oh boy 0 " << std::endl;
    //MCHistos_.ZRapMC->Sumw2();
@@ -250,10 +250,10 @@ EffAccHistos::getHistos(void)
    {
       std::cout << " The Z Defs under consideration are " << (*mine) << std::endl;
       //FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
-      FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
+      FromDataHists_.push_back((TH1F*)ZFDFile_->Get(Form("ZFromData/%s/C08-m(60,120)/Z0_Y",(*mine).c_str())));
       //MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C07-HLT-EtaDet/Z0_Y",(*mine).c_str())));
-      ///MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("ZFromData/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
-      MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C08-m(70,110)/Z0_Y",(*mine).c_str())));
+      ///MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("ZFromData/%s/C08-m(60,120)/Z0_Y",(*mine).c_str())));
+      MCHistos_.ZRap.push_back((TH1F*)ZMCFile_->Get(Form("mcEff/%s/C08-m(60,120)/Z0_Y",(*mine).c_str())));
 
 
       namedvechists ZFDhist;
@@ -757,6 +757,7 @@ myhmc->Scale(2./myhmc->Integral());
 
  //here i need to scale TOTAL
   total = 12816;
+  total = 14000;
 
   for (Int_t bin = 1 ; bin < numBins/2+1 ; ++bin)
     {
