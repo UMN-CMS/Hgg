@@ -181,8 +181,8 @@ void plotFinalQt(TFile* mctruth) {
   bool doUnsmearing(false); // use this to activate unsmearing + associated errors or leave it completely off
   if (doUnsmearing) {
     TH1* data_corr_smeared=corrData.makeTH1("data_corr_smeared");
-    TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../root/unfoldingMatrix_theOutPut.root");
-    TFile*    theunfoldingMatrixInputFile = new TFile("../root/unfoldingMatrix_theOutPut.root","read");
+    TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../root/unfoldingMatrix-pt_theOutPut.root");
+    TFile*    theunfoldingMatrixInputFile = new TFile("../root/unfoldingMatrix-pt_theOutPut.root","read");
     TMatrixD* theUnfoldingMatrix          = (TMatrixD*)theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotal"); // indices [0.. 99] X [0.. 99]
     double errorCumul=0;
     for (int i=0; i<BINCOUNT; i++) {  
