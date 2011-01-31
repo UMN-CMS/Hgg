@@ -26,7 +26,7 @@ void plotEffStat(TFile* f, TFile* of=0, const char* var="Z0_Y") {
   TLegend* tl=new TLegend(0.5,0.8,0.95,0.95);
 
 
-  TDirectory* ecec=defcont->Get("ECAL80-ECAL95");
+  TDirectory* ecec=defcont->Get("ECAL80-ECAL95-MUO");
   TDirectory* echf=defcont->Get("ECAL80-HF");
   TDirectory* ecnt=defcont->Get("ECAL80-NTTight");
 
@@ -102,7 +102,7 @@ void plotEffStat(TFile* f, TFile* of=0, const char* var="Z0_Y") {
 }
 
 
-void plotEffSyst(TFile* f, TFile *fhf,  TFile* of=0, const char* var="Z0_Pt", const char* varpm="Plus") {
+void plotEffSyst(TFile* f, TFile *fhf,  TFile* of=0, const char* var="Z0_Pt_masscut", const char* varpm="Plus") {
   setTDRStyle();
 
   TDirectory* based=(TDirectory*)f->Get("mcEff");
@@ -151,7 +151,7 @@ void plotEffSyst(TFile* f, TFile *fhf,  TFile* of=0, const char* var="Z0_Pt", co
   TLegend* tl=new TLegend(0.5,0.8,0.95,0.95);
 
 
-  TDirectory* ecec=based->Get("ECAL80-ECAL95/C07-HLT-GSF");
+  TDirectory* ecec=based->Get("ECAL80-ECAL95-MUO/C07-HLT-GSF");
   TDirectory* echf=based->Get("ECAL80-HF/C07-HLT-GSF");
   TDirectory* ecnt=based->Get("ECAL80-NTTight/C07-HLT-GSF");
 
