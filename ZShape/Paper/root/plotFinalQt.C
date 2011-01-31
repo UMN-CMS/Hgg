@@ -367,8 +367,8 @@ void plotFinalQt(TFile* mctruth) {
   tl->AddEntry(truth_vis,"POWHEG+CT10 Prediction","l");
   tl->Draw();
 
-  zrap_Prelim(0.85,0.90,0.85,0.85);
-  zrap_Lumi(0.85,0.86,lumi);
+  zrap_Prelim(0.82,0.90,0.82,0.85);
+  zrap_Lumi(0.82,0.86,lumi);
 
   sprintf(fnamework,"ZQt_final-%d.eps",lumi);
   c1->Print(fnamework);
@@ -441,8 +441,8 @@ void plotFinalQt(TFile* mctruth) {
   tl->AddEntry(effacc_syst_gr,"Efficiency Systematics","L");
   tl->Draw();
   
-  zrap_Prelim(0.3,0.24,0.3,0.2);
-  zrap_Lumi(0.30,0.19,lumi);
+  zrap_Prelim(0.82,0.26,0.82,0.2);
+  zrap_Lumi(0.82,0.21,lumi);
 
   sprintf(fnamework,"ZQt_final_errors-%d.eps",lumi);
   c3->Print(fnamework);

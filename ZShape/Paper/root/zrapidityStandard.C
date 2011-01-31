@@ -55,7 +55,7 @@ void zrap_Prelim(double px, double py, double tx=-1, double ty=-1) {
     tlabel -> SetTextAlign(22);
     tlabel -> SetTextAngle(0);
     
-    tlabel -> DrawText(tx, ty, Form("%s",time_));
+    tlabel -> DrawText(tx, ty-0.04, Form("%s",time_));
   }
 }
 
