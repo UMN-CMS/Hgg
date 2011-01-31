@@ -181,8 +181,9 @@ void plotFinal(TFile* mctruth, int mode=1) {
   // unsmear
   DataSeries corrDataClone(corrData);
 
-  bool doUnsmearing(false); // use this to activate unsmearing + associated errors or leave it completely off
-  if (doUnsmearing) {
+
+  bool       doMatrixUnsmearing(false); // use this to activate matrix (type-3) unsmearing + associated errors or leave it off  
+  if (doMatrixUnsmearing) {
     TH1* data_corr_smeared=corrData.makeTH1("data_corr_smeared",100,0);
     TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../root/unfoldingMatrix_theOutPut.root");
     TFile*    theunfoldingMatrixInputFile = new TFile("../root/unfoldingMatrix_theOutPut.root","read");
@@ -193,7 +194,7 @@ void plotFinal(TFile* mctruth, int mode=1) {
       for (int s=0; s<BINCOUNT; s++) {
 	errorCumul+= pow( corrDataClone.ey[s] * (*theUnfoldingMatrix)(s,i) , 2);
       }
-      if (doUnsmearing) corrData.ey[i]=sqrt(errorCumul);
+      if (doMatrixUnsmearing) corrData.ey[i]=sqrt(errorCumul);
       errorCumul=0;
     }
   }
@@ -206,6 +207,16 @@ void plotFinal(TFile* mctruth, int mode=1) {
   //DataSeries pdfFrac(data_all);
 
   DataSeries energyScale("energyScaleError.csv");
+
+  DataSeries unfoldSystMatrix("unfolding-relative-errors.txt");
+  DataSeries unfoldSystAverage("averageUnfolding-relative-errors.txt");
+  DataSeries unfoldSyst(unfoldSystAverage);
+  // there's a switch doMatrixUnsmearing  to activate matrix (type 3) unsmearing + associated errors or leave it  off (e.g. when type-2 is done)
+  if(doMatrixUnsmearing){
+    for (int i=0; i<BINCOUNT; i++) {
+      unfoldSyst.y[i]=unfoldSystMatrix.y[i];
+    }
+  }
 
   DataSeries effSystGSF("effSystGSFError.csv");
   DataSeries effSystWP80("effSystWP80Error.csv");
@@ -257,6 +268,7 @@ void plotFinal(TFile* mctruth, int mode=1) {
 			    pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
 			    pow(backgroundAllUnc.y[i]/effAcc.y[i],2)+
 			    pow(energyScale.y[i]*corrData.y[i],2)+
+			    pow(unfoldSyst.y[i]*corrData.y[i],2)+
 			    pow(effSystErr.y[i]*corrData.y[i],2)+
 			    0
 			    //			    pow(pdfTotal.y[i],2)
@@ -265,6 +277,7 @@ void plotFinal(TFile* mctruth, int mode=1) {
     totalSyst.ey[i]=sqrt( pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
 			  pow(backgroundAllUnc.y[i]/effAcc.y[i],2)+
 			  pow(energyScale.y[i]*corrData.y[i],2)+
+			  pow(unfoldSyst.y[i]*corrData.y[i],2)+
 			  pow(effSystErr.y[i]*corrData.y[i],2)+
 			  0
 			  //			  pow(pdfTotal.y[i],2)
@@ -303,7 +316,8 @@ void plotFinal(TFile* mctruth, int mode=1) {
     //    double pdferr=(pdfFrac.y[j]+pdfFrac.y[jadd])/2*corrDataFold.y[j]/sumtotal;
     double bkgderr=sqrt(pow(backgroundAllUnc.y[j],2)+pow(backgroundAllUnc.y[jadd],2))/ea_Ave/sumtotal;
     double energyerr=(energyScale.y[j]+energyScale.y[jadd])/2/ea_Ave/sumtotal;
-
+    double unfolder=(unfoldSyst.y[j]+unfoldSyst.y[jadd])/2/ea_Ave/sumtotal;
+    
     //corrDataFold.ey[j]=sqrt(data_all.y[j]+data_all.y[jadd]+backgroundAll.y[j]+backgroundAll.y[jadd])/ea_Ave/sumtotal;//FG
     corrDataFold.ey[j]=sqrt( pow(corrData.ey[j]*effAcc.y[j],2) + pow(corrData.ey[jadd]*effAcc.y[j],2) )/ea_Ave/sumtotal;
 
@@ -313,6 +327,7 @@ void plotFinal(TFile* mctruth, int mode=1) {
 				pow(corrDataFold.y[j]*(effSystErr.y[j]+effSystErr.y[jadd])/2,2)+
 				//				pow(pdferr,2)+
 				pow(energyerr,2)+
+				pow(unfolder,2)+
 				pow(bkgderr,2)
 				);
 
@@ -441,7 +456,7 @@ void plotFinal(TFile* mctruth, int mode=1) {
   truthalt->Draw("SAMEHIST");
 
   zrap_Prelim(0.32,0.24,0.32,0.15);
-  zrap_Lumi(0.32,0.19,lumi);
+  zrap_Lumi(0.32,0.195,lumi);
   
 
   sprintf(fnamework,"ZRapidity_final_fold-%d.eps",lumi);
@@ -467,6 +482,7 @@ void plotFinal(TFile* mctruth, int mode=1) {
   TH1* gr_bkgd_unc=backgroundUncFrac.makeTH1("bkgd unc",npoint,firsti-1);
   //  TH1* gr_pdf=pdfFrac.makeTH1("pdf_err",npoint,firsti-1);
   TH1* gr_energyscale=energyScale.makeTH1("es_unc",npoint,firsti-1);
+  TH1* gr_unfold=unfoldSyst.makeTH1("unfold unc",npoint,firsti-1);
   TH1* gr_systotal=totalSyst.makeTH1("total_syst",npoint,firsti-1);
   dummy3->Draw();
 
@@ -489,6 +505,9 @@ void plotFinal(TFile* mctruth, int mode=1) {
   gr_energyscale->SetLineWidth(2);
   gr_energyscale->SetLineColor(kBlue);
 
+  gr_unfold->SetLineWidth(2);
+  gr_unfold->SetLineColor(kViolet);
+
   //  gr_pdf->SetLineWidth(2);
   //  gr_pdf->SetLineColor(kViolet-5);
 
@@ -501,6 +520,8 @@ void plotFinal(TFile* mctruth, int mode=1) {
   gr_dataStatError->Draw("HSAME");
   gr_bkgd_unc->Draw("HSAME");
   gr_energyscale->Draw("HSAME");
+  gr_unfold->Draw("HSAME");
+
   //  gr_pdf->Draw("HSAME");
   gr_systotal->Draw("HISTSAME");
 
@@ -512,11 +533,12 @@ void plotFinal(TFile* mctruth, int mode=1) {
   tl->AddEntry(effacc_stat_gr,"Efficiency Statistics","L");
   //  tl->AddEntry(gr_pdf,"PDF (#epsilon #times A) Uncertainty","L");
   tl->AddEntry(gr_energyscale,"Energy Scale Uncertainty","L");
+  tl->AddEntry(gr_unfold,"Unfolding Uncertainty","L");
   tl->AddEntry(effacc_syst_gr,"Efficiency Systematics","L");
   tl->Draw();
   
-  zrap_Prelim(0.3,0.24,0.3,0.2);
-  zrap_Lumi(0.30,0.19,lumi);
+  zrap_Prelim(0.32,0.24,0.3,0.16);
+  zrap_Lumi(0.32,0.20,lumi);
 
   sprintf(fnamework,"ZRapidity_final_errors-%d.eps",lumi);
   c3->Print(fnamework);
@@ -538,6 +560,7 @@ sprintf(fnamework,"ZRapidity_final_fold_errtable-%d.tex",lumi);
     double staterr=(ea_statErr.y[j]+ea_statErr.y[jadd])/2;
     double systerr=(effSystErr.y[j]+effSystErr.y[jadd])/2;
     double energyerr=(energyScale.y[j]+energyScale.y[jadd])/2;
+    double unfolderr=(unfoldSyst.y[j]+unfoldSyst.y[jadd])/2;
 
     //    errmig/=binwidth*corrDataFold.y[j];
     //    pdferr/=binwidth*corrDataFold.y[j];
@@ -547,14 +570,14 @@ sprintf(fnamework,"ZRapidity_final_fold_errtable-%d.tex",lumi);
 
 
     if (i==0) {
-      fprintf(ftable,"\\begin{tabular}{|c|c||c|c|c|c|}\\hline\n");
-      fprintf(ftable,"            &             & Efficiency &   Bin     & Energy Scale  & Background \\\\ \n");
-      fprintf(ftable,"$|Y_{min}|$ & $|Y_{max}|$ & Statistics & Migration & Uncertainty & Estimation \\\\ \\hline \n");
+      fprintf(ftable,"\\begin{tabular}{|c|c||c|c|c|c|c|}\\hline\n");
+      fprintf(ftable,"            &             & Efficiency &   Bin     & Energy Scale & Unfolding   & Background \\\\ \n");
+      fprintf(ftable,"$|Y_{min}|$ & $|Y_{max}|$ & Statistics & Migration & Uncertainty  & Uncertainty & Estimation \\\\ \\hline \n");
     }
-      fprintf(ftable," %7.2f & %7.2f & %.4f & %.4f & %.4f & %.4f \\\\ \n",
+      fprintf(ftable," %7.2f & %7.2f & %.4f & %.4f & %.4f & %.4f & %.4f \\\\ \n",
              corrDataFold.xave[j]-corrDataFold.xwidth[j],
              corrDataFold.xave[j]+corrDataFold.xwidth[j],
-             staterr,systerr,energyerr,bkgderr);
+             staterr,systerr,energyerr,unfolderr,bkgderr);
     
   }
   fprintf(ftable,"\\hline\n\\end{tabular}\n");
