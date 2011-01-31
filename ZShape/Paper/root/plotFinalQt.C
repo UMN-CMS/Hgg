@@ -208,6 +208,8 @@ void plotFinalQt(TFile* mctruth) {
   DataSeries effSystWP80("effSystWP80PtError.csv");
   DataSeries effSystWP95("effSystWP95PtError.csv");
   DataSeries effSystHLT("effSystHLTPtError.csv");
+  
+  DataSeries unfoldSyst("unfolding-relative-errors-pt.txt");
 
   DataSeries effSystErr;
 
@@ -215,7 +217,7 @@ void plotFinalQt(TFile* mctruth) {
     effSystErr.y[i]=sqrt(pow(effSystGSF.y[i],2)+
 			 pow(effSystWP80.y[i],2)+
 			 pow(effSystWP95.y[i],2)+
-			 pow(effSystHLT.y[i],2));
+			 pow(effSystHLT.y[i],2)); //GF add unfolding here
   }  
 
   double sumtotal=0;
@@ -247,14 +249,16 @@ void plotFinalQt(TFile* mctruth) {
 			    pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
 			    pow(backgroundAllUnc.y[i]/effAcc.y[i],2)+
 			    pow(energyScale.y[i]*corrData.y[i],2)+
+			    pow(unfoldSyst.y[i]*corrData.y[i],2)+
 			    pow(effSystErr.y[i]*corrData.y[i],2)+
 			    0
 			    //			    pow(pdfTotal.y[i],2)
 			    );
-
+    
     totalSyst.ey[i]=sqrt( pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
 			  pow(backgroundAllUnc.y[i]/effAcc.y[i],2)+
 			  pow(energyScale.y[i]*corrData.y[i],2)+
+			  pow(unfoldSyst.y[i]*corrData.y[i],2)+
 			  pow(effSystErr.y[i]*corrData.y[i],2)+
 			  0
 			  //			  pow(pdfTotal.y[i],2)
@@ -393,6 +397,7 @@ void plotFinalQt(TFile* mctruth) {
   TH1* gr_bkgd_unc=backgroundUncFrac.makeTH1("bkgd unc");
   //  TH1* gr_pdf=pdfFrac.makeTH1("pdf_err");
   TH1* gr_energyscale=energyScale.makeTH1("es_unc");
+  TH1* gr_unfolding=unfoldSyst.makeTH1("unfold unc");
   TH1* gr_systotal=totalSyst.makeTH1("total_syst");
   dummy3->Draw();
 
@@ -415,6 +420,9 @@ void plotFinalQt(TFile* mctruth) {
   gr_energyscale->SetLineWidth(2);
   gr_energyscale->SetLineColor(kBlue);
 
+  gr_unfolding->SetLineWidth(2);
+  gr_unfolding->SetLineColor(kViolet);
+
   //  gr_pdf->SetLineWidth(2);
   //  gr_pdf->SetLineColor(kViolet-5);
 
@@ -428,15 +436,17 @@ void plotFinalQt(TFile* mctruth) {
   gr_bkgd_unc->Draw("HSAME");
   gr_energyscale->Draw("HSAME");
   //  gr_pdf->Draw("HSAME");
+  gr_unfolding->Draw("HSAME");
   gr_systotal->Draw("HISTSAME");
 
-   tl=new TLegend(0.35,0.70,0.75,0.94,"Error Source Contributions");
+  tl=new TLegend(0.35,0.70,0.75,0.94,"Error Source Contributions");
    //  tl->AddEntry(binmiggr,"Bin Migration","L");
   tl->AddEntry(gr_dataStatError,"Data Statistics","L");
   tl->AddEntry(gr_systotal,"Total Systematic Error","L");
   tl->AddEntry(gr_bkgd_unc,"Background Uncertainty","L");
   tl->AddEntry(effacc_stat_gr,"Efficiency Statistics","L");
   //  tl->AddEntry(gr_pdf,"PDF (#epsilon #times A) Uncertainty","L");
+  tl->AddEntry(gr_unfolding,"Unfolding Uncertainty","L");
   tl->AddEntry(gr_energyscale,"Energy Scale Uncertainty","L");
   tl->AddEntry(effacc_syst_gr,"Efficiency Systematics","L");
   tl->Draw();
