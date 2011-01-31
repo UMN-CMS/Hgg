@@ -43,6 +43,9 @@ void plotEffAcc(TFile* f, int mode=0, const char* var="Z0_Y_masscut") {
     base=(TH1*)((TDirectory*)basedir->Get("All"))->Get("Z0_Pt");
   }
 
+  TH1* baseclone=base->Clone("BaseClone");
+  baseclone->Scale(0.64/(0.5*(baseclone->GetBinContent(50)+baseclone->GetBinContent(51))));
+
   TDirectory* zdir=basedir->Get("ECAL80-ECAL95");
   TDirectory* zdir2=basedir->Get("ECAL80-HF");
 
@@ -171,7 +174,7 @@ void plotEffAcc(TFile* f, int mode=0, const char* var="Z0_Y_masscut") {
   final->GetYaxis()->SetTitleOffset(1.2);
   final->SetTitle(0);
   final->SetStats(false);
-  final->SetMaximum(0.85);
+  final->SetMaximum(0.90);
   final->SetMinimum(0.0);
   if (strstr(var,"Y")!=0) {
     final->GetXaxis()->SetRangeUser(-4.5,4.5);
@@ -185,7 +188,7 @@ void plotEffAcc(TFile* f, int mode=0, const char* var="Z0_Y_masscut") {
   final2->Draw("SAMEHIST");
   finalt->Draw("SAMEHIST");
 
-  tl3=new TLegend(0.65,0.75,0.9,0.9);
+  tl3=new TLegend(0.55,0.74,0.95,0.95);
   tl3->SetFillStyle(0);
   tl3->AddEntry(final,"ECAL-ECAL");
   tl3->AddEntry(final2,"ECAL-HF");
@@ -200,6 +203,23 @@ void plotEffAcc(TFile* f, int mode=0, const char* var="Z0_Y_masscut") {
   if (post==0) sprintf(stuff,"effacc_bytype.eps");
   else sprintf(stuff,"effacc_bytype_%s.eps",post);
   c2->Print(stuff);
+
+  baseclone->SetLineWidth(2);
+  baseclone->SetLineStyle(2);
+  baseclone->SetLineColor(kGreen+1);
+  tl3->AddEntry(baseclone,"POWHEG+CT10 Prediction");
+
+  baseclone->Draw("SAMEHIST");
+
+  if (post==0) sprintf(stuff,"effacc_bytypetheory.png");
+  else sprintf(stuff,"effacc_bytypetheory_%s.png",post);
+  c2->Print(stuff);
+  if (post==0) sprintf(stuff,"effacc_bytypetheory.eps");
+  else sprintf(stuff,"effacc_bytypetheory_%s.eps",post);
+  c2->Print(stuff);
+
+  
+
 
   if (post==0) sprintf(stuff,"effacc.txt");
   else sprintf(stuff,"effacc_%s.txt",post);

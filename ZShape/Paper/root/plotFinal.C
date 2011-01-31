@@ -113,7 +113,7 @@ void DataSeries::create(const char* file, int iy) {
 }
 
 void plotFinal(TFile* mctruth, int mode=1) {
-  int lumi=30;
+  int lumi=36;
   setTDRStyle();
 
   TH1* truth=(TH1*)(mctruth->Get("mcEff/All/Z0_Y_masscut")->Clone("truth"));
@@ -130,11 +130,17 @@ void plotFinal(TFile* mctruth, int mode=1) {
   DataSeries ea_statErr("effStatError.csv");
 
   const int firsti=16;
-  const int lasti=84;
-  const int npoint=lasti-firsti+2;
+  const int lasti=85;
+  const int npoint=lasti-firsti+1;
 
   double tt=0, td=0;
- 
+
+  /* 
+     // study HF efficiency shifts
+  for (int i=firsti-1; i<=lasti-1; i++)
+    if (i<26 || i>74) effAcc.y[i]*=0.95;
+  */
+
   for (int i=0; i<BINCOUNT; i++) {
     data_bkgd.y[i]=data_ef.y[i]+data_ee.y[i];
   }
@@ -163,20 +169,16 @@ void plotFinal(TFile* mctruth, int mode=1) {
   DataSeries corrData(data_all);
   DataSeries totalSyst(data_all);
 
-  for (int i=0; i<BINCOUNT; i++) {  
-    if (effAcc.y[i]==0) {
-      corrData.y[i]=0;
-      continue;
-    }
-    corrData.y[i]/=effAcc.y[i];
-  }
-  // unsmear
-
 
   for (int i=0; i<BINCOUNT; i++) {  
     if   (effAcc.y[i]==0) corrData.y[i]=0;
-    else                  corrData.ey[i]=sqrt(data_all.y[i]+backgroundAll.y[i])/effAcc.y[i];
+    else                  {
+      corrData.y[i]/=effAcc.y[i];
+      corrData.ey[i]=sqrt(data_bkgd.y[i])/effAcc.y[i];
+    }
   }
+
+  // unsmear
   DataSeries corrDataClone(corrData);
 
   bool doUnsmearing(false); // use this to activate unsmearing + associated errors or leave it completely off
@@ -236,11 +238,13 @@ void plotFinal(TFile* mctruth, int mode=1) {
     tt+=truth->GetBinContent(i+1);
     td+=corrData.y[i];
 
-    backgroundUncFrac.y[i]=backgroundAllUnc.y[i]/std::max(1.0,data_bkgd.y[i]);
+    backgroundUncFrac.y[i]=backgroundAllUnc.y[i]/std::max(1.0,data_all.y[i]);
     // GF
     //corrDataBkgd.ey[i]=sqrt(data_all.y[i]+backgroundAll.y[i])/effAcc.y[i];
     
     dataStatError.y[i]= corrDataBkgd.ey[i]/std::max(1.0,corrDataBkgd.y[i]);
+
+    printf("%d %f\n",i+1,backgroundUncFrac.y[i]);
 
     //    corrDataSyst.y[i]/=effAcc.y[i];
 
@@ -340,10 +344,12 @@ void plotFinal(TFile* mctruth, int mode=1) {
   // this is special
   TGraph* corrdsysb=new TGraphErrors(npoint,corrDataBkgd.xave+firsti-1,corrDataBkgd.y+firsti-1,corrDataSyst.xwidth+firsti-1,corrDataSyst.ey+firsti-1);
 
-  TH2* dummy=new TH2F("dummy","dummy",20,-3.5,3.5,30,0,600);
+  TH2* dummy=new TH2F("dummy","dummy",20,-3.5,3.5,30,0,700);
 
   dummy->GetYaxis()->SetTitle("Events/0.1 Units of Rapidity");
-  dummy->GetXaxis()->SetTitle("Y_{Z}");
+  dummy->GetXaxis()->SetTitle("y_{Z}");
+  dummy->GetXaxis()->CenterTitle();
+  dummy->GetYaxis()->CenterTitle();
   
   TCanvas* c1=new TCanvas("finalZRap","finalZRap",800,600);
   dummy->Draw();
@@ -376,8 +382,8 @@ void plotFinal(TFile* mctruth, int mode=1) {
   tl->AddEntry(truth,"POWHEG+CT10 Prediction","l");
   tl->Draw();
 
-  zrap_Prelim(0.85,0.90,0.85,0.85);
-  zrap_Lumi(0.85,0.86,lumi);
+  zrap_Prelim(0.82,0.90,0.82,0.80);
+  zrap_Lumi(0.82,0.86,lumi);
 
   sprintf(fnamework,"ZRapidity_final-%d.eps",lumi);
   c1->Print(fnamework);
@@ -416,9 +422,11 @@ void plotFinal(TFile* mctruth, int mode=1) {
   
 
   c2->cd();
-  dummy2->GetYaxis()->SetTitle("1/#sigma d#sigma/dY");
-  dummy2->GetXaxis()->SetTitle("|Y_{Z}|");
-  
+  dummy2->GetYaxis()->SetTitle("1/#sigma d#sigma/dy");
+  dummy2->GetXaxis()->SetTitle("|y_{Z}|");
+  dummy2->GetXaxis()->CenterTitle();
+  dummy2->GetYaxis()->CenterTitle();
+
   dummy2->Draw();
 
   TGraph* corrdfold=new TGraphErrors(npoint/2,corrDataFold.xave+izero-1,corrDataFold.y+izero-1,corrDataFold.xwidth+izero-1,corrDataFold.ey+izero-1);
@@ -432,8 +440,8 @@ void plotFinal(TFile* mctruth, int mode=1) {
   truthalt->SetLineColor(kRed);
   truthalt->Draw("SAMEHIST");
 
-  zrap_Prelim(0.3,0.24,0.3,0.2);
-  zrap_Lumi(0.30,0.19,lumi);
+  zrap_Prelim(0.32,0.24,0.32,0.15);
+  zrap_Lumi(0.32,0.19,lumi);
   
 
   sprintf(fnamework,"ZRapidity_final_fold-%d.eps",lumi);
@@ -448,8 +456,8 @@ void plotFinal(TFile* mctruth, int mode=1) {
   dummy3->SetMaximum(1.0);
   dummy3->SetMinimum(0.001);
   dummy3->GetYaxis()->SetTitle("Fractional Error");
-  dummy3->GetXaxis()->SetTitle("Y_{Z}");
-
+  dummy3->GetXaxis()->SetTitle("y_{Z}");
+  dummy3->GetXaxis()->CenterTitle();
 
   
   //  TH1* binmiggr=binMigPos.makeTH1("bin migration",npoint,firsti-1);
