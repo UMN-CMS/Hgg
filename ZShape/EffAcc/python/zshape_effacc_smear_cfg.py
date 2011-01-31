@@ -17,6 +17,8 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring("")
 )
 
+process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
+
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string('histo_10M_partBUILDINGTTEST.root')
 )
