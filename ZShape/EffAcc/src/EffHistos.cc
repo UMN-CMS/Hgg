@@ -53,7 +53,7 @@ void EffHistos::Book(TFileDirectory& tdf) {
 
   mZ_Y_ = tdf.make<TH2F>("Z0_Y_v_mass","Z0_Y_v_mass;Y_{Z0};m_{Z0}", zshape::y_bins, -zshape::y_max, zshape::y_max, 3*binsZmass, minZmass-10, maxZmass);
   pt_Y_ = tdf.make<TH2F>("Z0_Y_v_pt","Z0_Y_v_pt;Y_{Z0};p_{T,Z0}", zshape::y_bins, -zshape::y_max, zshape::y_max, zshape::pt_bins, zshape::pt_binning);
-  mZ_pt_ = tdf.make<TH2F>("Z0_pt_v_mass","Z0_pt_v_mass;m_{Z0};p_{T,Z0}",3*binsZmass, minZmass-10, maxZmass, zshape::pt_bins,zshape::pt_binning);
+  mZ_pt_ = tdf.make<TH2F>("Z0_pt_v_mass","Z0_pt_v_mass;p_{T,Z0};m_{Z0}", zshape::pt_bins,zshape::pt_binning,3*binsZmass, minZmass-10, maxZmass-10);
 
   e1eta_YZ_    = tdf.make<TH2F>("e1_eta_vs_Z0Y","e1_eta_vs_Z0Y;detector #eta_{e1};Y_{Z0}", 50, -5, 5,zshape::y_bins, -zshape::y_max, zshape::y_max );
   e2eta_YZ_    = tdf.make<TH2F>("e2_eta_vs_Z0Y","e2_eta_vs_Z0Y;detector #eta_{e2};Y_{Z0}", 50, -5, 5,zshape::y_bins, -zshape::y_max, zshape::y_max );

@@ -10,6 +10,8 @@
 #include <TH2.h>
 #include <TFile.h>
 #include <TKey.h>
+#include <TText.h>
+#include <TPaveText.h>
 #include <TCanvas.h>
 #include <TMath.h>
 
@@ -151,10 +153,50 @@ void SignalBackgroundExtraction::setRootFile(TFile * file){
 			  std::string dirname = effName_ + key2->GetName();
 			  TCanvas *tcan = (TCanvas* ) mdir2->Get(key3->GetName());
 			  tcan->cd();
-			  tcan->SetCanvasSize(1200,900);
-			  tcan->Draw();
-			  tcan->Print(Form("%s.png",dirname.c_str()));
-			  tcan->Print(Form("%s.eps",dirname.c_str()));
+			  TCanvas *myc2 = new TCanvas("myc2","myc2", 1200, 800);
+			  myc2->cd();
+
+			  TPad *mypad = (TPad*)tcan->GetPrimitive("fit_canvas_3");
+			  TIter mnext (mypad->GetListOfPrimitives());
+			  TObject *mkey;
+			  while((mkey=((TObject*) mnext()) )){
+			    if (strcmp(mkey->ClassName(),"TH1D")==0)
+			      {	
+				((TH1D*) mypad->GetPrimitive(mkey->GetName()))->SetTitle("");
+				((TH1D*) mypad->GetPrimitive(mkey->GetName()))->GetXaxis()->SetTitle("m_{Z} (GeV/c^{2})");
+				((TH1D*) mypad->GetPrimitive(mkey->GetName()))->GetXaxis()->CenterTitle(1);
+				((TH1D*) mypad->GetPrimitive(mkey->GetName()))->GetYaxis()->CenterTitle(1);
+				((TH1D*)mypad->GetPrimitive(mkey->GetName()))->GetYaxis()->SetRangeUser(0.01,75);
+				
+			      }
+			  }
+			  TPad *mypl =   (TPad*)tcan->GetPrimitive("fit_canvas_4");
+ 			  TPaveText *mypav = (TPaveText*) mypl->GetPrimitive("simPdf_paramBox");
+
+			  TPaveText *nmypav = new TPaveText(0.6,0.78,0.90,0.90,"brNDC");
+			  
+			  TText *l1 = nmypav->AddText(mypav->GetLine(2)->GetTitle());
+			  TText *l2 = nmypav->AddText(mypav->GetLine(1)->GetTitle());
+			  nmypav->SetLineColor(kBlack);
+			  nmypav->SetTextColor(kBlack);
+			  nmypav->SetFillColor(kWhite);
+
+			  myc2->cd();
+			  mypad->Draw();
+ 
+
+			  mypad->SetPad(0,0,1,1);
+			  mypad->cd();
+			  mypad->SetLogy(1);
+			  mypad->SetTitle("");
+			  nmypav->Draw();
+			  myc2->Modified();
+			  myc2->Update();
+			  mypad->Modified();
+
+
+			  myc2->Print(Form("%s.png",dirname.c_str()));
+			  myc2->Print(Form("%s.eps",dirname.c_str()));
 			  //This then prints out all the cute little plots... or it should.
 			}
 		      //std::cout << " key3 " << key3->GetName() << " type " << key3->GetClassName() << std::endl;
