@@ -31,6 +31,7 @@ TH1* readStandardFilePt(const char* name, const char* fname) {
   dist->Sumw2();
 
   FILE* af=fopen(fname,"rt");
+  if (af==0) return 0;
   char buffer[1024];
 
   int irow;

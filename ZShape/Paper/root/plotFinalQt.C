@@ -65,10 +65,10 @@ struct DataSeries {
 
   void create(const char* file, int iy);
 
-  void normalizeToWidth() {
+  void normalizeToWidth(double td=1.0) {
     for (int i=0; i<BINCOUNT; i++) {
-      y[i]/=(xwidth[i]*2);
-      ey[i]/=(xwidth[i]*2);
+      y[i]/=(xwidth[i]*2)*td;
+      ey[i]/=(xwidth[i]*2)*td;
     }
   }
 
@@ -122,8 +122,8 @@ void DataSeries::create(const char* file, int iy) {
   fclose(f);
 }
 
-void plotFinalQt(TFile* mctruth) {
-  int lumi=30;
+void plotFinalQt(TFile* mctruth, int mode) {
+  int lumi=36;
   setTDRStyle();
 
   TH1* truth=(TH1*)(mctruth->Get("mcEff/ECAL80-ECAL95/Acceptance/Z0_Pt_masscut")->Clone("truth"));
@@ -133,7 +133,21 @@ void plotFinalQt(TFile* mctruth) {
   DataSeries data_all;
   DataSeries data_bkgd(data_all);
   
-  DataSeries effAcc("eff_pt.txt"), ea_statErr("effStatPtError.csv");
+  DataSeries effAcc;
+  DataSeries ea_statErr("effStatPtError.csv");
+
+  const char* postfix="";
+
+  if (mode==1) {
+    effAcc=DataSeries("effAcc_pt_massCutdenom.txt");
+    postfix="_smear";
+  } else if (mode==2) {
+    effAcc=DataSeries("effAcc_pt_TLdenom.txt");
+    postfix="_avemig";
+  } else if (mode==3) {
+    effAcc=DataSeries("effAcc_pt_massCutdenom.txt");
+    postfix="_matrix";
+  }
 
   const int firsti=1;
   const int lasti=18;
@@ -178,7 +192,7 @@ void plotFinalQt(TFile* mctruth) {
   }
   DataSeries corrDataClone(corrData);
 
-  bool doUnsmearing(false); // use this to activate unsmearing + associated errors or leave it completely off
+  bool doUnsmearing(mode==3); // use this to activate unsmearing + associated errors or leave it completely off
   if (doUnsmearing) {
     TH1* data_corr_smeared=corrData.makeTH1("data_corr_smeared");
     TH1* data_corr_unsmeared=unfold(data_corr_smeared,"../root/unfoldingMatrix-pt_theOutPut.root");
@@ -197,12 +211,12 @@ void plotFinalQt(TFile* mctruth) {
   DataSeries corrDataSyst(corrData);
   DataSeries corrDataBkgd(corrData);
 
-  //  DataSeries pdfPos("pdfErrsPos.txt");
-  //  DataSeries pdfNeg("pdfErrsNeg.txt");
-  //DataSeries pdfTotal(data_all);
-  //DataSeries pdfFrac(data_all);
+  DataSeries pdfPos("pdfErrsPos_QT.txt");
+  DataSeries pdfNeg("pdfErrsNeg_QT.txt");
+  DataSeries pdfTotal(data_all);
+  DataSeries pdfFrac(data_all);
 
-  DataSeries energyScale("energyScale_pt.csv");
+  DataSeries energyScale("energyScaleErrorPt.csv");
 
   DataSeries effSystGSF("effSystGSFPtError.csv");
   DataSeries effSystWP80("effSystWP80PtError.csv");
@@ -240,10 +254,10 @@ void plotFinalQt(TFile* mctruth) {
 
     //    corrDataSyst.y[i]/=effAcc.y[i];
 
-    /*
-    pdfTotal.y[i]=(pdfPos.y[i]+(-pdfNeg.y[i]))/2*corrDataBkgd.y[i];
-    pdfFrac.y[i]=(pdfPos.y[i]+(-pdfNeg.y[i]))/2;
-    */
+    
+    pdfTotal.y[i]=(pdfPos.y[i]+fabs(pdfNeg.y[i]))/2*corrDataBkgd.y[i];
+    pdfFrac.y[i]=(pdfPos.y[i]+fabs(pdfNeg.y[i]))/2;
+    
     //  printf("%d %f %f %f %f\n",i,corrData.ey[i],corrData.y[i]*ea_statErr.y[i]);
     corrDataSyst.ey[i]=sqrt(pow(corrDataBkgd.ey[i],2)+
 			    pow(corrDataBkgd.y[i]*ea_statErr.y[i],2)+
@@ -270,27 +284,30 @@ void plotFinalQt(TFile* mctruth) {
   }
   char fnamework[1024];
 
-  
+  for (int i=0; i<BINCOUNT; i++) {
+    td+=corrData.y[i];
+  }  
  
-  data_all.normalizeToWidth();
-  data_bkgd.normalizeToWidth();
-  corrData.normalizeToWidth();
-  corrDataSyst.normalizeToWidth();
-  corrDataBkgd.normalizeToWidth();
+  data_all.normalizeToWidth(td);
+  data_bkgd.normalizeToWidth(td);
+  corrData.normalizeToWidth(td);
+  corrDataSyst.normalizeToWidth(td);
+  corrDataBkgd.normalizeToWidth(td);
 
 
   TH1* truth_vis=new TH1F("tvis","tvis",BINCOUNT,pt_binning_vis);
+  double td2=0;
 
   for (int i=0; i<BINCOUNT; i++) {
     truth_vis->SetBinContent(i+1,truth->GetBinContent(i+1)/(2*corrData.xwidth[i]));
 
     tt+=truth_vis->GetBinContent(i+1);
-    td+=corrData.y[i];
+    td2+=corrData.y[i];
   }
 
-  truth_vis->Scale(td/tt*1.0);
+  truth_vis->Scale(td2/tt*1.0);
 
-  sprintf(fnamework,"ZQt_final_table-%d.tex",lumi);
+  sprintf(fnamework,"ZQt_final_table%s.tex",postfix);
 
   FILE* ftable=fopen(fnamework,"w");
 
@@ -300,17 +317,24 @@ void plotFinalQt(TFile* mctruth) {
     fprintf(ftable,"%7.2f & %7.2f & ",
 	    corrData.xave[j]-corrData.xwidth[j],
 	    corrData.xave[j]+corrData.xwidth[j]);
-    if (corrData.y[j]/td>0.01)
+    if (corrData.y[j]>0.01)
       fprintf(ftable,"%7.4f & %7.4f & %7.4f \\\\ \n",
-	      corrData.y[j]/td,
-	      corrData.ey[j]/td,
-	      sqrt(pow(corrDataSyst.ey[j]/td,2)-pow(corrData.ey[j]/td,2))
+	      corrData.y[j],
+	      corrData.ey[j],
+	      sqrt(pow(corrDataSyst.ey[j],2)-pow(corrData.ey[j],2))
 	      );
-    else 
-      fprintf(ftable,"%7.2e & %7.2e & %7.2e \\\\ \n",
-	      corrData.y[j]/td,
-	      corrData.ey[j]/td,
-	      sqrt(pow(corrDataSyst.ey[j]/td,2)-pow(corrData.ey[j]/td,2))
+    else     if (corrData.y[j]>0.001)
+
+      fprintf(ftable,"%7.5f & %7.5f & %7.5f \\\\ \n",
+	      corrData.y[j],
+	      corrData.ey[j],
+	      sqrt(pow(corrDataSyst.ey[j],2)-pow(corrData.ey[j],2))
+	      );
+    else
+      fprintf(ftable,"%7.6f & %7.6f & %7.6f \\\\ \n",
+	      corrData.y[j],
+	      corrData.ey[j],
+	      sqrt(pow(corrDataSyst.ey[j],2)-pow(corrData.ey[j],2))
 	      );
   }
   
@@ -331,17 +355,18 @@ void plotFinalQt(TFile* mctruth) {
 
   double ybinage[21];
   for (int i=0; i<21; i++) {
-    ybinage[i]=0.1+900/20.0*i;
+    ybinage[i]=1e-6+0.07/20.0*i;
   }
 
   TH2* dummy=new TH2F("dummy","dummy",18,pt_binning_vis,20,ybinage);
 
-  dummy->GetYaxis()->SetTitle("Events/GeV");
-  dummy->GetXaxis()->SetTitle("q_{T,Z}");
+  dummy->GetYaxis()->SetTitle("1/#sigma d#sigma(Z#rightarrowee)/dq_{T} [GeV^{-1}]");
+  dummy->GetXaxis()->SetTitle("q_{T,Z} [GeV]");
+  dummy->GetXaxis()->CenterTitle();
   
   TCanvas* c1=new TCanvas("finalZQt","finalZQt",800,600);
   c1->SetLogx();
-  c1->SetLogy();
+  c1->SetLogy(false);
   dummy->Draw();
   dummy->SetDirectory(0);
 
@@ -364,7 +389,7 @@ void plotFinalQt(TFile* mctruth) {
 
   truth_vis->Draw("SAMEHIST");
 
-  TLegend* tl=new TLegend(0.4,0.16,0.72,0.34);
+  TLegend* tl=new TLegend(0.62,0.45,0.94,0.70);
   tl->AddEntry(corrd,"Corrected Data","P");
   tl->AddEntry(rawdb,"Raw Data","P");
   tl->AddEntry(rawd,"Background-Subtracted Data","P");
@@ -374,10 +399,56 @@ void plotFinalQt(TFile* mctruth) {
   zrap_Prelim(0.82,0.90,0.82,0.82);
   zrap_Lumi(0.82,0.86,lumi);
 
-  sprintf(fnamework,"ZQt_final-%d.eps",lumi);
+  sprintf(fnamework,"ZQt_final%s.eps",postfix);
   c1->Print(fnamework);
-  sprintf(fnamework,"ZQt_final-%d.png",lumi);
+  sprintf(fnamework,"ZQt_final%s.png",postfix);
   c1->Print(fnamework);
+
+  TCanvas* c1l=new TCanvas("finalZQtLog","finalZQtLog",800,600);
+  c1l->cd();
+  c1l->SetLogx();
+  c1l->SetLogy();
+
+  TH1* dummyl=(TH2*)(dummy->Clone("logdummy"));
+  dummyl->Draw();
+  dummyl->SetDirectory(0);
+
+  TH1* rawdl=(TH1*)(rawd->Clone("raw log"));
+  rawdl->Draw("PSAME");
+  TH1* rawdbl=(TH1*)(rawdb->Clone("rawsub log"));
+  rawdbl->Draw("PSAME");
+
+  //  corrd->SetMarkerStyle(20);
+  //  corrd->Draw("PSAME");
+
+  // corrdsys->SetMarkerStyle(0);
+  // corrdsys->Draw("PSAME");
+  
+  TH1* corrdbkgdl=(TH1*)(corrdbkgd->Clone("final log"));
+  corrdbkgdl->Draw("PSAME");
+  
+  TH1* corrdsysbl=(TH1*)(corrdsysb->Clone("finalsys log"));
+  corrdsysbl->Draw("PSAME");
+  
+  TH1* truth_visl=(TH1*)(truth_vis->Clone("truth log"));
+  truth_visl->Draw("SAMEHIST");
+  
+  
+  TLegend* tl2=new TLegend(0.3,0.20,0.62,0.38);
+  tl2->AddEntry(corrdbkgdl,"Corrected Data","P");
+  tl2->AddEntry(rawdbl,"Raw Data","P");
+  tl2->AddEntry(rawdl,"Background-Subtracted Data","P");
+    tl2->AddEntry(truth_visl,"POWHEG+CT10 Prediction","l");
+  tl2->Draw();
+  
+  zrap_Prelim(0.82,0.90,0.82,0.82);
+  zrap_Lumi(0.82,0.86,lumi);
+
+  sprintf(fnamework,"ZQt_final-log%s.eps",postfix);
+  c1l->Print(fnamework);
+  sprintf(fnamework,"ZQt_final-log%s.png",postfix);
+  c1l->Print(fnamework);
+
 
   TCanvas* c3=new TCanvas("finalZQtErrors","finalZQtErrors",800,600);
   TH1* dummy3=new TH1F("dummy3","dummy3",10,0.7,600);
@@ -390,25 +461,21 @@ void plotFinalQt(TFile* mctruth) {
   dummy3->GetXaxis()->SetTitle("q_{T,Z}");
 
   
-  //  TH1* binmiggr=binMigPos.makeTH1("bin migration");
   TH1* effacc_stat_gr=ea_statErr.makeTH1("eff stat");
   TH1* effacc_syst_gr=effSystErr.makeTH1("eff syst");
   TH1* gr_dataStatError=dataStatError.makeTH1("data stats err");
   TH1* gr_bkgd_unc=backgroundUncFrac.makeTH1("bkgd unc");
-  //  TH1* gr_pdf=pdfFrac.makeTH1("pdf_err");
+  TH1* gr_pdf=pdfFrac.makeTH1("pdf_err");
   TH1* gr_energyscale=energyScale.makeTH1("es_unc");
   TH1* gr_unfolding=unfoldSyst.makeTH1("unfold unc");
   TH1* gr_systotal=totalSyst.makeTH1("total_syst");
   dummy3->Draw();
 
-  //  binmiggr->SetLineWidth(2);
-  //  binmiggr->SetLineColor(kBlue);
-
   effacc_stat_gr->SetLineWidth(2);
   effacc_stat_gr->SetLineColor(kGreen+2);
 
   effacc_syst_gr->SetLineWidth(2);
-  effacc_syst_gr->SetLineColor(kGreen-5);
+  effacc_syst_gr->SetLineColor(kOrange+8);
 
   gr_dataStatError->SetLineWidth(2);
   gr_dataStatError->SetLineColor(kBlack);
@@ -423,29 +490,28 @@ void plotFinalQt(TFile* mctruth) {
   gr_unfolding->SetLineWidth(2);
   gr_unfolding->SetLineColor(kViolet);
 
-  //  gr_pdf->SetLineWidth(2);
-  //  gr_pdf->SetLineColor(kViolet-5);
+  gr_pdf->SetLineWidth(3);
+  gr_pdf->SetLineStyle(3);
+  gr_pdf->SetLineColor(kViolet-5);
 
   gr_systotal->SetLineWidth(2);
   
 
-  //  binmiggr->Draw("HSAME");
   effacc_stat_gr->Draw("HSAME");
   effacc_syst_gr->Draw("HSAME");
   gr_dataStatError->Draw("HSAME");
   gr_bkgd_unc->Draw("HSAME");
   gr_energyscale->Draw("HSAME");
-  //  gr_pdf->Draw("HSAME");
+  gr_pdf->Draw("HSAME");
   gr_unfolding->Draw("HSAME");
   gr_systotal->Draw("HISTSAME");
 
   tl=new TLegend(0.35,0.70,0.75,0.94,"Error Source Contributions");
-   //  tl->AddEntry(binmiggr,"Bin Migration","L");
   tl->AddEntry(gr_dataStatError,"Data Statistics","L");
   tl->AddEntry(gr_systotal,"Total Systematic Error","L");
   tl->AddEntry(gr_bkgd_unc,"Background Uncertainty","L");
   tl->AddEntry(effacc_stat_gr,"Efficiency Statistics","L");
-  //  tl->AddEntry(gr_pdf,"PDF (#epsilon #times A) Uncertainty","L");
+  tl->AddEntry(gr_pdf,"PDF (#epsilon #times A) Uncertainty","L");
   tl->AddEntry(gr_unfolding,"Unfolding Uncertainty","L");
   tl->AddEntry(gr_energyscale,"Energy Scale Uncertainty","L");
   tl->AddEntry(effacc_syst_gr,"Efficiency Systematics","L");
@@ -454,32 +520,42 @@ void plotFinalQt(TFile* mctruth) {
   zrap_Prelim(0.82,0.26,0.82,0.17);
   zrap_Lumi(0.82,0.21,lumi);
 
-  sprintf(fnamework,"ZQt_final_errors-%d.eps",lumi);
+  sprintf(fnamework,"ZQt_final_errors%s.eps",postfix);
   c3->Print(fnamework);
-  sprintf(fnamework,"ZQt_final_errors-%d.png",lumi);
+  sprintf(fnamework,"ZQt_final_errors%s.png",postfix);
   c3->Print(fnamework);
 
-  sprintf(fnamework,"ZRapidity_final_fold_errtable-%d.tex",lumi);
+  sprintf(fnamework,"ZQt_final_errtable%s.tex",postfix);
   ftable=fopen(fnamework,"w");
 
-  /*  
+  for (int i=0; i<lasti-1; i++)
   {
 
     if (i==0) {
-      fprintf(ftable,"\\begin{tabular}{|c|c||c|c|c|c|}\\hline\n");
-      fprintf(ftable,"            &             & Efficiency &   Bin     & Energy Scale  & Background \\\\ \n");
-      fprintf(ftable,"$|Y_{min}|$ & $|Y_{max}|$ & Statistics & Migration & Uncertainty & Estimation \\\\ \\hline \n");
+      fprintf(ftable,"\\begin{tabular}{|c|c||c|c|c|c|c|}\\hline\n");
+      fprintf(ftable,"            &             & Efficiency &   Bin     & Energy Scale  & Background & PDF\\\\ \n");
+      fprintf(ftable,"$|q_{T,min}|$ & $|q_{T,max}|$ & Uncertainties & Migration & Uncertainty & Estimation & Uncertainty \\\\ \\hline \n");
     }
+
+    double staterr=ea_statErr.y[i];
+    double systerr=effSystErr.y[i];
+    double efferr=corrData.y[i]*sqrt(staterr*staterr+systerr*systerr);
+    double energyerr=energyScale.y[i]*corrData.y[i];
+    double bkgderr=backgroundUncFrac.y[i]*corrData.y[i];
+    double migerr=unfoldSyst.y[i]*corrData.y[i];
+    double pdferr=pdfFrac.y[i]*corrData.y[i];
     
-      fprintf(ftable," %7.2f & %7.2f & %.4f & %.4f & %.4f & %.4f \\\\ \n",
-             corrDataFold.xave[j]-corrDataFold.xwidth[j],
-             corrDataFold.xave[j]+corrDataFold.xwidth[j],
-             staterr,systerr,energyerr,bkgderr);
-        
+    //    fprintf(ftable," %7.2f & %7.2f & %.5f & %.5f & %.5f & %.5f \\\\ \n",
+    fprintf(ftable," %7.2f & %7.2f & $%.3f \\times 10^{-4}$ &  $%.3f \\times 10^{-4}$ & $%.3f \\times 10^{-4}$ & $%.3f \\times 10^{-4}$ & $%.3f \\times 10^{-4}$ \\\\ \n",
+	    corrData.xave[i]-corrData.xwidth[i],
+	    corrData.xave[i]+corrData.xwidth[i],
+	    efferr*10000,migerr*10000,energyerr*10000,bkgderr*10000,
+	    pdferr*10000);
+    
   }
   fprintf(ftable,"\\hline\n\\end{tabular}\n");
   fclose(ftable);
-  */
+  
 
   //  printf(" Two models: %f %f \n",chi2_0,chi2_1);
 
