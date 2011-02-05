@@ -17,6 +17,13 @@ void EffHistos::Book(TFileDirectory& tdf) {
   const float maxZmass = 150;
   const int   binsZmass  = 50;
 
+  const double ZmassBins[]={ 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+			    51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 
+			    71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+			    91, 92, 93, 94, 95, 96, 97, 98, 99,100,101,102,103,104,105,106,107,108,109,110,
+			    111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,
+			    131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150};
+
   float detetaBins[104] = {-5., -4.9, -4.8, -4.7, -4.6, -4.5, -4.4, -4.3, -4.2, -4.1, -4., -3.9, -3.8, -3.7, -3.6,  //14
                        -3.5, -3.4, -3.3,  -3.2, -3.1, -3., //6
                        -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.89, -1.78, -1.67,  //13
@@ -65,6 +72,9 @@ void EffHistos::Book(TFileDirectory& tdf) {
   YZTL_YZ_matrix_= tdf.make<TH2F>("YZTL_vs_YZ_matrix","YZTL_vs_YZ_matrix;Y_{Z};Y_{ZtreeLevel}",zshape::y_bins,-zshape::y_max,zshape::y_max,zshape::y_bins,-zshape::y_max,zshape::y_max); 
 
   ptZTL_ptZ_       = tdf.make<TH2F>("PtTL_vs_PtZ","PtZTL_vs_PtZ;Pt_{Z};Pt_{ZtreeLevel}",zshape::pt_bins, zshape::pt_binning,zshape::pt_bins, zshape::pt_binning); 
+
+  //Now make the 2-D histogram
+  mZ_e2pt_e2eta_ = tdf.make<TH3F>("Z0_mass_vs_e2_pt_vs_e2_eta","Z0_mass_vs_e2_pt_vs_e2_eta;p_{T,e2};#eta_{e2};m_{Z0}", zshape::e_pt_bins,zshape::e_pt_binning,zshape::e_eta_bins,zshape::e_eta_binning,110, ZmassBins );
 
   //Now mkae some Event histograms
   evt_PVz_ =  tdf.make<TH1F>("evt_PVz","PV_z;PV_{z}", 50, -20,20);
@@ -165,6 +175,8 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
   
   e1eta_e2eta_ -> Fill(e1eta,e2eta,wgt);
 
+  //Now Fill the 3-D Histogram
+  mZ_e2pt_e2eta_ -> Fill(e2Pt,e2eta,zMass,wgt);
   // tree level rapidity VS fast reco-ed rapidity 
   if (doMC){
     YZTL_YZ_ -> Fill(zY,zTLY,wgt); 

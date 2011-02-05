@@ -19,7 +19,7 @@ from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositTk_cff import *
 from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositEcalFromHits_cff import *
 from RecoEgamma.EgammaIsolationAlgos.eleIsoDepositHcalFromTowers_cff import *
 
-hfEMClusters.correctionType = cms.int32(1)
+hfEMClusters.correctionType = cms.int32(2)
 hfRecoEcalCandidate.Correct = True
 #hfRecoEcalCandidate.e9e25Cut = 0
 hfRecoEcalCandidate.intercept2DCut = 0.32

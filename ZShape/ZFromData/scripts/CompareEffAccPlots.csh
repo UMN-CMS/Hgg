@@ -124,7 +124,7 @@ gStyle->SetTitleAlign(22);
 //2077.2 for 24
 //
 //EffAccHistos *myEffAccHistos = new EffAccHistos("/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeFromDataJeremyTEMPLATE/histoJason10_only1hlt_TRIAL_ZFULL.root","/data/whybee0c/user/haupt/Electrons/TNPTREE10/ZeeMCFromDataJeremyTEMPLATE/ZFD.Dec7thNEW.root",zdefvec, 108.1259);
-EffAccHistos *myEffAccHistos = new EffAccHistos("/local/cms/user/haupt/Electrons/TNPTREE10/ZFD.root","/local/cms/user/haupt/Electrons/TNPTREE10/testProdZEfficiencySmeared_10MTEMPLATE/MCHist.root",zdefvec, 184.5); //1935 //1650 //141.0 for OLD Z2TUNE //380 for 10 mil powheg
+EffAccHistos *myEffAccHistos = new EffAccHistos("/local/cms/user/haupt/Electrons/TNPTREE10/ZFD.root","/local/cms/user/haupt/Electrons/TNPTREE10/testProdZEfficiencySmeared_10MTEMPLATE/MCHist.root",zdefvec, 1845.); //1935 //1650 //141.0 for OLD Z2TUNE //380 for 10 mil powheg
 //2960 for the 4 inv pb of Nov 2010
 //WAS 3724
 //2208 for 4.5
