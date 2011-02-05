@@ -55,6 +55,8 @@ void EffHistos::Book(TFileDirectory& tdf) {
   ephi_ = tdf.make<TH1F>("e_phi","e_phi;#phi_{e}", 50,  -pi, pi);
   e1pt_  = tdf.make<TH1F>("e1_P_t","e1_P_t;p_{T,e1}", 200, 0, maxPt);
   e2pt_  = tdf.make<TH1F>("e2_P_t","e2_P_t;p_{T,e2}", 200, 0, maxPt);
+
+  hfeta_ = tdf.make<TH1F>("hf_eta","hf_eta;|#eta|",13*7,3.0,5.0);
  
   //Now make the 2-D histograms
 
@@ -161,6 +163,11 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
   eeta_ -> Fill(e2eta,wgt);
   ephi_ -> Fill(e1phi,wgt);
   ephi_ -> Fill(e2phi,wgt);
+
+  if (fabs(e1eta)>3.0 && fabs(e1eta)<5.0)
+    hfeta_ -> Fill(fabs(e1eta),wgt);
+  if (fabs(e2eta)>3.0 && fabs(e2eta)<5.0)
+    hfeta_ -> Fill(fabs(e2eta),wgt);
 
   
   //Now Fill the 2-D Histograms
