@@ -345,61 +345,50 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
     if((fabs(deteta)>2.964)&&(fabs(deteta)<=3)){
       newEta=deteta;
     }else if ((fabs(deteta)>3)&&(fabs(deteta)<=3.034)){
-      if(perc<=15){newEta=deteta;
-      }else if((perc>15)&&((perc<=57))){
+      if(perc<=40){newEta=deteta;
+      }else {
         newEta=sign*(3.0515+etabias);
-      }else if((perc>57)&&((perc<=100))){newEta=sign*(unif*0.175+2.964+etabias);
       }
     }else if ((fabs(deteta)>3.034)&&(fabs(deteta)<=3.104)){
-      if(perc<=3){newEta=deteta;
-      }else if((perc>3)&&((perc<=51))){
+      if(perc<=40){newEta=deteta;
+      }else {
         newEta=sign*(3.0515+etabias);
-      }else if((perc>51)&&((perc<=100))){
-        newEta=sign*(unif*0.175+2.964+etabias);
       }
     }else if ((fabs(deteta)>3.104)&&(fabs(deteta)<=3.139)){
-      if(perc<=30){newEta=sign*(3.0515+etabias);
-      }else if((perc>30)&&((perc<=100))){
-        newEta=deteta;
-      }
-    }else if ((fabs(deteta)>3.104)&&(fabs(deteta)<=3.139)){
-      if(perc<=30){
-        newEta=sign*(3.0515+etabias);
-      }else if((perc>30)&&((perc<=100))){
+      if(perc<=20){newEta=sign*(3.0515+etabias);
+      } else {
         newEta=deteta;
       }
     }else if ((fabs(deteta)>3.1915)&&(fabs(deteta)<=3.279)){
-      if(perc<=53){
+      if(perc<=43){
         newEta=sign*(3.22650+etabias);
-      }else if((perc>53)&&((perc<=100))){
+      }else {
         newEta=deteta;
       }
     }else if ((fabs(deteta)>3.3665)&&(fabs(deteta)<=3.454)){
-      if(perc<=42){
+      if(perc<=32){
         newEta=sign*(3.4015+etabias);
-      }else if((perc>42)&&((perc<=100))){
+      }else {
         newEta=deteta;
       }
     }else if ((fabs(deteta)>3.5415)&&(fabs(deteta)<=3.629)){
-      if(perc<=35){
+      if(perc<=25){
         newEta=sign*(3.5765+etabias);
-      }else if((perc>35)&&((perc<=100))){
+      }else {
         newEta=deteta;
       }
     }else if ((fabs(deteta)>3.7165)&&(fabs(deteta)<=3.804)){
-      if(perc<=25){
+      if(perc<=15){
         newEta=sign*(3.7515+etabias);
-      }else if((perc>25)&&((perc<=100))){
+      }else {
         newEta=deteta;
-      }else if ((fabs(deteta)>3.89135)&&(fabs(deteta)<=3.9786)){
-      if(perc<=20){
+      }
+    } else if ((fabs(deteta)>3.89135)&&(fabs(deteta)<=3.9786)){
+      if(perc<=10){
         newEta=sign*(3.926+etabias);
-      }else if((perc>20)&&((perc<=100))){
+      }else {
         newEta=deteta;
       }
-    
-      }
-
     }
    eta=(asinh(etaFact*sinh(newEta)));
   }
