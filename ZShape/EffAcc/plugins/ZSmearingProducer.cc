@@ -345,12 +345,12 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
     if((fabs(deteta)>2.964)&&(fabs(deteta)<=3)){
       newEta=deteta;
     }else if ((fabs(deteta)>3)&&(fabs(deteta)<=3.034)){
-      if(perc<=40){newEta=deteta;
+      if(perc<=60){newEta=deteta;
       }else {
         newEta=sign*(3.0515+etabias);
       }
     }else if ((fabs(deteta)>3.034)&&(fabs(deteta)<=3.104)){
-      if(perc<=40){newEta=deteta;
+      if(perc<=60){newEta=deteta;
       }else {
         newEta=sign*(3.0515+etabias);
       }
