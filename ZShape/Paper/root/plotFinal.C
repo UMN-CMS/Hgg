@@ -576,6 +576,9 @@ void plotFinal(TFile* mctruth, int mode=1) {
   sprintf(fnamework,"ZRapidity_final_fold_errtable%s.tex",postfix);
   ftable=fopen(fnamework,"w");
 
+  sprintf(fnamework,"ZRapidity_fold_zee%s.txt",postfix);
+  FILE* ftxt=fopen(fnamework,"w");
+  
   for (int i=0; i<=(lasti-firsti)/2; i++) {
     int j=izero+i-1;
     int jadd=izero-i-2;
@@ -601,17 +604,24 @@ void plotFinal(TFile* mctruth, int mode=1) {
       fprintf(ftable,"\\begin{tabular}{|c|c||c|c|c|c|c|}\\hline\n");
       fprintf(ftable,"            &             &  Background & Efficiency & Energy Scale & PDF \\effacc & Unfolding  \\\\ \n");
       fprintf(ftable,"$|Y_{min}|$ & $|Y_{max}|$ & Estimation & Determination & Systematics & Error & Uncertainty \\\\ \\hline \n");
+      fprintf(ftxt,"# Zee rapidity results\n");
+      fprintf(ftxt,"# bin  y_min  y_max value staterr systerr allerr \n");
     }
       fprintf(ftable," %7.2f & %7.2f & %.4f & %.4f & %.4f & %.4f & %.4f \\\\ \n",
              corrDataFold.xave[j]-corrDataFold.xwidth[j],
              corrDataFold.xave[j]+corrDataFold.xwidth[j],
 	      bkgderr,sqrt(staterr*staterr+systerr*systerr),
 	      energyerr,pdferr,unfolderr);
-    
+      fprintf(ftxt," %3d  %7.1f %7.1f %8.4f %8.4f %8.4f %8.4f\n",j+1,
+	      corrDataFold.xave[j]-corrDataFold.xwidth[j],
+	      corrDataFold.xave[j]+corrDataFold.xwidth[j],
+	      corrDataFold.y[j],corrDataFold.ey[j],
+	      sqrt(pow(corrDataSystFold.ey[j],2)-pow(corrDataFold.ey[j],2)),
+	      corrDataSystFold.ey[j]);
   }
   fprintf(ftable,"\\hline\n\\end{tabular}\n");
   fclose(ftable);
-
+  fclose(ftxt);
 
   //  printf(" Two models: %f %f \n",chi2_0,chi2_1);
 

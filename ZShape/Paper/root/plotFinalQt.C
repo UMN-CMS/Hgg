@@ -126,7 +126,7 @@ void plotFinalQt(TFile* mctruth, int mode) {
   int lumi=36;
   setTDRStyle();
 
-  TH1* truth=(TH1*)(mctruth->Get("mcEff/ECAL80-ECAL95/Acceptance/Z0_Pt_masscut")->Clone("truth"));
+  TH1* truth=(TH1*)(mctruth->Get("mcEff/ECAL80-ECAL95-MUO/Acceptance/Z0_PtTL_masscut")->Clone("truth"));
   truth->SetDirectory(0);
   
   DataSeries data_ee("ECAL80-ECAL95_Pt_RAW.csv");
@@ -348,7 +348,7 @@ void plotFinalQt(TFile* mctruth, int mode) {
   TGraph* rawd=data_all.makeTG();
   TGraph* rawdb=data_bkgd.makeTG();
   TGraph* corrd=corrData.makeTGE();
-  TGraph* corrdsys=corrDataSyst.makeTGE();
+  //  TGraph* corrdsys=corrDataSyst.makeTGE();
   TGraph* corrdbkgd=corrDataBkgd.makeTGE();
   // this is special
   TGraph* corrdsysb=new TGraphErrors(npoint,corrDataBkgd.xave+firsti-1,corrDataBkgd.y+firsti-1,corrDataSyst.xwidth+firsti-1,corrDataSyst.ey+firsti-1);
@@ -362,11 +362,13 @@ void plotFinalQt(TFile* mctruth, int mode) {
 
   dummy->GetYaxis()->SetTitle("1/#sigma d#sigma(Z#rightarrowee)/dq_{T} [GeV^{-1}]");
   dummy->GetXaxis()->SetTitle("q_{T,Z} [GeV]");
+  dummy->GetXaxis()->SetTitleOffset(1.2);
   dummy->GetXaxis()->CenterTitle();
   
   TCanvas* c1=new TCanvas("finalZQt","finalZQt",800,600);
   c1->SetLogx();
   c1->SetLogy(false);
+  c1->SetBottomMargin(0.16);
   dummy->Draw();
   dummy->SetDirectory(0);
 
@@ -389,11 +391,11 @@ void plotFinalQt(TFile* mctruth, int mode) {
 
   truth_vis->Draw("SAMEHIST");
 
-  TLegend* tl=new TLegend(0.62,0.45,0.94,0.70);
+  TLegend* tl=new TLegend(0.55,0.45,0.94,0.70);
   tl->AddEntry(corrd,"Corrected Data","P");
   tl->AddEntry(rawdb,"Raw Data","P");
   tl->AddEntry(rawd,"Background-Subtracted Data","P");
-  tl->AddEntry(truth_vis,"POWHEG+CT10 Prediction","l");
+  tl->AddEntry(truth_vis,"POWHEG+CT10+TuneZ2 Prediction","l");
   tl->Draw();
 
   zrap_Prelim(0.82,0.90,0.82,0.82);
@@ -408,6 +410,7 @@ void plotFinalQt(TFile* mctruth, int mode) {
   c1l->cd();
   c1l->SetLogx();
   c1l->SetLogy();
+  c1l->SetBottomMargin(0.16);
 
   TH1* dummyl=(TH2*)(dummy->Clone("logdummy"));
   dummyl->Draw();
@@ -434,11 +437,11 @@ void plotFinalQt(TFile* mctruth, int mode) {
   truth_visl->Draw("SAMEHIST");
   
   
-  TLegend* tl2=new TLegend(0.3,0.20,0.62,0.38);
+  TLegend* tl2=new TLegend(0.2,0.20,0.62,0.38);
   tl2->AddEntry(corrdbkgdl,"Corrected Data","P");
   tl2->AddEntry(rawdbl,"Raw Data","P");
   tl2->AddEntry(rawdl,"Background-Subtracted Data","P");
-    tl2->AddEntry(truth_visl,"POWHEG+CT10 Prediction","l");
+    tl2->AddEntry(truth_visl,"POWHEG+CT10+TuneZ2 Prediction","l");
   tl2->Draw();
   
   zrap_Prelim(0.82,0.90,0.82,0.82);
@@ -555,6 +558,18 @@ void plotFinalQt(TFile* mctruth, int mode) {
   }
   fprintf(ftable,"\\hline\n\\end{tabular}\n");
   fclose(ftable);
+
+
+  sprintf(fnamework,"dsdqt_zee_final%s.csv",postfix);
+  FILE* outFile = fopen("dsdqt_zee_final.csv", "wt");
+
+  fprintf(outFile, "#%9s %9s %9s %9s %12s %12s\n", "bin", "lower", "upper", "data", "stat error", "syst error");
+  for(int i = 0; i < BINCOUNT; i++)
+    {
+      fprintf(outFile, "%9i %9.1f %9.1f %9f %12.10f %12.10f\n", i+1, pt_binning[i], pt_binning[i+1], corrData.y[i], corrData.ey[i], sqrt(pow(corrDataSyst.ey[i],2)-pow(corrData.ey[i],2)));
+    }
+  
+  fclose(outFile);
   
 
   //  printf(" Two models: %f %f \n",chi2_0,chi2_1);

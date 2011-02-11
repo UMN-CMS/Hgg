@@ -13,6 +13,7 @@ TH1* zpt_rebinForPlot(TH1* original) {
 
   for(int i=1;i<=pt_bins;i++){
     rebinned->SetBinContent(i,original->GetBinContent(i));
+    rebinned->SetBinError(i,original->GetBinError(i));
   }
   return rebinned;
 }

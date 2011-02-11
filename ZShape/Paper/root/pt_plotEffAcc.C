@@ -31,8 +31,8 @@ const char* labelFor(int i) {
 void pt_plotEffAcc(TFile* f, const char* post=0, const char* var="Z0_Pt_masscut") {
   TDirectory* basedir=f->Get("mcEff");
 
-  //  TH1* base=((TDirectory*)basedir->Get("MUON-MUON/Acceptance"))->Get(var);
-  TH1* base=((TDirectory*)basedir->Get("MUON-MUON/Acceptance"))->Get("Z0_PtTL");
+  //TH1* base=((TDirectory*)basedir->Get("MUON-MUON/Acceptance"))->Get(var);
+   TH1* base=((TDirectory*)basedir->Get("MUON-MUON/Acceptance"))->Get("Z0_PtTL_masscut");
 
 
   TDirectory* zdir=basedir->Get("ECAL80-ECAL95-MUO");
