@@ -30,6 +30,7 @@ class EffHistos {
 
   TH1 *mZ_,*YZ_, *ptZ_,*ptZmon_;
   TH1 *YZmasscut_,*ptZmasscut_;
+  TH1 *YZTLmasscut_,*ptZTLmasscut_;
   TH1 *YZTL_,*ptZTLmon_,*mZTL_,*ptZTL_;
   bool booked_;
   TH1 *e1eta_,*e2eta_,*e1phi_,*e2phi_,*e1pt_,*e2pt_,*eeta_,*ephi_,*hfeta_;
