@@ -214,8 +214,9 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
     double lv=histoMigration->GetXaxis()->GetBinLowEdge(i+1);
     double lh=histoMigration->GetXaxis()->GetBinUpEdge(i+1);
 
-    if ((isRapidity) && ( fabs(lv)>3.8 || fabs(lh)>3.8)) continue;
-
+    if ((isRapidity) && ( fabs(lv)>3.5 || fabs(lh)>3.5)) continue;
+    if ((!isRapidity) && ( fabs(lv)>250 || fabs(lh)>600)) continue;
+    
     fprintf(texTable,"%5.2f & %5.2f & ",lv,lh);
 
     for (int j=-2; j<=2; j++) {
@@ -339,8 +340,8 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    if(isRapidity) {
    histoMatrix->GetXaxis()->SetTitle("Y_{Z,reco}");
    histoMatrix->GetYaxis()->SetTitle("Y_{Z,true}");
-   histoMatrix->GetXaxis()->SetRangeUser(-3.8,3.8);
-   histoMatrix->GetYaxis()->SetRangeUser(-3.8,3.8);
+   histoMatrix->GetXaxis()->SetRangeUser(-3.5,3.5);
+   histoMatrix->GetYaxis()->SetRangeUser(-3.5,3.5);
    } else {
    histoMatrix->GetXaxis()->SetTitle("q_{T,reco} [GeV/c]");
    histoMatrix->GetYaxis()->SetTitle("q_{T,true} [GeV/c]");
