@@ -126,8 +126,10 @@ void plotFinalQt(TFile* mctruth, int mode) {
   int lumi=36;
   setTDRStyle();
 
-  TH1* truth=(TH1*)(mctruth->Get("mcEff/ECAL80-ECAL95-MUO/Acceptance/Z0_PtTL_masscut")->Clone("truth"));
-  truth->SetDirectory(0);
+  TH2* truth2d=(TH1*)(mctruth->Get("mcEff/ECAL80-ECAL95-MUO/Acceptance/PtTL_vs_PtZ"));
+  //  TH1* proj=truth2d->ProjectionY();
+  //TH1* truth=(TH1*)(mctruth->Get("mcEff/ECAL80-ECAL95-MUO/Acceptance/Z0_PtTL_masscut")->Clone("truth"));
+
   
   DataSeries data_ee("ECAL80-ECAL95_Pt_RAW.csv");
   DataSeries data_all;
@@ -141,13 +143,19 @@ void plotFinalQt(TFile* mctruth, int mode) {
   if (mode==1) {
     effAcc=DataSeries("effAcc_pt_massCutdenom.txt");
     postfix="_smear";
+    proj=truth2d->ProjectionX();
   } else if (mode==2) {
     effAcc=DataSeries("effAcc_pt_TLdenom.txt");
     postfix="_avemig";
+    proj=truth2d->ProjectionY();
   } else if (mode==3) {
     effAcc=DataSeries("effAcc_pt_massCutdenom.txt");
     postfix="_matrix";
+    proj=truth2d->ProjectionY();
   }
+
+  TH1* truth=(TH1*)proj->Clone("truth");
+  truth->SetDirectory(0);
 
   const int firsti=1;
   const int lasti=18;
