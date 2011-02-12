@@ -231,8 +231,17 @@ void plotFinalQt(TFile* mctruth, int mode) {
   DataSeries effSystWP95("effSystWP95PtError.csv");
   DataSeries effSystHLT("effSystHLTPtError.csv");
   
-  DataSeries unfoldSyst("unfolding-relative-errors-pt.txt");
-
+  // pick unfolding systematic consistent with unfolding performed
+  DataSeries unfoldSyst;
+  if(mode==2) {
+    DataSeries unfoldSystTmp("averageUnfolding-relative-errors-pt.txt");
+    for (int i=firsti-1; i<lasti; i++) {    unfoldSyst.y[i]=unfoldSystTmp.y[i];   }
+  }
+  if(mode==3){ 
+    DataSeries unfoldSystTmp("unfolding-relative-errors-pt.txt");
+    for (int i=firsti-1; i<lasti; i++) {  unfoldSyst.y[i]=unfoldSystTmp.y[i];  } 
+  }
+  
   DataSeries effSystErr;
 
   for (int i=firsti-1; i<lasti; i++) {
