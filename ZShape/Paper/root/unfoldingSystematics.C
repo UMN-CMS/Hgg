@@ -624,7 +624,7 @@ int unfoldingSystematicsRatios(std::string variable){
     theEarlyDummy->GetXaxis()->SetTitle("Y_{Z0}");
   } else {
     theEarlyDummy = new TH2D("EarlyDummy","EarlyDummy",100,0,3500,2,-0.025,0.025);
-    theEarlyDummy->GetXaxis()->SetTitle("P_{t,Z0}");
+    theEarlyDummy->GetXaxis()->SetTitle("q_{t,Z0}    [GeV/c]");
   }
   theEarlyDummy->GetYaxis()->SetTitle("(#rho_{varied smearing}/#rho_{base}) -1");
   theEarlyDummy->GetXaxis()->CenterTitle();
@@ -776,7 +776,7 @@ int unfoldingSystematicsRatios(std::string variable){
     theDummy->GetXaxis()->CenterTitle();
   } else {
     theDummy = new TH2D("EarlyDummy","EarlyDummy",100,0.7,600,2,-0.025,0.025);
-    theDummy->GetXaxis()->SetTitle("P_{t,Z0}");
+    theDummy->GetXaxis()->SetTitle("q_{T,Z0}       [GeV/c]");
     theDummy->GetXaxis()->CenterTitle();
     theControlCanvasBis->SetLogx();
   }
@@ -815,22 +815,22 @@ int unfoldingSystematicsRatios(std::string variable){
 
 
   TH1F * histo;
+  TH1D * histoKevin;
   for(int v=1; v<=index; v++){
     
     histo = (TH1F *) theVariations[v]->Clone();
-    //    histo->UseCurrentStyle() ;
-    //    histo->SetLineColor(kBlack);
-    //    histo->SetLineWidth(1);
-    histo->SetLineStyle(2);
-    histo->SetMarkerStyle(1);
-    
-    histo->Draw("same hx HIST");
+   if(isRapidity){
+     histoKevin = (TH1D*) histo;}
+   else{
+     histoKevin=(TH1D*)zpt_rebinForPlot(histo);
+   }
+   histoKevin->SetLineStyle(2);
+   histoKevin->SetMarkerStyle(1);
+   // removing 'p' from drawing options remove markers
+   histoKevin->Draw("same hx HIST");
 
-    std::cout << v << std::endl;
-    //theVariations[v]->Draw("same");
   }
-//  theEffectPositive->Draw("same");
-//  theEffectNegative->Draw("same");
+
 
 
 
