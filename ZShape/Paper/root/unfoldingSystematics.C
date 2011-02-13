@@ -45,13 +45,11 @@ int unfoldingSystematics(std::string variable){
   //std::string filename("matrices/matrix-BASE.py.hadded.root ");  GF
   std::string filename("");
   if(isRapidity){  filename = std::string("matrices-Y/matrix-BASE.py.hadded.root");}
-  //  if(isRapidity){  filename = std::string("matrices-V00-05-05/MATRIX-BASE.py.hadded.root");}
   else          {  filename = std::string("matrices-pt/matrix-BASE.py.hadded.root");}
   TFile *theBASEmatrix = new TFile(filename.c_str(),"read");
 
   // I need to divide this distribution by eff acc 
-  //std::string fileEffAcc("effAcc-V00-05-03/BASE.zshape_effacc_smear.py.hadded.root"); 
-  std::string fileEffAcc("effAcc-V00-05-05/BASE.py.hadded.root"); 
+  std::string fileEffAcc("effAcc-V00-05-XX/BASE.py.hadded.root"); 
   TFile *theEffAcc = new TFile(fileEffAcc.c_str(),"read");
 
   std::string theInitTLString("");
@@ -59,23 +57,31 @@ int unfoldingSystematics(std::string variable){
   if(isRapidity){
     theInitTLString = std::string("mcEff/All/Z0_YTL");
     theInitSmearedSring = std::string("mcEff/All/Z0_Y");
+    theInit2dSring = std::string("mcEff/All/YZTL_vs_YZ");  //     you can also get from the 2d plot (already including gen-level mass cut!)
   } else    {
-    theInitTLString = std::string("mcEff/All/Z0_PtTL");    // GF: I will need to restrict to ECAL-ECAL/muon type here  -> no: insensitive to change in acceptance 
-    theInitSmearedSring = std::string("mcEff/All/Z0_Pt");  // GF: I will need to restrict to ECAL-ECAL/muon type here  -> no: insensitive to change in acceptance 
+    theInitTLString = std::string("mcEff/All/Z0_PtTL");
+    theInitSmearedSring = std::string("mcEff/All/Z0_Pt");
+    theInit2dSring = std::string("mcEff/All/PtTL_vs_PtZ"); //     you can also get from the 2d plot (already including gen-level mass cut!)
   }
+  
+  TH2 *  the2dPlot = theEffAcc->Get(theInit2dSring.c_str());
+  TH1D * theInitialTreeLevelHisto = the2dPlot->ProjectionY();
+  TH1D * theInitialHisto          = the2dPlot->ProjectionX();
 
-  TH1F * theInitialTreeLevelHisto = theEffAcc->Get(theInitTLString.c_str());         // this is the tree level Y before Eff Acc trials
-  TH1F * theInitialHisto          = theEffAcc->Get(theInitSmearedSring.c_str());     // this is the SMEARED Y before Eff Acc trials
+  //TH1F * theInitialTreeLevelHisto = theEffAcc->Get(theInitTLString.c_str());         // this is the tree level Y before Eff Acc trials
+  //TH1F * theInitialHisto          = theEffAcc->Get(theInitSmearedSring.c_str());     // this is the SMEARED Y before Eff Acc trials
 
   std::cout << "\tThere are: " << theInitialTreeLevelHisto->GetNbinsX() << " bins in the game\n\n" << std::endl;
+  std::cout << "\tFirst bin left: " << theInitialTreeLevelHisto->GetBinLowEdge(1) << "\t" << theInitialTreeLevelHisto->GetBinContent(1)  << std::endl;
+  std::cout << "\tFirst bin left: " << theInitialHisto->GetBinLowEdge(1)  << "\t" << theInitialHisto->GetBinContent(1) << std::endl;
   std::string theECALstring("");
   std::string theHFstring("");
   if(isRapidity){
-    theECALstring = std::string("mcEff/ECAL80-ECAL95/C08-m(70,110)/Z0_Y");
-    theHFstring = std::string("mcEff/ECAL80-HF/C08-m(70,110)/Z0_Y");
+    theECALstring = std::string("mcEff/ECAL80-ECAL95/C08-m(60,120)/Z0_Y");
+    theHFstring = std::string("mcEff/ECAL80-HF/C08-m(60,120)/Z0_Y");
   } else    {
-    theECALstring = std::string("mcEff/ECAL80-ECAL95/C08-m(70,110)/Z0_Pt");
-    theHFstring = std::string("mcEff/ECAL80-HF/C08-m(70,110)/Z0_Pt");
+    theECALstring = std::string("mcEff/ECAL80-ECAL95-MUO/C08-m(60,120)/Z0_Pt");
+    theHFstring = std::string("mcEff/ECAL80-HF/C08-m(60,120)/Z0_Pt");
   }
 
   
@@ -104,7 +110,7 @@ int unfoldingSystematics(std::string variable){
   // now eff-ACC correct the base 
   theEffAccCorrBaseRapidity->Divide(theEffAccHistoBase);
   TH1F    * baseUnfoldedRapidity = unfold(theEffAccCorrBaseRapidity,filename.c_str());
-  TCanvas * theCheck = new TCanvas("check the closure","check teh closure",150,150, 750,600);   theCheck->cd();
+  TCanvas * theCheck = new TCanvas("check the closure","check the closure",150,150, 750,600);   theCheck->cd();
   baseUnfoldedRapidity->Draw("");
   theInitialTreeLevelHisto->Draw("same");
   TLegend* leg = new TLegend(0.1,0.7,0.30,0.9);
@@ -142,25 +148,7 @@ int unfoldingSystematics(std::string variable){
   CanvasTLMinusRecoOverTL->cd();
   TLMinusRecoOverTL->Draw("hpx HIST same");
 
-//  TCanvas * CanvasRecoOverTL = new TCanvas("Reco/TL","Reco/TL",250,250,900,750); CanvasRecoOverTL->cd();
-//  TH1F * RecoOverTL = (TH1F*) theInitialHisto->Clone();
-//  theInitialTreeLevelHisto->Sumw2();
-//  RecoOverTL->Sumw2();
-//  RecoOverTL->Divide(theInitialTreeLevelHisto);
-//  RecoOverTL->SetLineColor(kBlack);
-//  TH1F*  RecoOverTLBis = RecoOverTL->Clone(); 
-//  RecoOverTL->GetYaxis()->SetTitle("#rho=Evt(meas)/Evt(true)");
-//  RecoOverTL->GetXaxis()->SetTitle("Y_{Z0}");
-//  RecoOverTL->GetXaxis()->SetTitleOffset(1.3);
-//  RecoOverTL->GetXaxis()->CenterTitle();
-//  RecoOverTLBis->SetLineColor(kBlack);
-//  RecoOverTLBis->Draw("hpx e HIST");
-//  RecoOverTL->GetXaxis()->SetTitle("Y_{Z0}");
-//  RecoOverTLBis->SetLineColor(kBlue);
-//  RecoOverTL->Draw("hpx e HIST");
-//  RecoOverTLBis->Draw("hpx HIST same");
-
-  TCanvas * CanvasRecoOverTL = new TCanvas("Reco/TL","Reco/TL",250,250,900,750); CanvasRecoOverTL->cd();
+  TCanvas * CanvasRecoOverTL = new TCanvas("Reco/TL","Reco/TL",0,0, 1050,750); CanvasRecoOverTL->cd();
   TH1F * RecoOverTL = (TH1F*) theInitialTreeLevelHisto->Clone();
   theInitialHisto->Sumw2();
   RecoOverTL->Sumw2();
@@ -183,8 +171,36 @@ int unfoldingSystematics(std::string variable){
   RecoOverTLBis->Draw("hpx e HIST");
   RecoOverTL->GetXaxis()->SetTitle("Y_{Z0}");
   RecoOverTLBis->SetLineColor(kBlue);
-  RecoOverTL->Draw("hpx e HIST");
-  RecoOverTLBis->Draw("hpx HIST same");
+
+  TH1D* theInitialTreeLevelHistoKevin = (TH1D*)zpt_rebinForPlot(theInitialTreeLevelHisto);
+  TH1D* theInitialHistoKevin = (TH1D*)zpt_rebinForPlot(theInitialHisto);
+  //theInitialTreeLevelHistoKevin->Draw("hpx e HIST");
+  //theInitialHistoKevin->Draw("hpx HIST same");
+
+  TH1D* RecoOverTLKevin;
+  TH1D* RecoOverTLBisKevin;
+  
+  if(isRapidity)    {     
+    RecoOverTLKevin = (TH1D*)RecoOverTL;
+    RecoOverTLBisKevin =(TH1D*)RecoOverTLBis;
+    RecoOverTLKevin->GetXaxis()->SetTitle("Y_{Z0}"); }
+  else              {
+    RecoOverTLKevin  = (TH1D*)zpt_rebinForPlot(RecoOverTL);
+    RecoOverTLBisKevin=  (TH1D*)zpt_rebinForPlot(RecoOverTLBis);
+    RecoOverTLKevin->GetXaxis()->SetTitle("q_{T,Z}     [GeV/c]"); 
+    RecoOverTLBisKevin->GetXaxis()->SetTitle("q_{T,Z}     [GeV/c]"); 
+    RecoOverTLKevin->GetXaxis()->SetTitleOffset(0.98);
+    RecoOverTLBisKevin->GetXaxis()->SetTitleOffset(0.98);
+    RecoOverTLBisKevin->GetXaxis()->CenterTitle();
+    RecoOverTLBisKevin->GetYaxis()->CenterTitle();
+    CanvasRecoOverTL->SetLogx();
+  }
+  RecoOverTLKevin->GetYaxis()->SetTitle("#rho=Evt(true)/Evt(reco)");
+  RecoOverTLKevin->GetXaxis()->CenterTitle();
+  RecoOverTLBisKevin->SetLineColor(kBlue);
+  RecoOverTLKevin->Draw("hx e HIST");
+  RecoOverTLBisKevin->Draw("hx HIST same");
+
 
   TCanvas * theBaseCanvas = new TCanvas("(unsmeared-tree)/tree","(unsmeared-tree)/tree",200,200,1000,800);  
   TH1D * h_effectUnsmearingBase = new TH1D("Y unsmearing Base","Y unsmearing Base",theInitialTreeLevelHisto->GetNbinsX(),theInitialTreeLevelHisto->GetXaxis()->GetXmin(),theInitialTreeLevelHisto->GetXaxis()->GetXmax()); 
@@ -386,11 +402,15 @@ int unfoldingSystematics(std::string variable){
   theDummy->GetXaxis()->CenterTitle();
   theControlCanvasBis->SetGridy();
   theDummy->Draw("");
-  // use Kevin's tool to conform binning (and go around log probls with x==0)
-  TH1D* theEffectPositiveKevin, *theEffectNegativeKevin;
   theEffectPositive->SetLineColor(kBlue);
   theEffectNegative->SetLineColor(kBlue);
   theEffectNegative->SetMarkerStyle(0);
+  if(isRapidity){
+  theEffectPositive->Draw("same hx HIST");
+  theEffectNegative->  Draw("same hx HIST");
+  } else {
+  // use Kevin's tool to conform binning (and go around log probls with x==0)
+  TH1D* theEffectPositiveKevin, *theEffectNegativeKevin;
   theEffectPositiveKevin=(TH1D*)zpt_rebinForPlot(theEffectPositive);
   theEffectPositiveKevin->SetLineColor(kBlue);
   theEffectPositiveKevin->SetMarkerStyle(0);
@@ -400,17 +420,24 @@ int unfoldingSystematics(std::string variable){
   // removing 'p' from drawing options remove markers
   theEffectNegativeKevin->Draw("same hx HIST");
   theEffectPositiveKevin->Draw("same  hx HIST");
+  }
+
 
  TH1F * histo;
-  for(int v=1; v<=index; v++){
-    
-    histo = (TH1F *) theVariations[v]->Clone();
-    histo->SetLineStyle(2);
-    histo->SetMarkerStyle(1);
-    // removing 'p' from drawing options remove markers
-    histo->Draw("same hx HIST");
-
-  }
+ TH1D * histoKevin;
+ for(int v=1; v<=index; v++){
+   
+   histo = (TH1F *) theVariations[v]->Clone();
+   if(isRapidity){
+     histoKevin = (TH1D*) histo;}
+   else{
+     histoKevin=(TH1D*)zpt_rebinForPlot(histo);
+   }
+   histoKevin->SetLineStyle(2);
+   histoKevin->SetMarkerStyle(1);
+   // removing 'p' from drawing options remove markers
+   histoKevin->Draw("same hx HIST");
+ }
 
   // http://root.cern.ch/root/html/THistPainter.html#HP01a
   //  TCanvas * theControlCanvasBisWIP = new TCanvas("pappo",filename.c_str(),0,0, 1050,750);  
@@ -455,16 +482,16 @@ int unfoldingSystematics(std::string variable){
    tlabel -> SetTextSize(0.02);
    tlabel -> SetTextAlign(22);
    tlabel -> SetTextAngle(0);
-   plabel -> DrawText(0.33, 0.91, "CMS 2010 PRELIMINARY");
+   plabel -> DrawText(0.33, 0.91, "CMS preliminary 2010");
    tlabel -> DrawText(0.33, 0.88, Form("%s",time_));
    std::cout << "\n\n The local time is: " << time_ << "\n\n" << std::endl;
 
    theControlCanvasBis->Print("relative-errors-unfolding.png");
-   theControlCanvasBis->Print("relative-errors-unfolding.pdf");
    theControlCanvasBis->Print("relative-errors-unfolding.eps");
+   //   theControlCanvasBis->Print("relative-errors-unfolding.pdf");
    
    CanvasRecoOverTL->cd();
-   plabel -> DrawText(0.55, 0.33, "CMS 2010 PRELIMINARY");
+   plabel -> DrawText(0.55, 0.33, "CMS preliminary 2010");
    tlabel -> DrawText(0.55, 0.30, Form("%s",time_));
   
 
@@ -558,21 +585,28 @@ int unfoldingSystematicsRatios(std::string variable){
   zrap_colors();
 
 
-  std::string fileEffAcc("effAcc-V00-05-05/BASE.py.hadded.root"); 
+  std::string fileEffAcc("effAcc-V00-05-XX/BASE.py.hadded.root"); 
   TFile* theEffAcc = new TFile(fileEffAcc.c_str(),"read");
   
   
   std::string theInitTLString("");
   std::string theInitSmearedSring("");
+  std::string theInit2dSring("");
   if(isRapidity){
     theInitTLString = std::string("mcEff/All/Z0_YTL");
     theInitSmearedSring = std::string("mcEff/All/Z0_Y");
+    theInit2dSring = std::string("mcEff/All/YZTL_vs_YZ");
   } else    {
-    theInitTLString = std::string("mcEff/All/Z0_PtTL");    // GF: I will need to restrict to ECAL-ECAL here
-    theInitSmearedSring = std::string("mcEff/All/Z0_Pt");  // GF: I will need to restrict to ECAL-ECAL here
+    theInitTLString = std::string("mcEff/All/Z0_PtTL");  
+    theInitSmearedSring = std::string("mcEff/All/Z0_Pt");
+    theInit2dSring = std::string("mcEff/All/PtTL_vs_PtZ");
   }
+
+  TH2  * the2dPlot = theEffAcc->Get(theInit2dSring.c_str());
+//  TH1D * theInitialTreeLevelHisto = the2dPlot->ProjectionY();
+//  TH1D * theInitialHisto          = the2dPlot->ProjectionX();
   
-  TH1F * theInitialTreeLevelHisto = theEffAcc->Get(theInitTLString.c_str());   // this is the tree level Y before Eff Acc trials
+  TH1F * theInitialTreeLevelHisto = theEffAcc->Get(theInitTLString.c_str());         // this is the tree level Y before Eff Acc trials
   TH1F * theInitialHisto          = theEffAcc->Get(theInitSmearedSring.c_str());     // this is the SMEARED Y before Eff Acc trials
   
   //  TH1F *  theInitialTreeLevelHisto = theEffAcc->Get("mcEff/All/Z0_YTL");   // this is the tree level Y before Eff Acc trials
@@ -603,7 +637,7 @@ int unfoldingSystematicsRatios(std::string variable){
   char buffer[10];
 
 
-  filename = std::string("effAcc-V00-05-05/BASE.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/BASE.py.hadded.root");
   TH1F* rho_BASE = theInitialTreeLevelHisto->Clone();
   rho_BASE->Sumw2(); theInitialHisto->Sumw2();
   rho_BASE->Divide(theInitialHisto);  // this is the first rho I compute
@@ -614,21 +648,9 @@ int unfoldingSystematicsRatios(std::string variable){
   theVariations[index]->Draw();
   
 
-  filename = std::string("effAcc-V00-05-05/a-EB-down.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/a-EB-down.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
-  filename = std::string("effAcc-V00-05-05/a-EB-up.py.hadded.root");
-  index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
-  theCanvases[index/2-1] = new TCanvas(filename.c_str(),filename.c_str(),100+10*index,100+10*index,700+10*index,500+10*index);
-  theCanvases[index/2-1]->cd(); if(!isRapidity) {theCanvases[index/2-1]->SetLogx();}
-  theEarlyDummy->Draw(); theVariations[index]->SetLineStyle(0);
-  theVariations[index-1]->Draw("hpx HIST same"); theVariations[index]->Draw(" hpx HIST same"); 
-  leg = new TLegend(0.35,0.8,0.9,0.93);   leg->SetHeader(filename.c_str());
-  leg->SetFillColor(0); leg->SetShadowColor(0); leg->SetTextSize(0.03); leg->AddEntry(theVariations[index],"+1#sigma","l"); leg->AddEntry(theVariations[index-1],"-1#sigma","l");
-  leg->Draw(); sprintf (buffer, "%d", (index/2)); ; filename = std::string( buffer ) + std::string(".png"); theCanvases[index/2-1]->Print(filename.c_str());
-
-  filename = std::string("effAcc-V00-05-05/alpha-EE-up.py.hadded.root");
-  index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
-  filename = std::string("effAcc-V00-05-05/alpha-EE-down.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/a-EB-up.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
   theCanvases[index/2-1] = new TCanvas(filename.c_str(),filename.c_str(),100+10*index,100+10*index,700+10*index,500+10*index);
   theCanvases[index/2-1]->cd(); if(!isRapidity) {theCanvases[index/2-1]->SetLogx();}
@@ -638,23 +660,9 @@ int unfoldingSystematicsRatios(std::string variable){
   leg->SetFillColor(0); leg->SetShadowColor(0); leg->SetTextSize(0.03); leg->AddEntry(theVariations[index],"+1#sigma","l"); leg->AddEntry(theVariations[index-1],"-1#sigma","l");
   leg->Draw(); sprintf (buffer, "%d", (index/2)); ; filename = std::string( buffer ) + std::string(".png"); theCanvases[index/2-1]->Print(filename.c_str());
 
-  if(isRapidity) {
-  filename = std::string("effAcc-V00-05-05/c-HFp-up.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/alpha-EE-up.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
-  filename = std::string("effAcc-V00-05-05/c-HFp-down.py.hadded.root");
-  index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
-  theCanvases[index/2-1] = new TCanvas(filename.c_str(),filename.c_str(),100+10*index,100+10*index,700+10*index,500+10*index);
-  theCanvases[index/2-1]->cd(); if(!isRapidity) {theCanvases[index/2-1]->SetLogx();}
-  theEarlyDummy->Draw(); theVariations[index]->SetLineStyle(0);
-  theVariations[index-1]->Draw("hpx HIST same"); theVariations[index]->Draw(" hpx HIST same"); 
-  leg = new TLegend(0.35,0.8,0.9,0.93);   leg->SetHeader(filename.c_str());
-  leg->SetFillColor(0); leg->SetShadowColor(0); leg->SetTextSize(0.03); leg->AddEntry(theVariations[index],"+1#sigma","l"); leg->AddEntry(theVariations[index-1],"-1#sigma","l");
-  leg->Draw(); sprintf (buffer, "%d", (index/2)); ; filename = std::string( buffer ) + std::string(".png"); theCanvases[index/2-1]->Print(filename.c_str());
-  }
-
-  filename = std::string("effAcc-V00-05-05/alpha-EB-up.py.hadded.root");
-  index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
-  filename = std::string("effAcc-V00-05-05/alpha-EB-down.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/alpha-EE-down.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
   theCanvases[index/2-1] = new TCanvas(filename.c_str(),filename.c_str(),100+10*index,100+10*index,700+10*index,500+10*index);
   theCanvases[index/2-1]->cd(); if(!isRapidity) {theCanvases[index/2-1]->SetLogx();}
@@ -665,9 +673,9 @@ int unfoldingSystematicsRatios(std::string variable){
   leg->Draw(); sprintf (buffer, "%d", (index/2)); ; filename = std::string( buffer ) + std::string(".png"); theCanvases[index/2-1]->Print(filename.c_str());
 
   if(isRapidity) {
-  filename = std::string("effAcc-V00-05-05/c-HFm-up.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/c-HFp-up.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
-  filename = std::string("effAcc-V00-05-05/c-HFm-down.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/c-HFp-down.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
   theCanvases[index/2-1] = new TCanvas(filename.c_str(),filename.c_str(),100+10*index,100+10*index,700+10*index,500+10*index);
   theCanvases[index/2-1]->cd(); if(!isRapidity) {theCanvases[index/2-1]->SetLogx();}
@@ -678,9 +686,9 @@ int unfoldingSystematicsRatios(std::string variable){
   leg->Draw(); sprintf (buffer, "%d", (index/2)); ; filename = std::string( buffer ) + std::string(".png"); theCanvases[index/2-1]->Print(filename.c_str());
   }
 
-  filename = std::string("effAcc-V00-05-05/a-EE-up.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/alpha-EB-up.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
-  filename = std::string("effAcc-V00-05-05/a-EE-down.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/alpha-EB-down.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
   theCanvases[index/2-1] = new TCanvas(filename.c_str(),filename.c_str(),100+10*index,100+10*index,700+10*index,500+10*index);
   theCanvases[index/2-1]->cd(); if(!isRapidity) {theCanvases[index/2-1]->SetLogx();}
@@ -690,9 +698,35 @@ int unfoldingSystematicsRatios(std::string variable){
   leg->SetFillColor(0); leg->SetShadowColor(0); leg->SetTextSize(0.03); leg->AddEntry(theVariations[index],"+1#sigma","l"); leg->AddEntry(theVariations[index-1],"-1#sigma","l");
   leg->Draw(); sprintf (buffer, "%d", (index/2)); ; filename = std::string( buffer ) + std::string(".png"); theCanvases[index/2-1]->Print(filename.c_str());
 
-  filename = std::string("effAcc-V00-05-05/c-EB-up.py.hadded.root");
+  if(isRapidity) {
+  filename = std::string("effAcc-V00-05-XX/c-HFm-up.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
-  filename = std::string("effAcc-V00-05-05/c-EB-down.py.hadded.root");
+  filename = std::string("effAcc-V00-05-XX/c-HFm-down.py.hadded.root");
+  index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
+  theCanvases[index/2-1] = new TCanvas(filename.c_str(),filename.c_str(),100+10*index,100+10*index,700+10*index,500+10*index);
+  theCanvases[index/2-1]->cd(); if(!isRapidity) {theCanvases[index/2-1]->SetLogx();}
+  theEarlyDummy->Draw(); theVariations[index]->SetLineStyle(0);
+  theVariations[index-1]->Draw("hpx HIST same"); theVariations[index]->Draw(" hpx HIST same"); 
+  leg = new TLegend(0.35,0.8,0.9,0.93);   leg->SetHeader(filename.c_str());
+  leg->SetFillColor(0); leg->SetShadowColor(0); leg->SetTextSize(0.03); leg->AddEntry(theVariations[index],"+1#sigma","l"); leg->AddEntry(theVariations[index-1],"-1#sigma","l");
+  leg->Draw(); sprintf (buffer, "%d", (index/2)); ; filename = std::string( buffer ) + std::string(".png"); theCanvases[index/2-1]->Print(filename.c_str());
+  }
+
+  filename = std::string("effAcc-V00-05-XX/a-EE-up.py.hadded.root");
+  index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
+  filename = std::string("effAcc-V00-05-XX/a-EE-down.py.hadded.root");
+  index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
+  theCanvases[index/2-1] = new TCanvas(filename.c_str(),filename.c_str(),100+10*index,100+10*index,700+10*index,500+10*index);
+  theCanvases[index/2-1]->cd(); if(!isRapidity) {theCanvases[index/2-1]->SetLogx();}
+  theEarlyDummy->Draw(); theVariations[index]->SetLineStyle(0);
+  theVariations[index-1]->Draw("hpx HIST same"); theVariations[index]->Draw(" hpx HIST same"); 
+  leg = new TLegend(0.35,0.8,0.9,0.93);   leg->SetHeader(filename.c_str());
+  leg->SetFillColor(0); leg->SetShadowColor(0); leg->SetTextSize(0.03); leg->AddEntry(theVariations[index],"+1#sigma","l"); leg->AddEntry(theVariations[index-1],"-1#sigma","l");
+  leg->Draw(); sprintf (buffer, "%d", (index/2)); ; filename = std::string( buffer ) + std::string(".png"); theCanvases[index/2-1]->Print(filename.c_str());
+
+  filename = std::string("effAcc-V00-05-XX/c-EB-up.py.hadded.root");
+  index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
+  filename = std::string("effAcc-V00-05-XX/c-EB-down.py.hadded.root");
   index++; theVariations[index] = computeRelativeDifferenceRho(rho_BASE,filename.c_str(),isRapidity);
   theCanvases[index/2-1] = new TCanvas(filename.c_str(),filename.c_str(),100+10*index,100+10*index,700+10*index,500+10*index);
   theCanvases[index/2-1]->cd(); if(!isRapidity) {theCanvases[index/2-1]->SetLogx();}
@@ -741,7 +775,7 @@ int unfoldingSystematicsRatios(std::string variable){
     theDummy->GetXaxis()->SetTitle("Y_{Z0}");
     theDummy->GetXaxis()->CenterTitle();
   } else {
-    theDummy = new TH2D("EarlyDummy","EarlyDummy",100,0,3500,2,-0.025,0.025);
+    theDummy = new TH2D("EarlyDummy","EarlyDummy",100,0.7,600,2,-0.025,0.025);
     theDummy->GetXaxis()->SetTitle("P_{t,Z0}");
     theDummy->GetXaxis()->CenterTitle();
     theControlCanvasBis->SetLogx();
@@ -751,15 +785,34 @@ int unfoldingSystematicsRatios(std::string variable){
   theDummy->GetXaxis()->CenterTitle();
   theDummy->SetTitle(0);
 
-  theDummy->GetXaxis()->SetTitle("Y_{Z0}");
+  //theDummy->GetXaxis()->SetTitle("Y_{Z0}");
   //theDummy->GetYaxis()->SetTitle("(d#sigma/dY_{Z0,base unfolding}/d#sigma/dY_{Z0,varied unfolding}) -1");
   theControlCanvasBis->SetGridy();
   theControlCanvasBis->cd();
   theDummy->Draw("");
   theEffectPositive->SetLineColor(kBlue);
-  theEffectPositive->Draw("same");
   theEffectNegative->SetLineColor(kBlue);
-  theEffectNegative->Draw("same");
+  theEffectNegative->SetMarkerStyle(0);
+  // theEffectPositive->Draw("same");
+  //  theEffectNegative->Draw("same");
+  TH1D* theEffectPositiveKevin, *theEffectNegativeKevin;
+  if(isRapidity){
+    theEffectPositive->Draw("same hx HIST");
+    theEffectNegative->Draw("same hx HIST");
+  } else {
+    // use Kevin's tool to conform binning (and go around log probls with x==0)
+    theEffectPositiveKevin=(TH1D*)zpt_rebinForPlot(theEffectPositive);
+    theEffectPositiveKevin->SetLineColor(kBlue);
+    theEffectPositiveKevin->SetMarkerStyle(0);
+    theEffectNegativeKevin=(TH1D*)zpt_rebinForPlot(theEffectNegative);
+    theEffectNegativeKevin->SetLineColor(kBlue);
+    theEffectNegativeKevin->SetMarkerStyle(0);
+    // removing 'p' from drawing options remove markers
+    theEffectNegativeKevin->Draw("same hx HIST");
+    theEffectPositiveKevin->Draw("same  hx HIST");
+  }
+
+
 
   TH1F * histo;
   for(int v=1; v<=index; v++){
@@ -769,16 +822,17 @@ int unfoldingSystematicsRatios(std::string variable){
     //    histo->SetLineColor(kBlack);
     //    histo->SetLineWidth(1);
     histo->SetLineStyle(2);
-    //
-    histo->SetMarkerStyle(0);
-    histo->SetLineStyle(2);
+    histo->SetMarkerStyle(1);
     
-    histo->Draw("same hpx HIST");
+    histo->Draw("same hx HIST");
 
+    std::cout << v << std::endl;
     //theVariations[v]->Draw("same");
   }
-  theEffectPositive->Draw("same");
-  theEffectNegative->Draw("same");
+//  theEffectPositive->Draw("same");
+//  theEffectNegative->Draw("same");
+
+
 
   // http://root.cern.ch/root/html/THistPainter.html#HP01a
   //  TCanvas * theControlCanvasBisWIP = new TCanvas("pappo",filename.c_str(),0,0, 1050,750);  
@@ -823,7 +877,7 @@ int unfoldingSystematicsRatios(std::string variable){
    tlabel -> SetTextSize(0.02);
    tlabel -> SetTextAlign(22);
    tlabel -> SetTextAngle(0);
-   plabel -> DrawText(0.33, 0.91, "CMS 2010 PRELIMINARY");
+   plabel -> DrawText(0.33, 0.91, "CMS preliminary 2010");
    tlabel -> DrawText(0.33, 0.88, Form("%s",time_));
    std::cout << "\n\n The local time is: " << time_ << "\n\n" << std::endl;
 
@@ -856,7 +910,7 @@ int unfoldingSystematicsRatios(std::string variable){
 
    theControlCanvasBis->Print("unfoldSystematicsRatios.png");
    theControlCanvasBis->Print("unfoldSystematicsRatios.eps");
-   theControlCanvasBis->Print("unfoldSystematicsRatios.pdf");
+   //   theControlCanvasBis->Print("unfoldSystematicsRatios.pdf");
 
    return 0;
 }
@@ -866,8 +920,9 @@ TH1F * computeRelativeDifferenceRho(const TH1* rho_BASE,  const char* filename, 
 
   TFile* theEffAcc = new TFile(filename,"read");
 
-  TH1F * theInitialTreeLevelHisto;
-  TH1F * theInitialSmearedHisto;
+  //  TH1F * theInitialTreeLevelHisto;
+  //  TH1F * theInitialSmearedHisto;
+
 
   if(isRapidity){
     theInitialTreeLevelHisto = (TH1F *) theEffAcc->Get("mcEff/All/Z0_YTL");   // this is the tree level Y (actually always the same)
@@ -876,7 +931,21 @@ TH1F * computeRelativeDifferenceRho(const TH1* rho_BASE,  const char* filename, 
     theInitialTreeLevelHisto = (TH1F *) theEffAcc->Get("mcEff/All/Z0_PtTL");   // this is the tree level pt (actually always the same)
     theInitialSmearedHisto   = (TH1F *) theEffAcc->Get("mcEff/All/Z0_Pt");     // this is the SMEARED pt before Eff Acc trials (for the present parameter variation)
   }
-  TH1F * theRhos                  = theInitialTreeLevelHisto->Clone();
+  
+  /*
+  std::string theInit2dString("");
+  if(isRapidity){
+    theInit2dString = std::string("mcEff/All/YZTL_vs_YZ");  // this has full info and gen-level mass cut
+  } else    {
+    theInit2dString = std::string("mcEff/All/PtTL_vs_PtZ"); // this has full info and gen-level mass cut
+  }
+  
+  TH2  * the2dPlot                 = theEffAcc->Get(theInit2dString.c_str());
+  TH1F * theInitialTreeLevelHisto  = (TH1F*) the2dPlot->ProjectionY();
+  TH1F * theInitialSmearedHisto    = (TH1F*) the2dPlot->ProjectionX();
+  */
+
+  TH1F * theRhos   = theInitialTreeLevelHisto->Clone();
   theRhos->Sumw2();  theInitialSmearedHisto->Sumw2();
   theRhos->Divide(theInitialSmearedHisto);
 
@@ -885,6 +954,7 @@ TH1F * computeRelativeDifferenceRho(const TH1* rho_BASE,  const char* filename, 
   theRatioOfRhos->Add(rho_BASE,-1);
   theRatioOfRhos->Divide(rho_BASE);
   theRatioOfRhos->SetLineStyle(2);
+  theRatioOfRhos->SetMarkerStyle(0);
 
   return theRatioOfRhos;
   
