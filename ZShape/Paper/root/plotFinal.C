@@ -138,8 +138,14 @@ void plotFinal(TFile* mctruth, int mode=1) {
     postfix="_avemig";
   }
   if (mode==3) {
+    effAcc=DataSeries("effAcc_combined.csv");
     postfix="_matrix";
     label="Matrix-based Unsmearing";
+  }
+  if (mode==4) {
+    effAcc=DataSeries("effAcc_combined.csv");
+    postfix="_foldMatrix";
+    label="Folded Matrix-based Unsmearing";
   }
   DataSeries ea_statErr("effStatError.csv");
 
@@ -448,6 +454,37 @@ void plotFinal(TFile* mctruth, int mode=1) {
   }
   
 
+  // this is where you unfold |Y|, if mode==4
+  DataSeries corrDataFoldClone(corrDataFold);
+  DataSeries corrDataSystFoldClone(corrDataSystFold);
+    // use this to activate matrix (type-3) unsmearing for the folded rapidity distribution |Y|
+  if (mode==4) {
+    TH1*      data_corr_fold_smeared      =corrDataFold.makeTH1("data_corr_fold_smeared",50,50);
+    TH1*      data_corr_unsmeared         =unfold(data_corr_fold_smeared,"../root/unfoldingMatrix_theOutPut.root",true);              // unfolding for |Y|
+    TFile*    theunfoldingMatrixInputFile =new TFile("../root/unfoldingMatrix_theOutPut.root","read");
+    TMatrixD* theUnfoldingMatrix          =(TMatrixD*)theunfoldingMatrixInputFile->Get("unsmearMatrices/unfoldingMatrixTotalFolded"); // indices [0.. 49] X [0.. 49]
+    double errorCumul=0;
+    double errorCumulSyst=0;
+    for (int i=0; i<=(lasti-firsti)/2; i++) { 
+      int j=izero+i-1;
+      corrDataFold.y[j]=data_corr_fold_smeared->GetBinContent(i+1);
+      // now do error propagation
+      for (int s=0; s<=(lasti-firsti)/2; s++) { 
+	int js=izero+s-1;
+	errorCumul+=     pow( corrDataFoldClone.ey[js]     * (*theUnfoldingMatrix)(s,i) , 2);
+	errorCumulSyst+= pow( corrDataSystFoldClone.ey[js] * (*theUnfoldingMatrix)(s,i) , 2);
+	//std::cout << "js: " << js << "\t" << corrDataFold.y[js] << "\t"<< corrDataFoldClone.ey[js] 
+	//	  << "\t" << corrDataSystFoldClone.ey[js] << "\t"<< (corrDataFoldClone.ey[js]/corrDataSystFoldClone.ey[js]) << std::endl;
+      }
+      //std::cout << "errorCumul: "<< errorCumul << "\t" << errorCumulSyst << std::endl;
+      corrDataFold.ey[j]    =sqrt(errorCumul*1);
+      corrDataSystFold.ey[j]=sqrt(errorCumulSyst*1);
+      errorCumul=0;
+      errorCumulSyst=0;
+    }
+  }
+  
+
   c2->cd();
   dummy2->GetYaxis()->SetTitle("1/#sigma d#sigma/dy");
   dummy2->GetXaxis()->SetTitle("|y_{Z}|");
@@ -461,7 +498,7 @@ void plotFinal(TFile* mctruth, int mode=1) {
   TGraph* corrdfoldsys=new TGraphErrors(npoint/2,corrDataFold.xave+izero-1,corrDataFold.y+izero-1,corrDataSystFold.xwidth+izero-1,corrDataSystFold.ey+izero-1);
   corrdfold->Draw("PSAME");
   corrdfoldsys->SetMarkerStyle(0);
-  corrdfoldsys->Draw("PSAME");
+  corrdfoldsys->Draw("PSAME"); // is this stat-only error?
 
   truth2->Draw("SAMEHIST");
   truthalt->SetLineColor(kRed);
