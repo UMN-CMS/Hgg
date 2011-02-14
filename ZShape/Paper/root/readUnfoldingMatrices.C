@@ -31,13 +31,17 @@
 
 TH1* unfold(const TH1* source, TMatrixD * theUnfoldingMatrix);
 
-TH1* unfold(const TH1* source, const char* unfoldingMatrixIF)  {
+TH1* unfold(const TH1* source, const char* unfoldingMatrixIF, bool isFoldedRap=false)  {
   // load the matrix...
 
   TFile theunfoldingMatrixInputFile(unfoldingMatrixIF,"read");
 
-  TMatrixD * theUnfoldingMatrix = (TMatrixD*)theunfoldingMatrixInputFile.Get("unsmearMatrices/unfoldingMatrixTotal");
-
+  TMatrixD * theUnfoldingMatrix;
+  theUnfoldingMatrix = (TMatrixD*)theunfoldingMatrixInputFile.Get("unsmearMatrices/unfoldingMatrixTotal");
+  if (isFoldedRap) {
+    theUnfoldingMatrix = (TMatrixD*)theunfoldingMatrixInputFile.Get("unsmearMatrices/unfoldingMatrixTotalFolded");
+    std::cout << "you've chosen to unfold |Y|" << std::endl;
+  }
   return unfold(source, theUnfoldingMatrix);
 }
 
