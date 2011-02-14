@@ -126,10 +126,9 @@ void plotFinalQt(TFile* mctruth, int mode) {
   int lumi=36;
   setTDRStyle();
 
-  TH2* truth2d=(TH1*)(mctruth->Get("mcEff/ECAL80-ECAL95-MUO/Acceptance/PtTL_vs_PtZ"));
+  //  TH2* truth2d=(TH1*)(mctruth->Get("mcEff/ECAL80-ECAL95-MUO/Acceptance/PtTL_vs_PtZ"));
   //  TH1* proj=truth2d->ProjectionY();
-  //TH1* truth=(TH1*)(mctruth->Get("mcEff/ECAL80-ECAL95-MUO/Acceptance/Z0_PtTL_masscut")->Clone("truth"));
-
+  TH1* truth=0;
   
   DataSeries data_ee("ECAL80-ECAL95_Pt_RAW.csv");
   DataSeries data_all;
@@ -143,18 +142,17 @@ void plotFinalQt(TFile* mctruth, int mode) {
   if (mode==1) {
     effAcc=DataSeries("effAcc_pt_massCutdenom.txt");
     postfix="_smear";
-    proj=truth2d->ProjectionX();
+    truth=(TH1*)(mctruth->Get("mcEff/MUON-MUON/Acceptance/Z0_Pt_masscut")->Clone("truth"));
   } else if (mode==2) {
     effAcc=DataSeries("effAcc_pt_TLdenom.txt");
     postfix="_avemig";
-    proj=truth2d->ProjectionY();
+    truth=(TH1*)(mctruth->Get("mcEff/MUON-MUON/Acceptance/Z0_PtTL_masscut")->Clone("truth"));
   } else if (mode==3) {
     effAcc=DataSeries("effAcc_pt_massCutdenom.txt");
     postfix="_matrix";
-    proj=truth2d->ProjectionY();
+    truth=(TH1*)(mctruth->Get("mcEff/MUON-MUON/Acceptance/Z0_PtTL_masscut")->Clone("truth"));
   }
 
-  TH1* truth=(TH1*)proj->Clone("truth");
   truth->SetDirectory(0);
 
   const int firsti=1;
@@ -170,8 +168,8 @@ void plotFinalQt(TFile* mctruth, int mode) {
 
   DataSeries dataStatError(data_all);
 
-  DataSeries backgroundAll("backgroundBkgFinalPtVals.csv",0);
-  DataSeries backgroundAllUnc("backgroundBkgFinalPtVals.csv",1);
+  DataSeries backgroundAll("background_all_qt.csv",0);
+  DataSeries backgroundAllUnc("background_all_qt.csv",1);
 
   DataSeries backgroundUncFrac(backgroundAllUnc);
 
@@ -578,7 +576,7 @@ void plotFinalQt(TFile* mctruth, int mode) {
 
 
   sprintf(fnamework,"dsdqt_zee_final%s.csv",postfix);
-  FILE* outFile = fopen("dsdqt_zee_final.csv", "wt");
+  FILE* outFile = fopen(fnamework, "wt");
 
   fprintf(outFile, "#%9s %9s %9s %9s %12s %12s\n", "bin", "lower", "upper", "data", "stat error", "syst error");
   for(int i = 0; i < BINCOUNT; i++)

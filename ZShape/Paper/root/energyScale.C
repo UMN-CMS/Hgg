@@ -128,7 +128,7 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,
   }
 
   TCanvas* c1=0;
-  if (mode==1) {
+  if (mode==1 || mode==2) {
     c1=new TCanvas("c1","c1",800,800);
     c1->SetLeftMargin(0.15);
     c1->SetTopMargin(0.02);
@@ -150,11 +150,12 @@ void energyScale(TFile* base, TFile* vpe, TFile* vme,
   valave->SetTitle(0);
   valave->SetStats(0);
   valave->GetXaxis()->SetRangeUser(-3.5,3.5);
+  valave->GetXaxis()->SetTitle("y_{Z}");
   valave->GetXaxis()->CenterTitle(true);
   valave->GetYaxis()->SetTitle("Fractional Error from Energy Scale");
   valave->GetYaxis()->SetTitleOffset(1.8);
   valave->GetYaxis()->CenterTitle(true);
-  if (mode==1)   valave->Draw("HIST");
+  if (mode==1 || mode==2)   valave->Draw("HIST");
   else   valave->Draw("HISTSAME");
   //  valm->Draw("HIST SAME");
 

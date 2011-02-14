@@ -162,11 +162,11 @@ void plotFinal(TFile* mctruth, int mode=1) {
 
   DataSeries dataStatError(data_all);
 
-  DataSeries backgroundEE("backgroundBkgFinalFixVals.txt",0);
-  DataSeries backgroundHF("backgroundBkgFinalHFFixVals.txt",0);
+  DataSeries backgroundEE("background_all_y_ee.csv",0);
+  DataSeries backgroundHF("background_all_y_ef.csv",0);
 
-  DataSeries backgroundEEUnc("backgroundBkgFinalFixVals.txt",1);
-  DataSeries backgroundHFUnc("backgroundBkgFinalHFFixVals.txt",1);
+  DataSeries backgroundEEUnc("background_all_y_ee.csv",1);
+  DataSeries backgroundHFUnc("background_all_y_ef.csv",1);
 
   DataSeries backgroundAll(backgroundEE), backgroundAllUnc(backgroundEEUnc),
     backgroundUncFrac(backgroundEEUnc);

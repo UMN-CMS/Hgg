@@ -113,7 +113,7 @@ void energyScalePt(TFile* base, TFile* vpe, TFile* vme, TFile* tpe, TFile* tme, 
 
     valave->SetTitle(0);
     valave->SetStats(0);
-    valave->GetXaxis()->SetTitle("Z Tranverse Momentum (GeV)");
+    valave->GetXaxis()->SetTitle("q_{T} [GeV/c]");
     valave->GetXaxis()->SetTitleOffset(1.2);
     valave->GetXaxis()->SetRangeUser(0.7, 500);
     valave->GetXaxis()->CenterTitle(true);
@@ -124,7 +124,7 @@ void energyScalePt(TFile* base, TFile* vpe, TFile* vme, TFile* tpe, TFile* tme, 
     //  valm->Draw("HIST SAME");
 
     zrap_Prelim(0.6, 0.9, 0.6, 0.87);
-    c1->Print("energyScale.eps");
+    c1->Print("energyScalePt.eps");
 
  const int pxbins=19;
   const double pxbinEdges[]={0, 2.5, 5, 7.5, 10, 12.5, 15, 17.5, 20, 30, 40, 50, 70, 90, 110, 150, 190,250, 600,3500};

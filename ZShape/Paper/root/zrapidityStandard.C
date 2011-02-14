@@ -2,7 +2,7 @@
 #include "TLatex.h"
 #include "TDatime.h"
 
-static bool dotime=true;
+static bool dotime=false;
 
 TH1* zpt_rebinForPlot(TH1* original) {
   char name[125];
