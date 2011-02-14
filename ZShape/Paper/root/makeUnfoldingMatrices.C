@@ -359,7 +359,7 @@ int makeUnfoldingMatrices(std::string effAccFileInputFile, std::string unfolding
    histoMatrix->SetStats(0);
    //histoMatrix->Draw("colz same");
    histoMatrix->Draw("colz");
-   plabel -> DrawText(0.30, 0.93, "CMS 2010 PRELIMINARY");
+   plabel -> DrawText(0.30, 0.93, "CMS preliminary 2010");
    tlabel -> DrawText(0.30, 0.90, Form("%s",time_));
    histoMatrix->SetTitle("Migration matrix (normalized)");
    c5->Print("migrationMatrix.png");
