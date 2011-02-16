@@ -46,7 +46,7 @@ void zrap_Prelim(double px, double py, double tx=-1, double ty=-1) {
 
   
   //Then for each plot, pick a nice spot and draw
-  plabel -> DrawText(px, py, "CMS 2010 PRELIMINARY");
+  plabel -> DrawText(px, py, "CMS preliminary 2010"); // 'ala VBTF'
   if (tx>=0 && ty>=0 && dotime) {
     TText *tlabel = new TText();
     tlabel-> SetNDC();
