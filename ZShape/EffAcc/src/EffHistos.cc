@@ -78,6 +78,7 @@ void EffHistos::Book(TFileDirectory& tdf) {
   YZTL_YZ_matrix_= tdf.make<TH2F>("YZTL_vs_YZ_matrix","YZTL_vs_YZ_matrix;Y_{Z};Y_{ZtreeLevel}",zshape::y_bins,-zshape::y_max,zshape::y_max,zshape::y_bins,-zshape::y_max,zshape::y_max); 
 
   ptZTL_ptZ_       = tdf.make<TH2F>("PtTL_vs_PtZ","PtZTL_vs_PtZ;Pt_{Z};Pt_{ZtreeLevel}",zshape::pt_bins, zshape::pt_binning,zshape::pt_bins, zshape::pt_binning); 
+  ptZTL_ptZ_zoom_  = tdf.make<TH2F>("PtTL_vs_PtZ_zoom","PtZTL_vs_PtZ_zoom;Pt_{Z};Pt_{ZtreeLevel}",25,0.0,25.0,25,0.0,25.0);
 
   //Now make the 2-D histogram
   mZ_e2pt_e2eta_ = tdf.make<TH3F>("Z0_mass_vs_e2_pt_vs_e2_eta","Z0_mass_vs_e2_pt_vs_e2_eta;p_{T,e2};#eta_{e2};m_{Z0}", zshape::e_pt_bins,zshape::e_pt_binning,zshape::e_eta_bins,zshape::e_eta_binning,110, ZmassBins );
@@ -145,9 +146,10 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
     ptZmasscut_ -> Fill(zPt,wgt);    
 
     // tree level rapidity VS fast reco-ed rapidity 
-    if (doMC){
+    if (doMC && zTLMass >= massWindowLow_ && zTLMass <=massWindowHigh_){
       YZTL_YZ_ -> Fill(zY,zTLY,wgt); 
       ptZTL_ptZ_  -> Fill(zPt,zTLPt,wgt); 
+      ptZTL_ptZ_zoom_  -> Fill(zPt,zTLPt,wgt); 
     }
   }
 

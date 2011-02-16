@@ -36,7 +36,7 @@ class EffHistos {
   TH1 *e1eta_,*e2eta_,*e1phi_,*e2phi_,*e1pt_,*e2pt_,*eeta_,*ephi_,*hfeta_;
   TH2 *mZ_Y_,*mZ_pt_,*pt_Y_,*e1eta_YZ_,*e2eta_YZ_,*e1eta_ptZ_,*e2eta_ptZ_,*e1eta_e2eta_,*YZTL_YZ_,*YZTL_YZ_matrix_;
   TH1 *evt_PVz_, *evt_BSz_, *evt_MET_, *evt_PFMET_, *evt_TCMET_;
-  TH2* ptZTL_ptZ_;
+  TH2* ptZTL_ptZ_, *ptZTL_ptZ_zoom_;
   TH3* mZ_e2pt_e2eta_;
 
 }; 
