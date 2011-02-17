@@ -27,7 +27,7 @@ void finalBackground(int mode) {
     nbins=18;
     qcd=readStandardFilePt("qcd","background_qcd_qt.csv");
     ttbar=readStandardFilePt("ttbar","background_ttbar_qt.csv");
-    tau=readStandardFile("tau","background_tautau_qt.csv");
+    tau=readStandardFilePt("tau","background_tautau_qt.csv");
     outf=fopen("background_all_qt.csv","wt");
     break;
   }
@@ -77,7 +77,7 @@ void finalBackground(int mode) {
     TLegend* tl=new TLegend(0.20,0.80,0.51,0.92,"ECAL-ECAL Channel");
     tl->AddEntry(qcd,"QCD Background ","P");
     tl->AddEntry(ttbar,"t#bar{t} Background","P");
-    tl->AddEntry(tau,"#tau#tau Background","P");
+    tl->AddEntry(tau,"Z/#gamma*#rightarrow#tau#tau Background","P");
     tl->Draw();
     zrap_Prelim(0.75,0.9,0.8,0.8);
     zrap_Lumi(0.86,0.86,36);
@@ -87,7 +87,7 @@ void finalBackground(int mode) {
     TLegend* tl=new TLegend(0.35,0.75,0.75,0.85,"ECAL-HF Channel");
     tl->AddEntry(qcd,"QCD Background ","P");
     tl->AddEntry(ttbar,"t#bar{t} Background","P");
-    tl->AddEntry(tau,"#tau#tau Background","P");
+    tl->AddEntry(tau,"Z/#gamma*#rightarrow#tau#tau Background","P");
     tl->Draw();
     zrap_Prelim(0.75,0.9,0.8,0.8);
     zrap_Lumi(0.86,0.86,36);
@@ -101,7 +101,7 @@ void finalBackground(int mode) {
     TLegend* tl=new TLegend(0.20,0.81,0.51,0.90);
     tl->AddEntry(qcd,"QCD Background ","P");
     tl->AddEntry(ttbar,"t#bar{t} Background","P");
-    tl->AddEntry(tau,"#tau#tau Background","P");
+    tl->AddEntry(tau,"Z/#gamma*#rightarrow#tau#tau Background","P");
     tl->Draw();
     zrap_Prelim(0.75,0.9,0.8,0.8);
     zrap_Lumi(0.86,0.86,36);

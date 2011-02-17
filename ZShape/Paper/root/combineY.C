@@ -7,6 +7,11 @@ void combineY(TFile* theory) {
   truth->SetDirectory(0);  
 
   setTDRStyle();
+
+  TH1* pdf_sens_low=readStandardFile("pdf_frac_low","pdfSensitivitiesNeg_Y.txt");
+  TH1* pdf_sens_high=readStandardFile("pdf_frac_high","pdfSensitivitiesPos_Y.txt");
+
+
   TH1* elec_stat=readStandardFile("elec_stat","ZRapidity_fold_zee_avemig.txt",0);
   TH1* elec_syst=readStandardFile("elec_all","ZRapidity_fold_zee_avemig.txt",1);
   TH1* mu_stat=readStandardFile("mu_stat","dsdy_muons.txt",0);
@@ -67,8 +72,28 @@ void combineY(TFile* theory) {
 
   truth->Scale(1.0/(tt*0.1));
 
-  elec_all->GetXaxis()->SetRangeUser(0.0,3.5);
-  comb_all->GetXaxis()->SetRangeUser(0.0,3.5);
+  static const int npoints=(85-51+1+2)*2;
+  double terrorsx[npoints];
+  double terrorsy[npoints];
+
+  for (int i=51; i<=85; i++) {
+    terrorsx[i-51+1]=truth->GetBinCenter(i);
+    terrorsy[i-51+1]=truth->GetBinContent(i)*(1+pdf_sens_high->GetBinContent(i));
+
+    terrorsx[123-i]=truth->GetBinCenter(i);
+    terrorsy[123-i]=truth->GetBinContent(i)*(1+pdf_sens_low->GetBinContent(i));    
+  }
+
+  terrorsx[0]=0; terrorsy[0]=terrorsy[1];
+  terrorsx[36]=3.5; terrorsy[36]=terrorsy[35];
+  terrorsx[37]=3.5; terrorsy[37]=terrorsy[38];
+  terrorsx[73]=0; terrorsy[73]=terrorsy[72];
+
+  TGraph* terrors=new TGraph(npoints,terrorsx,terrorsy);
+  terrors->SetFillColor(kCyan);
+
+  elec_all->GetXaxis()->SetRangeUser(0.0,3.45);
+  comb_all->GetXaxis()->SetRangeUser(0.0,3.45);
 
   elec_all->SetMarkerStyle(25);
   mu_all->SetMarkerStyle(26);
@@ -83,6 +108,9 @@ void combineY(TFile* theory) {
   comb_all->GetYaxis()->CenterTitle();
 
   comb_all->Draw("E");
+  terrors->Draw("F");
+
+  comb_all->Draw("SAME E");
 
   truth->Draw("SAME HIST");
 
@@ -91,7 +119,7 @@ void combineY(TFile* theory) {
 
   TLegend* tl=new TLegend(0.20,0.25,0.75,0.40);
   tl->AddEntry(comb_all,"Z#rightarrow e^{+}e^{-} and Z#rightarrow #mu^{+}#mu^{-} combined","P");
-  tl->AddEntry(truth,"POWHEG + CT10","L");
+  tl->AddEntry(terrors,"POWHEG + CT10","LF");
 
   tl->Draw();
 
