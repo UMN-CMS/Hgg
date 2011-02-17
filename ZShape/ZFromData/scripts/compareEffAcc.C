@@ -432,15 +432,15 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
      const char *rtype = ZDefVec_[i].c_str();
      TCanvas *tempCan = new TCanvas("tempcan","tempcan",800,600);
      FromDataHists_[i]->Draw("E1");
-          plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");  //   tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+          plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010");  //   tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
      tempCan->Print(Form("ZFromData_%s_Z0_Y.%s",rtype,ftype));
 
      MCHistos_.ZRap[i]->Draw();
-          plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");     //tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+          plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010");     //tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
      tempCan->Print(Form("ZMC_%s_Z0_Y.%s",rtype,ftype));
 
      MCHistos_.EffAcc[i]->Draw("E1");
-          plabel -> DrawText(xlab_, ylabp_, "CMS PRELIMINARY");   //  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));
+          plabel -> DrawText(xlab_, ylabp_, "CMS preliminary 2010");   //  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));
      tempCan->Print(Form("ZMC_EffAcc_%s_Z0_Y.%s",rtype,ftype));
 
   }
@@ -449,15 +449,15 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
   FinalHistos_.ZResult->SetMarkerSize(0.9);
   FinalHistos_.ZResult->SetLineWidth(2);
   FinalHistos_.ZResult->Draw();
-       plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+       plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
   tempCan1->Print(Form("ZResult_Z0_Y.%s",ftype));
 
   FinalHistos_.ZEffAccTotal->Draw("hist");
-       plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+       plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
   tempCan1->Print(Form("ZEffAccTotal_Z0_Y.%s",ftype));
 
   FinalHistos_.ZRapTotal->Draw("pe1");
-       plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+       plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
   tempCan1->Print(Form("ZEffRapTotal_Z0_Y.%s",ftype));
 
   
@@ -476,7 +476,7 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
     }
   FinalHistos_.ZMCRapTotal->SetLineColor(kRed);
   
-       plabel -> DrawText(xlabb_, ylabpb_, "CMS PRELIMINARY");   
+       plabel -> DrawText(xlabb_, ylabpb_, "CMS preliminary 2010");   
        TLegend *myLegj = new TLegend(.78,.80,.98,.95);
        myLegj->AddEntry(FinalHistos_.ZMCRapTotal,"Zee MC","l");
        myLegj->AddEntry(FinalHistos_.ZRapTotal,"7 TeV Data ","lp");
@@ -486,7 +486,7 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
        myLegj->Delete();
 
   MCHistos_.ZRapMC->Draw("hist");
-       plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+       plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
   tempCan1->Print(Form("ZMCRAPFull_Z0_Y.%s",ftype));
 
   //MCHistos_.ZRapMC->Scale(1./8.117);
@@ -497,7 +497,7 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
   MCHistos_.ZRapMC->Draw("histsame");
   FinalHistos_.ZResult->Draw("same");
   
-       plabel -> DrawText(xlabr_, ylabpr_, "PRELIMINARY");     tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+       plabel -> DrawText(xlabr_, ylabpr_, "preliminary 2010");     tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
   tempCan1->Print(Form("ZResult_With_MC_Z0_Y.%s",ftype));
 
   MCHistos_.ZRapMC_FD->SetLineColor(kBlue);
@@ -562,10 +562,10 @@ EffAccHistos::printIndividualHistos(const char *ftype, bool withcolor)
               if ( electron > 0 ) (*zfdvhit)->GetXaxis()->SetTitle(Form("#eta_{d,e%d}",electron));
 	      else (*zfdvhit)->GetXaxis()->SetTitle("#eta_{d,e}");
            }
-           if (placement ==0 )  { plabel -> DrawText(xlab_, ylabp_, "CMS  PRELIMINARY");   }//  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));}
-           else  if (placement == 1 )  { plabel -> DrawText(xlabc_, ylabpc_, "CMS PRELIMINARY");    }// tlabel -> DrawText(xlabc_, ylabtc_, Form("%s",time_));}
-           else  if (placement == 2 )   {plabel -> DrawText(xlabb_, ylabpb_, "CMS PRELIMINARY"); }//    tlabel -> DrawText(xlabb_, ylabtb_, Form("%s",time_));}
-           else { plabel -> DrawText(xlab_, ylabp_, "CMS PRELIMINARY");   }//  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));}
+           if (placement ==0 )  { plabel -> DrawText(xlab_, ylabp_, "CMS  preliminary 2010");   }//  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));}
+           else  if (placement == 1 )  { plabel -> DrawText(xlabc_, ylabpc_, "CMS preliminary 2010");    }// tlabel -> DrawText(xlabc_, ylabtc_, Form("%s",time_));}
+           else  if (placement == 2 )   {plabel -> DrawText(xlabb_, ylabpb_, "CMS preliminary 2010"); }//    tlabel -> DrawText(xlabb_, ylabtb_, Form("%s",time_));}
+           else { plabel -> DrawText(xlab_, ylabp_, "CMS preliminary 2010");   }//  tlabel -> DrawText(xlab_, ylabt_, Form("%s",time_));}
  
             if (lastplot) {
               std::cout << " Did I get here " << std::endl;
@@ -641,14 +641,14 @@ for (uint i =0; i < ZDefVec_.size(); ++i)
 FinalHistos_.ZEffAccTotSk->Draw("hist");
 myLegf->Draw();
 FinalHistos_.ZEffAccTotSk->GetXaxis()->SetTitle("Y_{Z0}");
-     plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");   //  tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+     plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010");   //  tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZEffAccTotalStacked_Z0_Y.%s",ftype));
 
 
 FinalHistos_.ZRapTotSk->Draw();
 FinalHistos_.ZRapTotSk->GetXaxis()->SetTitle("Y_{Z0}");
 myLegf->Draw();
-     plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+     plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010");    // tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZRapTotalStacked_Z0_Y.%s",ftype));
 
 if (FinalHistos_.ZRapTotSk->GetMaximum() > FinalHistos_.ZMCRapTotal->GetMaximum()) {
@@ -683,11 +683,11 @@ for (uint i =0; i < ZDefVec_.size(); ++i)
 
 FinalHistos_.ZEffAccTotSk->Draw("histnostack");
 myLegl->Draw();
-     plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY"); //    tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+     plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010"); //    tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZEffAccTotalEach_Z0_Y.%s",ftype));
 FinalHistos_.ZRapTotSk->Draw("e1p,nostack");
 myLegl->Draw();
-     plabel -> DrawText(xlabr_, ylabpr_, "CMS PRELIMINARY");   //  tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
+     plabel -> DrawText(xlabr_, ylabpr_, "CMS preliminary 2010");   //  tlabel -> DrawText(xlabr_, ylabtr_, Form("%s",time_));
 tempCan->Print(Form("ZRapTotalEach_Z0_Y.%s",ftype));
 
 FinalHistos_.ZResult->SetMarkerStyle(kOpenCircle);
@@ -705,7 +705,7 @@ myLegpl->AddEntry(MCHistos_.ZRapMC,"POWHEG","pl");
 
 
 myLegpl->Draw();
-     plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "35 pb^{-1}");
+     plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV preliminary 2010");     tllabel -> DrawLatex(xlabl_, ylabtl_, "35 pb^{-1}");
 tempCan->Print(Form("ZRapCOOL_Z0_Y.%s",ftype));
 
 
@@ -809,7 +809,7 @@ myhmc->Scale(2./myhmc->Integral());
   legh->SetFillColor(kWhite);
   legh->Draw();
 
-  plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "35 pb^{-1}");
+  plabel -> DrawText(xlabl_, ylabpl_, "CMS preliminary 2010");     tllabel -> DrawLatex(xlabl_, ylabtl_, "36 pb^{-1}");
   tempCan->Print(Form("ZRapFOLD_Z0_Y.%s",ftype));
   
   //new plot
@@ -829,7 +829,7 @@ myhmc->Scale(2./myhmc->Integral());
   //pt->SetFillColor(kWhite);
   //pt->Draw();
 
- plabel -> DrawText(xlabl_, ylabpl_, "CMS 7TEV PRELIMINARY");     tllabel -> DrawLatex(xlabl_, ylabtl_, "35 pb^{-1}");
+ plabel -> DrawText(xlabl_, ylabpl_, "CMS preliminary 2010");     tllabel -> DrawLatex(xlabl_, ylabtl_, "36 pb^{-1}");
   tempCan->Print(Form("ZRapFOLDSTAT_Z0_Y.%s",ftype));
 
 
