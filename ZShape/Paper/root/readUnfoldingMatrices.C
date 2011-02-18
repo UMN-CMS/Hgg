@@ -1,9 +1,11 @@
 #include <iostream> 
-//#include <stdlib.h>
+#include <stdlib.h>
 #include "TH1.h"
 #include "TMatrixD.h"
 #include "TVectorD.h"
 #include "TStyle.h"
+#include "../root/tdrstyle.C"
+#include "../root/zrapidityStandard.C"
 
 // In this example, you pick up an unfolding matrix (made with makeUnfoldingMatrices.C) from a file (unfoldingMatrix_theOutPut.root)
 // and apply to a rapidity/pt distribution you get from an effAcc file (effAccSource.root)
@@ -82,6 +84,82 @@ TH1* unfold(const TH1* source, TMatrixD * theUnfoldingMatrix)  {
       else                                           h_RapidityUNSmeared->SetBinError(bin,source->GetBinError(bin));
     }
   return h_RapidityUNSmeared;
+}
+
+
+//void makeCovarianceMatrix(const char* file, TMatrixD * theUnfoldingMatrix)  {
+void makeCovarianceMatrix(const char* file,  TMatrixD * theUnfoldingMatrix)  {
+  
+  setTDRStyle();
+  zrap_colors();
+
+  // get unfolding matrix and make its transpose
+  TMatrixD unfoldingMatrix        = *((TMatrixD*)theUnfoldingMatrix->Clone("theUnfoldingMatrix")) ;
+  TMatrixD transpUnfoldingMatrix  = *((TMatrixD*) theUnfoldingMatrix->Transpose((*theUnfoldingMatrix))  );
+
+  // import total errors
+  Double_t errorsArray[1000];
+  int   errorsCounter(0);
+  FILE* f=fopen(file,"r");
+  if (f==0) {
+    fprintf(stderr,"Cannot open '%s'\n",file);
+    return;
+  }
+  char line[4096];
+  while (!feof(f)) {
+    line[0]=0;
+    fgets(line,4095,f);
+    if (strlen(line)<5 || line[0]=='#') continue;
+    int i;
+      float a,b,c,d,e;
+      int ate, atetotal=0;
+      int found=sscanf(line," %d %f %f %f %f %f",&i,&a,&b,&c,&d,&e);
+      std::cout << i << "\t" << e << std::endl;
+      errorsArray[errorsCounter] = e; 
+      errorsCounter++;
+      if (found!=3) continue;
+  }
+  fclose(f);
+    
+  TVectorD totalErrorsVector; totalErrorsVector.Use(errorsCounter,errorsArray);
+
+  TMatrixD errorsOnDiagonalMatrix(errorsCounter,errorsCounter);  
+  TMatrixDDiag diag1(errorsOnDiagonalMatrix); diag1 = totalErrorsVector;
+  for(int i=0; i<errorsCounter; i++){
+    for(int j=0; j<errorsCounter; j++){
+      if( errorsOnDiagonalMatrix(i,j) !=0){       std::cout << i << "\t" << j << "\t" << errorsOnDiagonalMatrix(i,j) << std::endl;       }
+    }}
+  
+  gStyle->SetPalette(1);
+  
+  // manipulate erros and matrices to get correlation matrix
+  
+  TCanvas * theErrorsCanvas = new TCanvas("theErrorsCanvas","theErrorsCanvas",200,200,1000,800);  
+  theErrorsCanvas->cd();
+  errorsOnDiagonalMatrix.Draw("colz");
+  errorsOnDiagonalMatrix.Draw("text same");
+
+  TCanvas * theUnfoldingCanvas = new TCanvas("theUnfoldingCanvas","theUnfoldingCanvas",210,210,1000,800);  
+  theUnfoldingCanvas->cd();
+  unfoldingMatrix.Draw("colz");
+
+  TCanvas * theTransposeCanvas = new TCanvas("theTransposeCanvas","theTransposeCanvas",210,210,1000,800);  
+  theTransposeCanvas->cd();
+  transpUnfoldingMatrix.Draw("colz");
+
+  
+  //  TMatrixD covarianceMatrix(errorsCounter,errorsCounter);
+  TMatrixD tmp(errorsOnDiagonalMatrix,TMatrixD::kMult,transpUnfoldingMatrix);
+  TMatrixD covarianceMatrix(unfoldingMatrix,TMatrixD::kMult,tmp);
+  TCanvas * theCovarianceCanvas = new TCanvas("theCovarianceCanvas","theCovarianceCanvas",200,200,1000,800);
+  theCovarianceCanvas->cd();
+  covarianceMatrix.Draw("colz");
+  covarianceMatrix.Draw("text same");
+ 
+  
+  // export formulas from here:
+  // http://en.wikipedia.org/wiki/Propagation_of_uncertainty#Linear_combinations
+
 }
 
 
