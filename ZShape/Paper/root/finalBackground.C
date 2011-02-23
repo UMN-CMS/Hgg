@@ -30,7 +30,7 @@ void finalBackground(int mode) {
     qcd=readStandardFilePt("qcd","background_qcd_qt.csv");
     ttbar=readStandardFilePt("ttbar","background_ttbar_qt.csv");
     tau=readStandardFilePt("tau","background_tautau_qt.csv");
-    vv=readStandardFilePt("vv","background_vv_y_qt.csv");
+    vv=readStandardFilePt("vv","background_vv_qt.csv");
 
     outf=fopen("background_all_qt.csv","wt");
     break;
@@ -70,12 +70,14 @@ void finalBackground(int mode) {
   qcd->SetMarkerStyle(20);
   ttbar->SetMarkerStyle(24);
   tau->SetMarkerStyle(26);
+vv->SetMarkerStyle(30);
   TCanvas* c1=new TCanvas("c1","c1",700,700);
   c1->SetLogy();
 
   qcd->Draw("E1");
   ttbar->Draw("E1 SAME");
   tau->Draw("E1 SAME");
+vv->Draw("E1 SAME");
 
   if (mode==1) {
     TLegend* tl=new TLegend(0.20,0.80,0.51,0.92,"ECAL-ECAL Channel");
