@@ -6,7 +6,7 @@ void finalBackground(int mode) {
   setTDRStyle();
   int nbins;
   FILE *outf;
-  TH1* qcd,*ttbar,*tau;
+  TH1* qcd,*ttbar,*tau, *vv;
 
   switch (mode) {
   case (1) : 
@@ -14,6 +14,7 @@ void finalBackground(int mode) {
     qcd=readStandardFile("qcd","background_qcd_y_ee.csv");
     ttbar=readStandardFile("ttbar","background_ttbar_y_ee.csv");
     tau=readStandardFile("tau","background_tautau_y_ee.csv");
+    vv=readStandardFile("vv","background_vv_y_ee.csv");
     outf=fopen("background_all_y_ee.csv","wt");
     break;
   case (2) : 
@@ -21,6 +22,7 @@ void finalBackground(int mode) {
     qcd=readStandardFile("qcd","background_qcd_y_ef.csv");
     ttbar=readStandardFile("ttbar","background_ttbar_y_ef.csv");
     tau=readStandardFile("tau","background_tautau_y_ef.csv");
+    vv=readStandardFile("vv","background_vv_y_ef.csv");
     outf=fopen("background_all_y_ef.csv","wt");
     break;
   case (3) : 
@@ -28,6 +30,8 @@ void finalBackground(int mode) {
     qcd=readStandardFilePt("qcd","background_qcd_qt.csv");
     ttbar=readStandardFilePt("ttbar","background_ttbar_qt.csv");
     tau=readStandardFilePt("tau","background_tautau_qt.csv");
+    vv=readStandardFilePt("vv","background_vv_y_qt.csv");
+
     outf=fopen("background_all_qt.csv","wt");
     break;
   }
@@ -36,8 +40,8 @@ void finalBackground(int mode) {
     fprintf(outf,"%3d %8.1f %8.1f ",i,qcd->GetXaxis()->GetBinLowEdge(i),
 	    qcd->GetXaxis()->GetBinUpEdge(i));
 
-    double tback=qcd->GetBinContent(i)+ttbar->GetBinContent(i)+tau->GetBinContent(i);
-    double terr=sqrt(pow(qcd->GetBinError(i),2)+pow(ttbar->GetBinError(i),2)+pow(tau->GetBinError(i),2));
+    double tback=qcd->GetBinContent(i)+ttbar->GetBinContent(i)+tau->GetBinContent(i)+vv->GetBinContent(i);
+    double terr=sqrt(pow(qcd->GetBinError(i),2)+pow(ttbar->GetBinError(i),2)+pow(tau->GetBinError(i),2)+pow(vv->GetBinError(i),2));
 
     fprintf(outf,"%8.2f %8.2f\n",tback,terr);
   }
@@ -78,6 +82,8 @@ void finalBackground(int mode) {
     tl->AddEntry(qcd,"QCD Background ","P");
     tl->AddEntry(ttbar,"t#bar{t} Background","P");
     tl->AddEntry(tau,"Z/#gamma*#rightarrow#tau#tau Background","P");
+    tl->AddEntry(vv,"VV Background","P");
+
     tl->Draw();
     zrap_Prelim(0.75,0.9,0.8,0.8);
     zrap_Lumi(0.86,0.86,36);
@@ -88,6 +94,8 @@ void finalBackground(int mode) {
     tl->AddEntry(qcd,"QCD Background ","P");
     tl->AddEntry(ttbar,"t#bar{t} Background","P");
     tl->AddEntry(tau,"Z/#gamma*#rightarrow#tau#tau Background","P");
+    tl->AddEntry(vv,"VV Background","P");
+
     tl->Draw();
     zrap_Prelim(0.75,0.9,0.8,0.8);
     zrap_Lumi(0.86,0.86,36);
@@ -102,6 +110,8 @@ void finalBackground(int mode) {
     tl->AddEntry(qcd,"QCD Background ","P");
     tl->AddEntry(ttbar,"t#bar{t} Background","P");
     tl->AddEntry(tau,"Z/#gamma*#rightarrow#tau#tau Background","P");
+    tl->AddEntry(vv,"VV Background","P");
+
     tl->Draw();
     zrap_Prelim(0.75,0.9,0.8,0.8);
     zrap_Lumi(0.86,0.86,36);
