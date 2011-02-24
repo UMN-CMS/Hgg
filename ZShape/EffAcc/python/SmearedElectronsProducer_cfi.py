@@ -15,7 +15,9 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
        constantp = cms.double(0.137),
        constantm = cms.double(0.126845),
        meanp = cms.double(1.0243),
-       meanm = cms.double(1.0353)
+       meanm = cms.double(1.0353),
+       reseta = cms.double(0.05),
+       resphi = cms.double(0.05)
        #tuned by kevin on 04-16-09, mean added by J. Mans 05-22-09
     ),
     EB = cms.PSet(

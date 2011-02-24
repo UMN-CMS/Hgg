@@ -29,7 +29,7 @@ bool EtaAcceptance::isInAcceptance(double p, Zone z) const {
   case (zone_MUON) : // only acceptance with muons
     return (eta<2.10); 
   case (zone_HF) :
-    return (eta>3.05) && (eta<4.60);
+    return (eta>3.10) && (eta<4.60);
   case (zone_ECAL) :
     return isInAcceptance(p,zone_EB) || isInAcceptance(p,zone_EE);
   case (zone_ECAL_muon) :

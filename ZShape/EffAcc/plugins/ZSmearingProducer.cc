@@ -37,6 +37,7 @@ Implementation:
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 #include "DataFormats/GeometryVector/interface/Phi.h"
+#include "Geometry/HcalTowerAlgo/src/HcalHardcodeGeometryData.h"
 
 #include "Math/VectorUtil.h"
 
@@ -94,6 +95,8 @@ private:
     double constantm;
     double meanp;
     double meanm;
+    double res_eta;
+    double res_phi;
 
   } HFParams_;
   
@@ -131,6 +134,8 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   HFParams_.constantm=ps.getParameter<double>("constantm");
   HFParams_.meanp=ps.getParameter<double>("meanp");
   HFParams_.meanm=ps.getParameter<double>("meanm");
+  HFParams_.res_eta=ps.getParameter<double>("reseta");
+  HFParams_.res_phi=ps.getParameter<double>("resphi");
 
   std::cout << "++ HF smearing parameters: \tstocastic: " << HFParams_.stocastic
 	    << "\t+constant: " << HFParams_.constantp
@@ -306,6 +311,7 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   const double EBEEboundry = 1.5;
   const double EEHFbountry = 3.0;
   double eta = electron.eta();
+  double phi = electron.phi();
   double e  = electron.E();
   double et  = electron.Et();
   //double pt = electron.Pt();
@@ -338,59 +344,41 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
     double  etaFact=sinh(eta)/sinh(deteta);
     Efrac = randomNum_->Gaus(mymean,mysig);
     double newEta=deteta;
-    double perc = randomNum_->Uniform(100);
-    double unif = randomNum_->Uniform(0.64,0.9);
+    double perc = randomNum_->Uniform(1.0);
     double sign = (deteta < 0.) ?(-1.) : (1.); //added to know the + or - sign.
-    double etabias=0.0144;
-    if((fabs(deteta)>2.964)&&(fabs(deteta)<=3)){
-      newEta=deteta;
-    }else if ((fabs(deteta)>3)&&(fabs(deteta)<=3.034)){
-      if(perc<=60){newEta=deteta;
-      }else {
-        newEta=sign*(3.0515+etabias);
+
+    static const double binCenterProb[] = { 0.00, 0.050, 0.050, 0.030, 0.030, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.000 };
+
+
+    double deteta_abs=fabs(deteta);
+    static const double eta_offset=0.0144225; // needed because this is applied in reco for a "centered hit"
+    
+    double centerProb=0.0;
+
+    int iring=0;
+
+    for (iring=0; iring<14; iring++)
+      if (deteta_abs<theHFEtaBounds[iring+1]) {
+	centerProb=binCenterProb[iring];
+	break;
       }
-    }else if ((fabs(deteta)>3.034)&&(fabs(deteta)<=3.104)){
-      if(perc<=60){newEta=deteta;
-      }else {
-        newEta=sign*(3.0515+etabias);
-      }
-    }else if ((fabs(deteta)>3.104)&&(fabs(deteta)<=3.139)){
-      if(perc<=20){newEta=sign*(3.0515+etabias);
-      } else {
-        newEta=deteta;
-      }
-    }else if ((fabs(deteta)>3.1915)&&(fabs(deteta)<=3.279)){
-      if(perc<=43){
-        newEta=sign*(3.22650+etabias);
-      }else {
-        newEta=deteta;
-      }
-    }else if ((fabs(deteta)>3.3665)&&(fabs(deteta)<=3.454)){
-      if(perc<=32){
-        newEta=sign*(3.4015+etabias);
-      }else {
-        newEta=deteta;
-      }
-    }else if ((fabs(deteta)>3.5415)&&(fabs(deteta)<=3.629)){
-      if(perc<=25){
-        newEta=sign*(3.5765+etabias);
-      }else {
-        newEta=deteta;
-      }
-    }else if ((fabs(deteta)>3.7165)&&(fabs(deteta)<=3.804)){
-      if(perc<=15){
-        newEta=sign*(3.7515+etabias);
-      }else {
-        newEta=deteta;
-      }
-    } else if ((fabs(deteta)>3.89135)&&(fabs(deteta)<=3.9786)){
-      if(perc<=10){
-        newEta=sign*(3.926+etabias);
-      }else {
-        newEta=deteta;
-      }
+
+    if (perc<centerProb) {
+      newEta=sign*((theHFEtaBounds[iring]+theHFEtaBounds[iring+1])/2+eta_offset);
     }
-   eta=(asinh(etaFact*sinh(newEta)));
+    
+    double newPhi=electron.phi();
+
+    // smear eta and phi
+    newEta+=randomNum_->Gaus(1.0,HFParams_.res_eta);
+    newPhi+=randomNum_->Gaus(1.0,HFParams_.res_phi);
+    if (newPhi<-M_PI) newPhi+=2*M_PI;
+    if (newPhi>M_PI) newPhi-=2*M_PI;
+
+    phi=newPhi;
+
+    eta=(asinh(etaFact*sinh(newEta)));
+
   }
   
   //std::cout << " OLD E " << electron.E() << " new eta " << electron.eta() << " new et " << electron.Et() << " new pt " << electron.pt() <<  " mass : " << electron.M() << std::endl;
@@ -399,7 +387,7 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   ///electron.SetE(Efrac*e);
   //electron.SetPt(pow(-e*e*(1-Efrac*Efrac)+pt*pt,0.5));
   ///electron.SetPt(electron.Et());
-  electron = math::PtEtaPhiELorentzVector(Efrac*e/cosh(eta),eta,electron.phi(),Efrac*e);
+  electron = math::PtEtaPhiELorentzVector(Efrac*e/cosh(eta),eta,phi,Efrac*e);
  
 
   //std::cout << " cosh way " << Efrac*e/cosh(eta) << " Other way " << Efrac*e*sin(electron.theta()) << std::endl;
