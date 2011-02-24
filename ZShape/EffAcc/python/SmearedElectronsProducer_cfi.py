@@ -33,9 +33,10 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
      EE = cms.PSet(
        p0 = cms.double(1.5137),
        p1 = cms.double(0.72),
-       p2 = cms.double(0.15), #0.15
-       alpha = cms.double(1.6194),
-       mean = cms.double(0.9796),
+       p2 = cms.double(0.15),   #0.15
+       c  = cms.double(0.025),  #AN2011_038_v1.pdf
+       alpha = cms.double(1.61528),
+       mean = cms.double(0.977413),
        n = cms.double(2.0) 	
     )
                                           

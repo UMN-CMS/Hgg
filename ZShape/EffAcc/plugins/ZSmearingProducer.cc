@@ -108,7 +108,7 @@ private:
   } EBPrams_;
 
   struct {
-    double sigma[3];
+    double sigma[4];
 	double alpha;
 	double N;
 	double mean;
@@ -166,6 +166,7 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   EEPrams_.sigma[0]=ps.getParameter<double>("p0");
   EEPrams_.sigma[1]=ps.getParameter<double>("p1");
   EEPrams_.sigma[2]=ps.getParameter<double>("p2");
+  EEPrams_.sigma[3]=ps.getParameter<double>("c");
   EEPrams_.alpha=ps.getParameter<double>("alpha");
   EEPrams_.mean=ps.getParameter<double>("mean");
   EEPrams_.N=ps.getParameter<double>("n");
@@ -313,7 +314,7 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   double eta = electron.eta();
   double phi = electron.phi();
   double e  = electron.E();
-  double et  = electron.Et();
+  //double et  = electron.Et();
   //double pt = electron.Pt();
 
   double Efrac = 1.0;
@@ -332,7 +333,7 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   else if (fabs(deteta) < EEHFbountry)
   {
     //Do EE Stuff
-    Efrac = smearECALCB(deteta,et, mdt_EE);
+    Efrac = smearECALCB(deteta,e, mdt_EE);
   }
   else if (fabs(deteta) < 5.0)
   {
@@ -413,15 +414,22 @@ Double_t crystalBall(Double_t *x, Double_t *par)
 
 }
 
+// old version
+//Double_t EBRes(Double_t *x,Double_t *par) { if (x[0] < 0.01 ) return 100.;
+//  if (x[0] < 0.01 ) return 100.;
+//  Double_t p0 = par[0]/x[0] + par[3];
+//  Double_t p1 = par[0]*par[1]/x[0];
+//  Double_t p2 = par[0]*par[2]/x[0];
+//  return (p0-p1*fabs(x[1])+p2*x[1]*x[1]);
+//}
+
+// x[0] is energy, x[1] is eta 
 Double_t EBRes(Double_t *x,Double_t *par) {
   if (x[0] < 0.01 ) return 100.;
-  //  Double_t p0 = par[0]/x[0] + par[3];
-  //  Double_t p1 = par[1]/x[0];
-  //  Double_t p2 = par[2]/x[0];
-  Double_t p0 = par[0]/x[0] + par[3];
-  Double_t p1 = par[0]*par[1]/x[0];
+  Double_t p0 = par[0]/x[0];        // par[0] is stochastic term
+  Double_t p1 = par[0]*par[1]/x[0]; // par[1-2] are parameters for eta-dependece
   Double_t p2 = par[0]*par[2]/x[0];
-  return (p0-p1*fabs(x[1])+p2*x[1]*x[1]);
+  return ( TMath::Power((TMath::Power( (p0-p1*fabs(x[1])+p2*x[1]*x[1]),2) + par[3]*par[3]),0.5) );
 }
 
 Double_t EERes(Double_t *x,Double_t *par) {
@@ -444,7 +452,7 @@ double ZSmearingProducer::getSigma(double eta, double et, MyDetType det)
   }
   else if ( det == mdt_EE)
   {
-     return (EERes(x,EEPrams_.sigma));
+     return (EBRes(x,EEPrams_.sigma)); // since EB and EE have same functional form now
   }
   else return 1.0;
 }
@@ -455,7 +463,7 @@ double ZSmearingProducer::smearECALCB(double eta, double et, MyDetType det)
   params[3] = getSigma(eta, et, det);
   params[0] = ( det == mdt_EB ) ? (EBPrams_.alpha) : (EEPrams_.alpha);
   params[1] = ( det == mdt_EB ) ? (EBPrams_.N) : (EEPrams_.N);
-  params[2] = ( det == mdt_EB) ? (EBPrams_.mean) : (1.0);
+  params[2] = ( det == mdt_EB) ?  (EBPrams_.mean) : (1.0);
   params[4] = 100.;
   double sf = ( det == mdt_EB) ? (1.0) : (EEPrams_.mean);
   crystalball_->SetParameters(params);
@@ -479,7 +487,7 @@ double ZSmearingProducer::smearECALCB(double eta, double et, MyDetType det)
 
 }
 
-//Method for smearing ECAL
+//Method for smearing ECAL - nowhere use feb 24th 2011 (gf)
 double ZSmearingProducer::smearECAL(double eta, double et, MyDetType det)
 {
   double p0r = 0.;
