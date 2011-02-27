@@ -93,6 +93,9 @@ private:
     double stocastic;
     double constantp;
     double constantm;
+    double constantp2;
+    double constantm2;
+    double fraction2;
     double meanp;
     double meanm;
     double res_eta;
@@ -132,6 +135,9 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   HFParams_.stocastic=ps.getParameter<double>("stocastic");
   HFParams_.constantp=ps.getParameter<double>("constantp");
   HFParams_.constantm=ps.getParameter<double>("constantm");
+  HFParams_.constantp2=ps.getParameter<double>("constantp2");
+  HFParams_.constantm2=ps.getParameter<double>("constantm2");
+  HFParams_.fraction2=ps.getParameter<double>("fraction2");
   HFParams_.meanp=ps.getParameter<double>("meanp");
   HFParams_.meanm=ps.getParameter<double>("meanm");
   HFParams_.res_eta=ps.getParameter<double>("reseta");
@@ -140,6 +146,9 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   std::cout << "++ HF smearing parameters: \tstocastic: " << HFParams_.stocastic
 	    << "\t+constant: " << HFParams_.constantp
 	    << "\t-constant: " << HFParams_.constantm
+	    << "\t+constant2: " << HFParams_.constantp2
+	    << "\t-constant2: " << HFParams_.constantm2
+	    << "\t-fraction2: " << HFParams_.fraction2
 	    << "\t+mean: " << HFParams_.meanp
 	    << "\t-mean: " << HFParams_.meanm << std::endl;
 
@@ -337,7 +346,16 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   }
   else if (fabs(deteta) < 5.0)
   {
-    double myconst = ( deteta > 0 ) ? HFParams_.constantp : HFParams_.constantm;
+
+    // pick the constant...
+    double myfraction = randomNum_->Uniform(1.0);
+    double myconst;
+    if (myfraction<HFParams_.fraction2) {
+      myconst = ( deteta > 0 ) ? HFParams_.constantp2 : HFParams_.constantm2;
+    } else {
+      myconst = ( deteta > 0 ) ? HFParams_.constantp : HFParams_.constantm;
+    }
+
     double mymean = ( deteta > 0 ) ? HFParams_.meanp : HFParams_.meanm;
     double mysig = TMath::Power(TMath::Power(HFParams_.stocastic/sqrt(std::max(e,1.0)),2)+myconst*myconst,0.5);
     //double mysig = HFParams_.stocastic/sqrt(std::max(e,1.0)+myconst;
@@ -348,11 +366,13 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
     double perc = randomNum_->Uniform(1.0);
     double sign = (deteta < 0.) ?(-1.) : (1.); //added to know the + or - sign.
 
-    static const double binCenterProb[] = { 0.00, 0.050, 0.050, 0.030, 0.030, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.000 };
+    //    static const double binCenterProb[] = { 0.00, 0.050, 0.050, 0.030, 0.030, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.000 };
+    static const double binCenterProb[] = { 0.00, 0.050, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.000 };
 
 
     double deteta_abs=fabs(deteta);
-    static const double eta_offset=0.0144225; // needed because this is applied in reco for a "centered hit"
+    //    static const double eta_offset=0.0144225; // needed because this is applied in reco for a "centered hit"
+    static const double eta_offset=0.0; // needed because this is applied in reco for a "centered hit"
     
     double centerProb=0.0;
 
@@ -366,13 +386,17 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
 
     if (perc<centerProb) {
       newEta=sign*((theHFEtaBounds[iring]+theHFEtaBounds[iring+1])/2+eta_offset);
+      // smear eta
+      newEta+=randomNum_->Gaus(0.0,HFParams_.res_eta/10.0); // small effect here
+    } else {
+      // smear eta
+      newEta+=randomNum_->Gaus(0.0,HFParams_.res_eta);
     }
     
     double newPhi=electron.phi();
 
-    // smear eta and phi
-    newEta+=randomNum_->Gaus(1.0,HFParams_.res_eta);
-    newPhi+=randomNum_->Gaus(1.0,HFParams_.res_phi);
+    // smear phi
+    newPhi+=randomNum_->Gaus(0.0,HFParams_.res_phi);
     if (newPhi<-M_PI) newPhi+=2*M_PI;
     if (newPhi>M_PI) newPhi-=2*M_PI;
 
