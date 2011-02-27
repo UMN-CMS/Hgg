@@ -145,7 +145,7 @@ sc_sequence = cms.Sequence( ( hfSuperClusterCandidate * theHFSuperClusters + hfR
 ##
 
 
-from ElectroWeakAnalysis.ZEE.simpleEleIdSequence_cff import *
+from ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff import *
 from RecoEgamma.EgammaIsolationAlgos.egammaIsolationSequence_cff import *
 from PhysicsTools.PatAlgos.patSequences_cff import *
 
