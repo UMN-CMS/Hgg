@@ -20,6 +20,9 @@ void ZShapeZDef::addCriterion(ZShapeZDef::CriterionType ct, const std::string& c
       if (!strcasecmp(pref,"Y")) {
 	zrs.reqType=zr_Rapidity;
       }
+      if (!strcasecmp(pref,"q")) {
+	zrs.reqType=zr_QT;
+      }
       if (!strcasecmp(pref,"G")) {
 	zrs.reqType=zr_NGsf20;
       }
@@ -78,6 +81,8 @@ bool ZShapeZDef::passZ(const ZShapeEvent& evt, int nz) const {
       rule=evt.m()>=m_zCuts[i].lower && evt.m()<m_zCuts[i].upper;
     } else if (m_zCuts[i].reqType==zr_Rapidity) {
       rule=evt.Y()>=m_zCuts[i].lower && evt.Y()<m_zCuts[i].upper;
+    } else if (m_zCuts[i].reqType==zr_QT) {
+      rule=evt.qT()>=m_zCuts[i].lower && evt.qT()<m_zCuts[i].upper;
     } else if (m_zCuts[i].reqType==zr_NGsf20) {
       rule=evt.n_gsf20 >=m_zCuts[i].lower && evt.n_gsf20 <=m_zCuts[i].upper;
     }

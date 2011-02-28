@@ -72,6 +72,7 @@ void ZShapeEvent::afterLoad() {
   math::PtEtaPhiMLorentzVector ZP4 = elec(0).p4_ + elec(1).p4_;
   mass_=ZP4.M();
   rap_=ZP4.Rapidity();
+  qT_=ZP4.Pt();
 }
 
 void ZShapeEvent::initEvent(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
