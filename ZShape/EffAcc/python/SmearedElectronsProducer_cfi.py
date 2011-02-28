@@ -12,16 +12,11 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
     SmearTable = cms.FileInPath('ZShape/EffAcc/data/CBBinsFile.txt'),
     HF = cms.PSet(
        stocastic = cms.double(2.08),
-       constantp = cms.double(0.120),
-       constantm = cms.double(0.110),
-       constantp2 = cms.double(0.300),
-       constantm2 = cms.double(0.300),
-       fraction2 = cms.double(0.15),
+       constantp = cms.double(0.137),
+       constantm = cms.double(0.126845),
        meanp = cms.double(1.0243),
-       meanm = cms.double(1.0353),
-       reseta = cms.double(0.045),
-       resphi = cms.double(0.045)
-       #tuned J. Mans 02-26-11
+       meanm = cms.double(1.0353)
+       #tuned by kevin on 04-16-09, mean added by J. Mans 05-22-09
     ),
     EB = cms.PSet(
        #tuned by j. Mans on 06-08-09
@@ -36,10 +31,9 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
      EE = cms.PSet(
        p0 = cms.double(1.5137),
        p1 = cms.double(0.72),
-       p2 = cms.double(0.15),   #0.15
-       c  = cms.double(0.025),  #AN2011_038_v1.pdf
-       alpha = cms.double(1.61528),
-       mean = cms.double(0.977413),
+       p2 = cms.double(0.15), #0.15
+       alpha = cms.double(1.6194),
+       mean = cms.double(0.9796),
        n = cms.double(2.0) 	
     )
                                           
