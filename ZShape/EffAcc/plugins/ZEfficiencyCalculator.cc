@@ -506,7 +506,7 @@ ZEfficiencyCalculator::beginJob()
 
       // one sub-dir for each step of selection
       td = sd.mkdir(dirname);
-      zplots->zCut_[i].Book(td);
+      zplots->zCut_[i].Book(td,true);
       zplots->zCut_[i].setupMassWindow(massLow_,massHigh_);
     }    
 
