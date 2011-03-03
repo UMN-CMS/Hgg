@@ -577,7 +577,7 @@ ZFromData::beginJob()
 
       // one sub-dir for each step of selection
       td = sd.mkdir(dirname);
-      zplots->zCut_[i].Book(td);
+      zplots->zCut_[i].Book(td,true);
       if (extraHistos_){ zplots->zCutExtra_[i].Book(td);}
     }
 
