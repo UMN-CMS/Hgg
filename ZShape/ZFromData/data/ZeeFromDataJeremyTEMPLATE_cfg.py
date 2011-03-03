@@ -391,6 +391,15 @@ process.ZFromData = cms.EDAnalyzer("ZFromData",
                 Z = cms.untracked.vstring('m(60,120)'),
                 ptorder = cms.untracked.bool (True)
           ),
+        cms.PSet(
+            name = cms.untracked.string('ECAL80-ECAL95-MUO-HIGHPT'),
+            e1 = cms.untracked.vstring("ACC(ECAL+MUON)","PT10","Supercluster-Eta","PT20",
+                                       "GsfTrack-EtaDet","WP95","WP80", "HLT-GSF"),
+            e2 = cms.untracked.vstring("ACC(ECAL+MUON)","PT10","Supercluster-Eta","PT20",
+                                       "GsfTrack-EtaDet","PT20","WP95"),		
+            Z = cms.untracked.vstring('m(60,120)','q(90,600)'),
+            ptorder = cms.untracked.bool (True)
+          ),
           cms.PSet(
                 name = cms.untracked.string('ECAL80-ECAL95-MUO'),
                             e1 = cms.untracked.vstring("ACC(ECAL+MUON)","PT10","Supercluster-Eta","PT20",
