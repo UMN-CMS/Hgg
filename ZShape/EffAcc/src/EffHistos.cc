@@ -6,9 +6,10 @@ typedef math::XYZTLorentzVector XYZTLorentzVector;
 // for reference
 // $ROOTSYS/include/Math/GenVector/LorentzVector.h
 
-void EffHistos::Book(TFileDirectory& tdf) {
+void EffHistos::Book(TFileDirectory& tdf,bool mzbin) {
 
   booked_=true;
+  massFinals_=mzbin;
 
   // add here all extremes, tidily
   const float pi       = 3.141593;
@@ -84,7 +85,17 @@ void EffHistos::Book(TFileDirectory& tdf) {
   ptZTL_ptZ_zoom_  = tdf.make<TH2F>("PtTL_vs_PtZ_zoom","PtZTL_vs_PtZ_zoom;Pt_{Z};Pt_{ZtreeLevel}",25,0.0,25.0,25,0.0,25.0);
 
   //Now make the 2-D histogram
-  mZ_e2pt_e2eta_ = tdf.make<TH3F>("Z0_mass_vs_e2_pt_vs_e2_eta","Z0_mass_vs_e2_pt_vs_e2_eta;p_{T,e2};#eta_{e2};m_{Z0}", zshape::e_pt_bins,zshape::e_pt_binning,zshape::e_eta_bins,zshape::e_eta_binning,110, ZmassBins );
+  //  mZ_e2pt_e2eta_ = tdf.make<TH3F>("Z0_mass_vs_e2_pt_vs_e2_eta","Z0_mass_vs_e2_pt_vs_e2_eta;p_{T,e2};#eta_{e2};m_{Z0}", zshape::e_pt_bins,zshape::e_pt_binning,zshape::e_eta_bins,zshape::e_eta_binning,110, ZmassBins );
+
+  if (massFinals_) {
+    mZ_binned_finals.e1eta_ = tdf.make<TH2F>("mZ_vs_e1_eta","mZ_vs_e1_eta;detector #eta_{e1};m_{ee}", 50, -5, 5,55,40,150);
+    mZ_binned_finals.e2eta_ = tdf.make<TH2F>("mZ_vs_e2_eta","mZ_vs_e2_eta;detector #eta_{e2};m_{ee}", 50, -5, 5,55,40,150);
+    mZ_binned_finals.hfeta_ = tdf.make<TH2F>("mZ_vs_hfeta","mZ_vs_hf_eta;detector #eta_{e};m_{ee}", 13*7, 3.0, 5.0,55,40,150);
+    mZ_binned_finals.e1phi_ = tdf.make<TH2F>("mZ_vs_e1_phi","mZ_vs_e1_phi;#phi_{e1};m_{ee}", 50, -pi, pi,55,40,150);
+    mZ_binned_finals.e2phi_ = tdf.make<TH2F>("mZ_vs_e2_phi","mZ_vs_e2_phi;#phi_{e2};m_{ee}", 50,  -pi, pi,55,40,150);
+    mZ_binned_finals.e1pt_  = tdf.make<TH2F>("mZ_vs_e1_P_t","mZ_vs_e1_P_t;p_{T,e1};m_{ee}", 200, 0, maxPt,55,40,150);
+    mZ_binned_finals.e2pt_  = tdf.make<TH2F>("mZ_vs_e2_P_t","mZ_vs_e2_P_t;p_{T,e2};m_{ee}", 200, 0, maxPt,55,40,150);
+  }
 
   //Now mkae some Event histograms
   evt_PVz_ =  tdf.make<TH1F>("evt_PVz","PV_z;PV_{z}", 50, -20,20);
@@ -205,7 +216,21 @@ void EffHistos::Fill(const  ZShapeElectron& e1, const  ZShapeElectron& e2,
   e1eta_e2eta_ -> Fill(e1eta,e2eta,wgt);
 
   //Now Fill the 3-D Histogram
-  mZ_e2pt_e2eta_ -> Fill(e2Pt,e2eta,zMass,wgt);
+  //  mZ_e2pt_e2eta_ -> Fill(e2Pt,e2eta,zMass,wgt);
+
+  if (massFinals_) {
+    mZ_binned_finals.e1eta_ -> Fill(e1eta,zMass,wgt);
+    mZ_binned_finals.e1pt_  -> Fill(e1Pt,zMass,wgt);
+    mZ_binned_finals.e1phi_ -> Fill(e1phi,zMass,wgt);
+
+    mZ_binned_finals.e2eta_ -> Fill(e2eta,zMass,wgt);
+    mZ_binned_finals.e2pt_  -> Fill(e2Pt,zMass,wgt);
+    mZ_binned_finals.e2phi_ -> Fill(e2phi,zMass,wgt);
+
+    if (fabs(e2eta)>3.0 && fabs(e2eta)<5.0)
+      mZ_binned_finals.hfeta_ -> Fill(fabs(e2eta),zMass,wgt);
+    
+  }
 
 }
 
