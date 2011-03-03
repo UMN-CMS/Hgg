@@ -17,7 +17,7 @@
 class EffHistos {
 
  public:
-  void Book(TFileDirectory& tfd);
+  void Book(TFileDirectory& tfd,bool massFinals=false);
   void Fill(const ZShapeElectron& e1, const  ZShapeElectron& e2, 
             const ::math::PtEtaPhiMLorentzVector& eTL1, const ::math::PtEtaPhiMLorentzVector& eTL2, double wgt=1.0, bool doMC=true); 
   void FillEvt(const ZShapeEvent& zevtm, bool justPV=false);
@@ -39,6 +39,11 @@ class EffHistos {
   TH1 *evt_PVz_, *evt_BSz_, *evt_MET_, *evt_PFMET_, *evt_TCMET_;
   TH2* ptZTL_ptZ_, *ptZTL_ptZ_zoom_;
   TH3* mZ_e2pt_e2eta_;
+
+  bool massFinals_;
+  struct {
+    TH2 *e1eta_,*e2eta_,*e1phi_,*e2phi_,*e1pt_,*e2pt_,*hfeta_;    
+  } mZ_binned_finals;
 
 }; 
 
