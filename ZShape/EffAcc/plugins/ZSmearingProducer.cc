@@ -37,7 +37,6 @@ Implementation:
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 #include "DataFormats/GeometryVector/interface/Phi.h"
-#include "Geometry/HcalTowerAlgo/src/HcalHardcodeGeometryData.h"
 
 #include "Math/VectorUtil.h"
 
@@ -93,13 +92,8 @@ private:
     double stocastic;
     double constantp;
     double constantm;
-    double constantp2;
-    double constantm2;
-    double fraction2;
     double meanp;
     double meanm;
-    double res_eta;
-    double res_phi;
 
   } HFParams_;
   
@@ -111,7 +105,7 @@ private:
   } EBPrams_;
 
   struct {
-    double sigma[4];
+    double sigma[3];
 	double alpha;
 	double N;
 	double mean;
@@ -135,20 +129,12 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   HFParams_.stocastic=ps.getParameter<double>("stocastic");
   HFParams_.constantp=ps.getParameter<double>("constantp");
   HFParams_.constantm=ps.getParameter<double>("constantm");
-  HFParams_.constantp2=ps.getParameter<double>("constantp2");
-  HFParams_.constantm2=ps.getParameter<double>("constantm2");
-  HFParams_.fraction2=ps.getParameter<double>("fraction2");
   HFParams_.meanp=ps.getParameter<double>("meanp");
   HFParams_.meanm=ps.getParameter<double>("meanm");
-  HFParams_.res_eta=ps.getParameter<double>("reseta");
-  HFParams_.res_phi=ps.getParameter<double>("resphi");
 
   std::cout << "++ HF smearing parameters: \tstocastic: " << HFParams_.stocastic
 	    << "\t+constant: " << HFParams_.constantp
 	    << "\t-constant: " << HFParams_.constantm
-	    << "\t+constant2: " << HFParams_.constantp2
-	    << "\t-constant2: " << HFParams_.constantm2
-	    << "\t-fraction2: " << HFParams_.fraction2
 	    << "\t+mean: " << HFParams_.meanp
 	    << "\t-mean: " << HFParams_.meanm << std::endl;
 
@@ -175,7 +161,6 @@ ZSmearingProducer::ZSmearingProducer(const edm::ParameterSet& iConfig) :
   EEPrams_.sigma[0]=ps.getParameter<double>("p0");
   EEPrams_.sigma[1]=ps.getParameter<double>("p1");
   EEPrams_.sigma[2]=ps.getParameter<double>("p2");
-  EEPrams_.sigma[3]=ps.getParameter<double>("c");
   EEPrams_.alpha=ps.getParameter<double>("alpha");
   EEPrams_.mean=ps.getParameter<double>("mean");
   EEPrams_.N=ps.getParameter<double>("n");
@@ -321,9 +306,8 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   const double EBEEboundry = 1.5;
   const double EEHFbountry = 3.0;
   double eta = electron.eta();
-  double phi = electron.phi();
   double e  = electron.E();
-  //double et  = electron.Et();
+  double et  = electron.Et();
   //double pt = electron.Pt();
 
   double Efrac = 1.0;
@@ -342,20 +326,11 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   else if (fabs(deteta) < EEHFbountry)
   {
     //Do EE Stuff
-    Efrac = smearECALCB(deteta,e, mdt_EE);
+    Efrac = smearECALCB(deteta,et, mdt_EE);
   }
   else if (fabs(deteta) < 5.0)
   {
-
-    // pick the constant...
-    double myfraction = randomNum_->Uniform(1.0);
-    double myconst;
-    if (myfraction<HFParams_.fraction2) {
-      myconst = ( deteta > 0 ) ? HFParams_.constantp2 : HFParams_.constantm2;
-    } else {
-      myconst = ( deteta > 0 ) ? HFParams_.constantp : HFParams_.constantm;
-    }
-
+    double myconst = ( deteta > 0 ) ? HFParams_.constantp : HFParams_.constantm;
     double mymean = ( deteta > 0 ) ? HFParams_.meanp : HFParams_.meanm;
     double mysig = TMath::Power(TMath::Power(HFParams_.stocastic/sqrt(std::max(e,1.0)),2)+myconst*myconst,0.5);
     //double mysig = HFParams_.stocastic/sqrt(std::max(e,1.0)+myconst;
@@ -363,47 +338,59 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
     double  etaFact=sinh(eta)/sinh(deteta);
     Efrac = randomNum_->Gaus(mymean,mysig);
     double newEta=deteta;
-    double perc = randomNum_->Uniform(1.0);
+    double perc = randomNum_->Uniform(100);
+    double unif = randomNum_->Uniform(0.64,0.9);
     double sign = (deteta < 0.) ?(-1.) : (1.); //added to know the + or - sign.
-
-    //    static const double binCenterProb[] = { 0.00, 0.050, 0.050, 0.030, 0.030, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.020, 0.000 };
-    static const double binCenterProb[] = { 0.00, 0.050, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.040, 0.000 };
-
-
-    double deteta_abs=fabs(deteta);
-    //    static const double eta_offset=0.0144225; // needed because this is applied in reco for a "centered hit"
-    static const double eta_offset=0.0; // needed because this is applied in reco for a "centered hit"
-    
-    double centerProb=0.0;
-
-    int iring=0;
-
-    for (iring=0; iring<14; iring++)
-      if (deteta_abs<theHFEtaBounds[iring+1]) {
-	centerProb=binCenterProb[iring];
-	break;
+    double etabias=0.0144;
+    if((fabs(deteta)>2.964)&&(fabs(deteta)<=3)){
+      newEta=deteta;
+    }else if ((fabs(deteta)>3)&&(fabs(deteta)<=3.034)){
+      if(perc<=60){newEta=deteta;
+      }else {
+        newEta=sign*(3.0515+etabias);
       }
-
-    if (perc<centerProb) {
-      newEta=sign*((theHFEtaBounds[iring]+theHFEtaBounds[iring+1])/2+eta_offset);
-      // smear eta
-      newEta+=randomNum_->Gaus(0.0,HFParams_.res_eta/10.0); // small effect here
-    } else {
-      // smear eta
-      newEta+=randomNum_->Gaus(0.0,HFParams_.res_eta);
+    }else if ((fabs(deteta)>3.034)&&(fabs(deteta)<=3.104)){
+      if(perc<=60){newEta=deteta;
+      }else {
+        newEta=sign*(3.0515+etabias);
+      }
+    }else if ((fabs(deteta)>3.104)&&(fabs(deteta)<=3.139)){
+      if(perc<=20){newEta=sign*(3.0515+etabias);
+      } else {
+        newEta=deteta;
+      }
+    }else if ((fabs(deteta)>3.1915)&&(fabs(deteta)<=3.279)){
+      if(perc<=43){
+        newEta=sign*(3.22650+etabias);
+      }else {
+        newEta=deteta;
+      }
+    }else if ((fabs(deteta)>3.3665)&&(fabs(deteta)<=3.454)){
+      if(perc<=32){
+        newEta=sign*(3.4015+etabias);
+      }else {
+        newEta=deteta;
+      }
+    }else if ((fabs(deteta)>3.5415)&&(fabs(deteta)<=3.629)){
+      if(perc<=25){
+        newEta=sign*(3.5765+etabias);
+      }else {
+        newEta=deteta;
+      }
+    }else if ((fabs(deteta)>3.7165)&&(fabs(deteta)<=3.804)){
+      if(perc<=15){
+        newEta=sign*(3.7515+etabias);
+      }else {
+        newEta=deteta;
+      }
+    } else if ((fabs(deteta)>3.89135)&&(fabs(deteta)<=3.9786)){
+      if(perc<=10){
+        newEta=sign*(3.926+etabias);
+      }else {
+        newEta=deteta;
+      }
     }
-    
-    double newPhi=electron.phi();
-
-    // smear phi
-    newPhi+=randomNum_->Gaus(0.0,HFParams_.res_phi);
-    if (newPhi<-M_PI) newPhi+=2*M_PI;
-    if (newPhi>M_PI) newPhi-=2*M_PI;
-
-    phi=newPhi;
-
-    eta=(asinh(etaFact*sinh(newEta)));
-
+   eta=(asinh(etaFact*sinh(newEta)));
   }
   
   //std::cout << " OLD E " << electron.E() << " new eta " << electron.eta() << " new et " << electron.Et() << " new pt " << electron.pt() <<  " mass : " << electron.M() << std::endl;
@@ -412,7 +399,7 @@ void ZSmearingProducer::smearElectron(math::PtEtaPhiELorentzVector &electron)
   ///electron.SetE(Efrac*e);
   //electron.SetPt(pow(-e*e*(1-Efrac*Efrac)+pt*pt,0.5));
   ///electron.SetPt(electron.Et());
-  electron = math::PtEtaPhiELorentzVector(Efrac*e/cosh(eta),eta,phi,Efrac*e);
+  electron = math::PtEtaPhiELorentzVector(Efrac*e/cosh(eta),eta,electron.phi(),Efrac*e);
  
 
   //std::cout << " cosh way " << Efrac*e/cosh(eta) << " Other way " << Efrac*e*sin(electron.theta()) << std::endl;
@@ -438,22 +425,15 @@ Double_t crystalBall(Double_t *x, Double_t *par)
 
 }
 
-// old version
-//Double_t EBRes(Double_t *x,Double_t *par) { if (x[0] < 0.01 ) return 100.;
-//  if (x[0] < 0.01 ) return 100.;
-//  Double_t p0 = par[0]/x[0] + par[3];
-//  Double_t p1 = par[0]*par[1]/x[0];
-//  Double_t p2 = par[0]*par[2]/x[0];
-//  return (p0-p1*fabs(x[1])+p2*x[1]*x[1]);
-//}
-
-// x[0] is energy, x[1] is eta 
 Double_t EBRes(Double_t *x,Double_t *par) {
   if (x[0] < 0.01 ) return 100.;
-  Double_t p0 = par[0]/x[0];        // par[0] is stochastic term
-  Double_t p1 = par[0]*par[1]/x[0]; // par[1-2] are parameters for eta-dependece
+  //  Double_t p0 = par[0]/x[0] + par[3];
+  //  Double_t p1 = par[1]/x[0];
+  //  Double_t p2 = par[2]/x[0];
+  Double_t p0 = par[0]/x[0] + par[3];
+  Double_t p1 = par[0]*par[1]/x[0];
   Double_t p2 = par[0]*par[2]/x[0];
-  return ( TMath::Power((TMath::Power( (p0-p1*fabs(x[1])+p2*x[1]*x[1]),2) + par[3]*par[3]),0.5) );
+  return (p0-p1*fabs(x[1])+p2*x[1]*x[1]);
 }
 
 Double_t EERes(Double_t *x,Double_t *par) {
@@ -476,7 +456,7 @@ double ZSmearingProducer::getSigma(double eta, double et, MyDetType det)
   }
   else if ( det == mdt_EE)
   {
-     return (EBRes(x,EEPrams_.sigma)); // since EB and EE have same functional form now
+     return (EERes(x,EEPrams_.sigma));
   }
   else return 1.0;
 }
@@ -487,7 +467,7 @@ double ZSmearingProducer::smearECALCB(double eta, double et, MyDetType det)
   params[3] = getSigma(eta, et, det);
   params[0] = ( det == mdt_EB ) ? (EBPrams_.alpha) : (EEPrams_.alpha);
   params[1] = ( det == mdt_EB ) ? (EBPrams_.N) : (EEPrams_.N);
-  params[2] = ( det == mdt_EB) ?  (EBPrams_.mean) : (1.0);
+  params[2] = ( det == mdt_EB) ? (EBPrams_.mean) : (1.0);
   params[4] = 100.;
   double sf = ( det == mdt_EB) ? (1.0) : (EEPrams_.mean);
   crystalball_->SetParameters(params);
@@ -511,7 +491,7 @@ double ZSmearingProducer::smearECALCB(double eta, double et, MyDetType det)
 
 }
 
-//Method for smearing ECAL - nowhere use feb 24th 2011 (gf)
+//Method for smearing ECAL
 double ZSmearingProducer::smearECAL(double eta, double et, MyDetType det)
 {
   double p0r = 0.;
