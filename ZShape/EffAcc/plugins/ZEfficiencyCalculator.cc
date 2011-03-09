@@ -165,7 +165,8 @@ void ZEfficiencyCalculator::analyze(const edm::Event& iEvent, const edm::EventSe
   // these stages merely _fill_ bits.  They do not apply cuts!
   for (int ne=0; ne<2; ne++) {
     stdCuts_.acceptanceCuts(evt_.elec(ne));
-    stdCuts_.ptCuts(evt_.elec(ne));
+    stdCuts_.ptCuts(evt_.elec(ne));    
+    stdCuts_.gen_ptCuts(evt_.elecTreeLevel(ne),evt_.elec(ne)); // ordering might not be perfect, but should be ok for most purposes!
     stdCuts_.dummyCuts(evt_.elec(ne));
   }
 
@@ -494,7 +495,7 @@ ZEfficiencyCalculator::beginJob()
 
       // one sub-dir for each step of selection
       td = sd.mkdir(dirname);
-      zplots->postCut_[i-1].Book(td);
+      zplots->postCut_[i-1].Book(td,((i+1)==q->second->criteriaCount(ZShapeZDef::crit_E1)));
       zplots->postCut_[i-1].setupMassWindow(massLow_,massHigh_);
     }
     int iOffset=q->second->criteriaCount(ZShapeZDef::crit_E1);

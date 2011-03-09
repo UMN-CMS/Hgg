@@ -562,7 +562,7 @@ ZFromData::beginJob()
       //std::cout << " BGDBG 62 " << std::endl;
       // one sub-dir for each step of selection
       td = sd.mkdir(dirname);
-      zplots->postCut_[i-1].Book(td);
+      zplots->postCut_[i-1].Book(td,((i+1)==q->second->criteriaCount(ZShapeZDef::crit_E1)));
       
        //if (extraHistos_){td->cd(); zplots->postCutExtra_[i-1].Book();}
       if (extraHistos_){ zplots->postCutExtra_[i-1].Book(td);}

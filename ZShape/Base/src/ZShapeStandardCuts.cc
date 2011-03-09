@@ -27,6 +27,19 @@ void ZShapeStandardCuts::ptCuts(ZShapeElectron& elec) const {
   elec.cutResult("PT30",pt>=30);
 }
 
+void ZShapeStandardCuts::gen_ptCuts(reco::GenParticle& gelec,ZShapeElectron& elec) const {
+  double pt=gelec.polarP4().Pt();
+  elec.cutResult("GPT0",pt>=-50000);
+  elec.cutResult("GPT5",pt>=5);
+  elec.cutResult("GPT10",pt>=10);
+  elec.cutResult("GPT15",pt>=15);
+  elec.cutResult("GPT17",pt>=17);
+  elec.cutResult("GPT20",pt>=20);
+  elec.cutResult("GPT25",pt>=25);
+  elec.cutResult("GPT30",pt>=30);
+}
+
+
 void ZShapeStandardCuts::dummyCuts(ZShapeElectron& elec) const {
   elec.cutResult("DummyPass",true);
   elec.cutResult("DummyFail",false);
