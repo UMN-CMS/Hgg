@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Thu Oct  4 11:30:13 CEST 2007
-// $Id: ZEfficiencyCalculator.h,v 1.14 2009/04/17 13:42:08 haupt Exp $
+// $Id: ZEfficiencyCalculator.h,v 1.17 2009/08/25 14:46:30 haupt Exp $
 //
 //
 
@@ -28,7 +28,7 @@ Implementation:
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/Candidate/interface/Particle.h"
 
@@ -59,7 +59,7 @@ public:
 
 
 private:
-  virtual void beginJob(const edm::EventSetup&) ;
+  virtual void beginJob() ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
 
@@ -107,6 +107,13 @@ private:
 
   // before any z-def selection
   EffHistos allCase_;
+
+  struct RegionalPlots {
+    TH1F* ecal_ecal, *ecal_ntrk, *ecal_hf, *ecal_noacc;
+    TH1F* ntrk_ntrk, *ntrk_hf, *ntrk_noacc;
+    TH1F* hf_hf, *hf_noacc, *noacc_noacc;
+  } accHistos_;
+    
 
   // at each step of selection for any z-definition
   struct ZPlots {

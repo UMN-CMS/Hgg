@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  Giovanni FRANZONI
 //         Created:  Mon Feb 18 21:18:39 CET 2008
-// $Id: ZEventProducer.cc,v 1.6 2008/06/29 14:42:41 franzoni Exp $
+// $Id: ZEventProducer.cc,v 1.8 2009/08/25 14:46:30 haupt Exp $
 //
 //
 
@@ -37,7 +37,7 @@ Implementation:
 
 #include "DataFormats/Math/interface/LorentzVector.h"
 
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
@@ -53,7 +53,7 @@ public:
   ~ZEventProducer();
 
 private:
-  virtual void beginJob(const edm::EventSetup&) ;
+  virtual void beginJob() ;
   virtual void produce(edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
       
@@ -328,7 +328,7 @@ ZEventProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 
 // ------------ Method called once each job just before starting event loop  ------------
-void ZEventProducer::beginJob(const edm::EventSetup&)
+void ZEventProducer::beginJob()
 {
 }
 

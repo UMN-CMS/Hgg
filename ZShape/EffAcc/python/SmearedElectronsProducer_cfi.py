@@ -13,7 +13,7 @@ SmearedElectronsProducer = cms.EDProducer("ZSmearingProducer",
     HF = cms.PSet(
        stocastic = cms.double(2.61),
        constant = cms.double(0.050),
-       mean = cms.double(1.000)
+       mean = cms.double(0.997)
         #tuned by kevin on 04-16-09, mean added by J. Mans 05-22-09
     ),
     EB = cms.PSet(
